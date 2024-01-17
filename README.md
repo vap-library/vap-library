@@ -7,7 +7,7 @@ This repo contains UNOFFICIAL, community maintained collection of [Kubernetes Va
 # Using the library
 *NOTE: Validating Admission Policy is beta in 1.28+ and disabled by default in most Kubernetes distributions. Follow the [official instructions](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/#before-you-begin) to enable it on your k8s cluster/distribution*
 
-**Every policy (and related parameter CRD if exists) has a name prefix of `vaplibrary`. This highly reduces the risk of name collisions when the library gets installed.**
+**Every policy (and related parameter CRD if exists) has a name prefix of `vaplib`. This highly reduces the risk of name collisions when the library gets installed.**
 ## Install using kubectl
 ### parameter CRDs
 Some policies that require complex parameters (that cannot be easily represented in a ConfigMap) has their own CRDs for parameters. Clone the repo with the selected `ref` and use following command to install the CRDs
