@@ -1,0 +1,23 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+- ../../base/
+nameSuffix: -test01
+namespace: vaplibtest-httproutehostname-test01
+
+patches:
+- patch: |-
+    apiVersion: admissionregistration.k8s.io/v1beta1
+    kind: ValidatingAdmissionPolicyBinding
+    metadata:
+      name: vaplibtest-httproute-hostnames
+    spec:
+      matchResources:
+        matchPolicy: Equivalent
+        namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: vaplibtest-httproutehostname-test01
+      paramRef:
+        name: vaplibtest-param-test01
+        namespace: vaplibtest-httproutehostname-test01
+

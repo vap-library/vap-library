@@ -1,0 +1,8 @@
+apiVersion: vap-library.io/v1beta1
+kind: VAPLIBHTTPRouteHostnameParam
+metadata:
+  name: vaplibtest-param
+spec:
+  allowedHostnames:
+  - test.example.com
+  - test2.example.com
