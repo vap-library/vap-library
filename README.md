@@ -12,12 +12,12 @@ This repo contains UNOFFICIAL, community maintained collection of [Kubernetes Va
 ### parameter CRDs
 Some policies that require complex parameters (that cannot be easily represented in a ConfigMap) has their own CRDs for parameters. Clone the repo with the selected `ref` and use following command to install the CRDs
 ```
-kubectl install install/vap-library-parameter-crds.yaml
+kubectl apply -f install/vap-library-parameter-crds.yaml
 ```
 
 ### policies
 ```
-kubectl install install/vap-library-policies.yaml
+kubectl apply -f install/vap-library-policies.yaml
 ```
 
 ## Create resources for parameters (if needed)
