@@ -1,0 +1,15 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: vaplibtest-grafana-enforce-folder-for-dashboard-test02
+  namespace: vaplibtest-grafana-enforce-folder-for-dashboard-test02
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: vaplibtest-grafana-enforce-folder-for-dashboard-test02
+    objectSelector: {}
+  policyName: vaplib-grafana-enforce-folder-for-dashboard
+  validationActions:
+  - Deny

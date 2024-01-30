@@ -1,0 +1,19 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "vaplib-grafana-enforce-folder-for-dashboard"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["configmaps", "secrets"]
+  matchConditions:
+    - name: 'filter-for-grafana-labels'
+      expression: 'object.metadata.labels.grafana_dashboard == "1"'
+  validations:
+    - expression: 'object.metadata.annotations.grafana_folder == namespaceObject.metadata.name'
+      message: "metadata.annotations.grafana_folder must be set to the namespace of the ConfigMap/Secret"
+      reason: Invalid
