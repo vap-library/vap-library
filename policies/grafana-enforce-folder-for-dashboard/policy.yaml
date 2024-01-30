@@ -11,9 +11,9 @@ spec:
       operations:  ["CREATE", "UPDATE"]
       resources:   ["configmaps", "secrets"]
   matchConditions:
-    - name: 'filter-for-grafana-labels'
+    - name: "filter-for-grafana-dashboard-label"
       expression: 'object.metadata.labels.grafana_dashboard == "1"'
   validations:
-    - expression: 'object.metadata.annotations.grafana_folder == namespaceObject.metadata.name'
+    - expression: "object.metadata.annotations.grafana_folder == namespaceObject.metadata.name"
       message: "metadata.annotations.grafana_folder must be set to the namespace of the ConfigMap/Secret"
       reason: Invalid
