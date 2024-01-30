@@ -32,4 +32,4 @@ Create the [ValidatingAdmissionPolicyBinding](https://kubernetes.io/docs/referen
 * [Kubernetes CEL documenation](https://kubernetes.io/docs/reference/using-api/cel/)
 
 # NO WARRANTY INCLUDED
-**While the policies have been written and/or reviewed by experienced k8s engineers/developers this is a community driven, public repository. Use it at your own risk!**
+**REMINDER: These policies are maintained by the k8s community. Use it at your own risk!**
