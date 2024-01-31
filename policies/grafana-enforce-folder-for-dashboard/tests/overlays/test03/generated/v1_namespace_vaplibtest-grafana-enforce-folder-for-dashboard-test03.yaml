@@ -3,4 +3,4 @@ kind: Namespace
 metadata:
   labels:
     vaplib-grafana-enforce-folder-for-dashboard: deny
-  name: vaplibtest-grafana-enforce-folder-for-dashboard-test02
+  name: vaplibtest-grafana-enforce-folder-for-dashboard-test03

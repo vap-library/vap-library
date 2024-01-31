@@ -8,7 +8,7 @@ spec:
     matchPolicy: Equivalent
     namespaceSelector:
       matchLabels:
-        kubernetes.io/metadata.name: vaplibtest-grafana-enforce-folder-for-dashboard-test01
+        vaplib-grafana-enforce-folder-for-dashboard: deny
     objectSelector: {}
   policyName: vaplib-grafana-enforce-folder-for-dashboard
   validationActions:

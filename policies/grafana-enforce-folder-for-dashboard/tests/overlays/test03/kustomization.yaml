@@ -2,8 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - ../../base/
-nameSuffix: -test01
-namespace: vaplibtest-grafana-enforce-folder-for-dashboard-test01
+nameSuffix: -test03
+namespace: vaplibtest-grafana-enforce-folder-for-dashboard-test03
 
 patches:
 - patch: |-
@@ -13,5 +13,3 @@ patches:
         name: vaplibtest-grafana-enforce-folder-for-dashboard
         labels:
           grafana_dashboard: "1"
-        annotations:
-          grafana_folder: "vaplibtest-grafana-enforce-folder-for-dashboard-test01"
