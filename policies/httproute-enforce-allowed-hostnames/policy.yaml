@@ -5,7 +5,7 @@ metadata:
 spec:
   failurePolicy: Fail
   paramKind:
-    apiVersion: vap-library.io/v1beta1
+    apiVersion: vap-library.com/v1beta1
     kind: VAPLIBHTTPRouteHostnameParam
   matchConstraints:
     resourceRules:

@@ -9,7 +9,7 @@ hostnames in a list of strings field called `spec.allowedHostnames`.
 
 # Example parameter
 ```
-apiVersion: vap-library.io/v1beta1
+apiVersion: vap-library.com/v1beta1
 kind: VAPLIBHTTPRouteHostnameParam
 metadata:
   name: example

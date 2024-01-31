@@ -1,4 +1,4 @@
-apiVersion: vap-library.io/v1beta1
+apiVersion: vap-library.com/v1beta1
 kind: VAPLIBHTTPRouteHostnameParam
 metadata:
   name: vaplibtest-param-test02
