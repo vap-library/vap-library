@@ -10,7 +10,7 @@ hostnames in an array of strings field called `spec.allowedHostnames`.
 # Example parameter
 ```
 apiVersion: vap-library.com/v1beta1
-kind: VAPLIBHTTPRouteHostnameParam
+kind: HTTPRouteEnforceHostnamesParam
 metadata:
   name: example
   namespace: example
