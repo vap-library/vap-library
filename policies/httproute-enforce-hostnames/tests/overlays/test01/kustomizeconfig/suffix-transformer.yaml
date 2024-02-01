@@ -1,0 +1,8 @@
+apiVersion: builtin
+kind: PrefixSuffixTransformer
+metadata:
+  name: customSuffixer
+suffix: "-test01"
+fieldSpecs:
+- kind: HTTPRoute
+  path: metadata/name
