@@ -3,13 +3,13 @@ kind: Kustomization
 resources:
 - ../../base/
 nameSuffix: -test03
-namespace: vaplibtest-grafana-enforce-folder-for-dashboard-test03
+namespace: grafana-enforce-dashboard-folder-vap-library-test03
 
 patches:
 - patch: |-
       apiVersion: v1
       kind: ConfigMap
       metadata:
-        name: vaplibtest-grafana-enforce-folder-for-dashboard
+        name: grafana-enforce-dashboard-folder-vap-library-test
         labels:
           grafana_dashboard: "1"

@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: vaplibtest-grafana-enforce-folder-for-dashboard
-  labels:
-    vaplib-grafana-enforce-folder-for-dashboard: deny
-

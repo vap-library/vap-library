@@ -1,14 +1,14 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
-  name: vaplibtest-grafana-enforce-folder-for-dashboard
+  name: grafana-enforce-dashboard-folder-vap-library-test
 spec:
   matchResources:
     matchPolicy: Equivalent
     namespaceSelector:
       matchLabels:
-        vaplib-grafana-enforce-folder-for-dashboard: deny
+        vap-library.com/grafana-enforce-dashboard-folder: deny
     objectSelector: {}
-  policyName: vaplib-grafana-enforce-folder-for-dashboard
+  policyName: grafana-enforce-dashboard-folder.vap-library.com
   validationActions:
   - Deny
