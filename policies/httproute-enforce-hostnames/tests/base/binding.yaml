@@ -1,18 +1,17 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
-  name: vaplibtest-httproute-hostnames
+  name: httproute-enforce-hostnames-vap-library-test
 spec:
   matchResources:
     matchPolicy: Equivalent
     namespaceSelector:
       matchLabels:
-        kubernetes.io/metadata.name: test
+        vap-library.com/httproute-enforce-hostnames: deny
     objectSelector: {}
   paramRef:
-    name: vaphttproutehostnameparams-test
-    namespace: test
+    name: httproute-enforce-hostnames-vap-library-test
     parameterNotFoundAction: Deny
-  policyName: vaplib-httproute-enforce-allowed-hostnames
+  policyName: httproute-enforce-hostnames.vap-library.com
   validationActions:
   - Deny

@@ -4,8 +4,8 @@ the `spec.allowedHostnames` list of the parameter custom resource. When there is
 denys.
 
 # Parameter used by the policy
-The policy is using a custom resource (CR) kind called `VAPLIBHTTPRouteHostnameParam`. The CR has to lists the allowed
-hostnames in a list of strings field called `spec.allowedHostnames`.
+The policy is using a mandatory custom resource (CR) kind called `HTTPRouteEnforceHostnamesParam`. The CR has to list the allowed
+hostnames in an array of strings field called `spec.allowedHostnames`.
 
 # Example parameter
 ```

@@ -1,7 +1,7 @@
 apiVersion: vap-library.com/v1beta1
-kind: VAPLIBHTTPRouteHostnameParam
+kind: HTTPRouteEnforceHostnamesParam
 metadata:
-  name: vaplibtest-param
+  name: httproute-enforce-hostnames-vap-library-test
 spec:
   allowedHostnames:
   - test.example.com
