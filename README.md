@@ -27,7 +27,7 @@ Most of the policies require parameters which could be either a `ConfigMap` or a
 Create the [ValidatingAdmissionPolicyBinding](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/#what-resources-make-a-policy) to bind the policy (and reference the parameter) to selected resources.
 
 # Sources
-* Some of re planning to port some of the policies that are available in the [Kubescape's](https://www.armosec.io/kubescape/) [cel-admission-library](https://github.com/kubescape/cel-admission-library/tree/main). Great repo to review and learn from
+* We are planning to port some of the policies that are available in [ARMOS's](https://www.armosec.io/) [cel-admission-library](https://github.com/kubescape/cel-admission-library/tree/main). Great repo to review and learn from
 * [Official VAP documentation](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/)
 * [Kubernetes CEL documenation](https://kubernetes.io/docs/reference/using-api/cel/)
 
