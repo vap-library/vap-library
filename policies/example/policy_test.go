@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strings"
 	"testing"
 	"vap-library/testutils"
 
@@ -22,7 +23,7 @@ func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
 	testutils.CreateFromFile("binding.yaml", t)
 
 	t.Run("dashboard with folder corresponding to namespace should be allowed", func(t *testing.T) {
-		err := testutils.CreationShouldFail(t, dedent.Dedent(`
+		errorMessage := testutils.CreationShouldFail(t, dedent.Dedent(`
 		apiVersion: apps/v1
 		kind: Deployment
 		metadata:
@@ -42,8 +43,10 @@ func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
 		    spec:
 		      containers:
 		      - image: nginx
-		      name: nginx`))
+		        name: nginx`))
 
-		println(err)
+		if !strings.HasSuffix(errorMessage, "object.spec.replicas <= 3\n") {
+			t.Errorf("Unexpected error message: %s", errorMessage)
+		}
 	})
 }
