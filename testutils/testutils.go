@@ -45,8 +45,11 @@ func CreateFromFile(filename string, t *testing.T) {
 	fmt.Println(out)
 }
 
-func CreateNamespace(name string, t *testing.T) {
-	out, err := runCommand("kubectl", "create", "namespace", name)
+func RecreateNamespace(name string, t *testing.T) {
+	out, err := runCommand("kubectl", "delete", "namespace", name)
+	fmt.Println(out)
+
+	out, err = runCommand("kubectl", "create", "namespace", name)
 	if err != nil {
 		t.Fatalf("failed to create namespace: %v", out)
 	}

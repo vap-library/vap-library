@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
 	testutils.CreateFromFile("../policy.yaml", t)
 	testutils.CreateFromFile("binding.yaml", t)
-	testutils.CreateNamespace("my-namespace", t)
+	testutils.RecreateNamespace("my-namespace", t)
 
 	t.Run("dashboard with folder corresponding to namespace should be allowed", func(t *testing.T) {
 		testutils.CreationShouldSucceed(t, dedent.Dedent(`
