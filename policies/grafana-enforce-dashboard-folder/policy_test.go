@@ -27,7 +27,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
-	testutils.CreateFromFile("../policy.yaml", t)
+	testutils.CreateFromFile("policy.yaml", t)
 	testutils.CreateFromFile("binding.yaml", t)
 	testutils.DeleteNamespace("grafana-enforce-dashboard-folder-vap-library-test", t)
 	testutils.CreateFromFile("namespace.yaml", t)
@@ -58,6 +58,23 @@ func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
 			    grafana_dashboard: "1"
 			  annotations:
 			    grafana_folder: some-other-folder
+			data:
+			  test: "test"`))
+
+		if !strings.HasSuffix(errorMessage, "metadata.annotations.grafana_folder must be set to the namespace of the ConfigMap/Secret\n") {
+			t.Errorf("Unexpected error message: %s", errorMessage)
+		}
+	})
+
+	t.Run("dashboard with no folder specified should be denied", func(t *testing.T) {
+		errorMessage := testutils.CreationShouldFail(t, dedent.Dedent(`
+			apiVersion: v1
+			kind: ConfigMap
+			metadata:
+			  name: grafana-enforce-dashboard-folder-vap-library-test
+			  namespace: grafana-enforce-dashboard-folder-vap-library-test
+			  labels:
+			    grafana_dashboard: "1"
 			data:
 			  test: "test"`))
 
