@@ -29,7 +29,8 @@ func TestMain(m *testing.M) {
 func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
 	testutils.CreateFromFile("../policy.yaml", t)
 	testutils.CreateFromFile("binding.yaml", t)
-	testutils.RecreateNamespace("my-namespace", t)
+	testutils.DeleteNamespace("grafana-enforce-dashboard-folder-vap-library-test", t)
+	testutils.CreateFromFile("namespace.yaml", t)
 
 	t.Run("dashboard with folder corresponding to namespace should be allowed", func(t *testing.T) {
 		testutils.CreationShouldSucceed(t, dedent.Dedent(`
@@ -37,11 +38,11 @@ func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
 			kind: ConfigMap
 			metadata:
 			  name: dashboard-in-correct-folder
-			  namespace: my-namespace
+			  namespace: grafana-enforce-dashboard-folder-vap-library-test
 			  labels:
 			    grafana_dashboard: "1"
 			  annotations:
-			    grafana_folder: my-namespace
+			    grafana_folder: grafana-enforce-dashboard-folder-vap-library-test
 			data:
 			  test: "test"`))
 	})
@@ -52,11 +53,11 @@ func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
 			kind: ConfigMap
 			metadata:
 			  name: dashboard-in-wrong-folder
-			  namespace: my-namespace
+			  namespace: grafana-enforce-dashboard-folder-vap-library-test
 			  labels:
 			    grafana_dashboard: "1"
 			  annotations:
-			    grafana_folder: "some-other-folder"
+			    grafana_folder: some-other-folder
 			data:
 			  test: "test"`))
 

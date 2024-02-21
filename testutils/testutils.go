@@ -42,18 +42,24 @@ func CreateFromFile(filename string, t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to create kubernetes resources: %v", out)
 	}
-	fmt.Println(out)
+	t.Log(out)
 }
 
 func RecreateNamespace(name string, t *testing.T) {
 	out, err := runCommand("kubectl", "delete", "namespace", name)
-	fmt.Println(out)
+	// ignore errors if namespace is not there
+	t.Log(out)
 
 	out, err = runCommand("kubectl", "create", "namespace", name)
 	if err != nil {
 		t.Fatalf("failed to create namespace: %v", out)
 	}
-	fmt.Println(out)
+	t.Log(out)
+}
+
+func DeleteNamespace(name string, t *testing.T) {
+	runCommand("kubectl", "delete", "namespace", name)
+	// ignore errors if namespace is not there
 }
 
 func Destroy(id string) {
