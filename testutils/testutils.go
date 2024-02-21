@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 
+	"github.com/lithammer/dedent"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/e2e-framework/klient/k8s"
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
@@ -79,6 +81,10 @@ func CreationShouldFail(t *testing.T, resourceDef string) string {
 		t.Fatalf("Creation should have failed, but it succeeded: %v", out)
 	}
 	return out
+}
+
+func Dedent(text string) string {
+	return strings.ReplaceAll(dedent.Dedent(text), "\t", "    ")
 }
 
 func runCommandWithInput(input string, name string, args ...string) (string, error) {

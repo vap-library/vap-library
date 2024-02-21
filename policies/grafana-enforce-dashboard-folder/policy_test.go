@@ -6,7 +6,6 @@ import (
 	"testing"
 	"vap-library/testutils"
 
-	"github.com/lithammer/dedent"
 	"sigs.k8s.io/e2e-framework/pkg/env"
 )
 
@@ -33,33 +32,33 @@ func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
 	testutils.CreateFromFile("namespace.yaml", t)
 
 	t.Run("dashboard with folder corresponding to namespace should be allowed", func(t *testing.T) {
-		testutils.CreationShouldSucceed(t, dedent.Dedent(`
+		testutils.CreationShouldSucceed(t, testutils.Dedent(`
 			apiVersion: v1
 			kind: ConfigMap
 			metadata:
-			  name: dashboard-in-correct-folder
-			  namespace: grafana-enforce-dashboard-folder-vap-library-test
-			  labels:
-			    grafana_dashboard: "1"
-			  annotations:
-			    grafana_folder: grafana-enforce-dashboard-folder-vap-library-test
+				name: dashboard-in-correct-folder
+				namespace: grafana-enforce-dashboard-folder-vap-library-test
+				labels:
+					grafana_dashboard: "1"
+				annotations:
+					grafana_folder: grafana-enforce-dashboard-folder-vap-library-test
 			data:
-			  test: "test"`))
+				test: "test"`))
 	})
 
 	t.Run("dashboard with folder different from namespace should be denied", func(t *testing.T) {
-		errorMessage := testutils.CreationShouldFail(t, dedent.Dedent(`
+		errorMessage := testutils.CreationShouldFail(t, testutils.Dedent(`
 			apiVersion: v1
 			kind: ConfigMap
 			metadata:
-			  name: dashboard-in-wrong-folder
-			  namespace: grafana-enforce-dashboard-folder-vap-library-test
-			  labels:
-			    grafana_dashboard: "1"
-			  annotations:
-			    grafana_folder: some-other-folder
+				name: dashboard-in-wrong-folder
+				namespace: grafana-enforce-dashboard-folder-vap-library-test
+				labels:
+					grafana_dashboard: "1"
+				annotations:
+					grafana_folder: some-other-folder
 			data:
-			  test: "test"`))
+				test: "test"`))
 
 		if !strings.HasSuffix(errorMessage, "metadata.annotations.grafana_folder must be set to the namespace of the ConfigMap/Secret\n") {
 			t.Errorf("Unexpected error message: %s", errorMessage)
@@ -67,16 +66,16 @@ func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
 	})
 
 	t.Run("dashboard with no folder specified should be denied", func(t *testing.T) {
-		errorMessage := testutils.CreationShouldFail(t, dedent.Dedent(`
+		errorMessage := testutils.CreationShouldFail(t, testutils.Dedent(`
 			apiVersion: v1
 			kind: ConfigMap
 			metadata:
-			  name: grafana-enforce-dashboard-folder-vap-library-test
-			  namespace: grafana-enforce-dashboard-folder-vap-library-test
-			  labels:
-			    grafana_dashboard: "1"
+				name: grafana-enforce-dashboard-folder-vap-library-test
+				namespace: grafana-enforce-dashboard-folder-vap-library-test
+				labels:
+					grafana_dashboard: "1"
 			data:
-			  test: "test"`))
+				test: "test"`))
 
 		if !strings.HasSuffix(errorMessage, "metadata.annotations.grafana_folder must be set to the namespace of the ConfigMap/Secret\n") {
 			t.Errorf("Unexpected error message: %s", errorMessage)

@@ -6,7 +6,6 @@ import (
 	"testing"
 	"vap-library/testutils"
 
-	"github.com/lithammer/dedent"
 	"sigs.k8s.io/e2e-framework/pkg/env"
 )
 
@@ -23,27 +22,29 @@ func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
 	testutils.CreateFromFile("binding.yaml", t)
 
 	t.Run("dashboard with folder corresponding to namespace should be allowed", func(t *testing.T) {
-		errorMessage := testutils.CreationShouldFail(t, dedent.Dedent(`
+		yaml := testutils.Dedent(`
 		apiVersion: apps/v1
 		kind: Deployment
 		metadata:
-		  labels:
-		    app: nginx
-		  name: nginx
-		  namespace: sample-app
+			labels:
+				app: nginx
+			name: nginx
+			namespace: sample-app
 		spec:
-		  replicas: 6
-		  selector:
-		    matchLabels:
-		      app: nginx
-		  template:
-		    metadata:
-		      labels:
-		        app: nginx
-		    spec:
-		      containers:
-		      - image: nginx
-		        name: nginx`))
+			replicas: 6
+			selector:
+				matchLabels:
+					app: nginx
+			template:
+				metadata:
+					labels:
+						app: nginx
+				spec:
+					containers:
+					- image: nginx
+					  name: nginx`)
+
+		errorMessage := testutils.CreationShouldFail(t, yaml)
 
 		if !strings.HasSuffix(errorMessage, "object.spec.replicas <= 3\n") {
 			t.Errorf("Unexpected error message: %s", errorMessage)
