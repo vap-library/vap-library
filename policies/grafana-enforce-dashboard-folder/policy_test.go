@@ -13,15 +13,8 @@ var testenv env.Environment
 
 func TestMain(m *testing.M) {
 	testenv = env.New()
-	// kindClusterName := envconf.RandomName("vap-library-", 16)
-	// testenv.Setup(
-	// 	envfuncs.CreateCluster(kind.NewProvider(), kindClusterName),
-	// )
-
-	// testenv.Finish(
-	// 	envfuncs.DestroyCluster(kindClusterName),
-	// )
-
+	testutils.CheckPrerequisites()
+	testutils.CreateKindCluster()
 	os.Exit(testenv.Run(m))
 }
 

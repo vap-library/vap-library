@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -91,6 +92,54 @@ func CreationShouldFail(t *testing.T, resourceDef string) string {
 // De-indents a string and replaces tabs with spaces.
 func Dedent(text string) string {
 	return strings.ReplaceAll(dedent.Dedent(text), "\t", "    ")
+}
+
+func CreateKindCluster() {
+	if !IsKindClusterRunning() {
+		log.Println("Creating kind cluster")
+
+		out, err := runCommand("kind", "create", "cluster", "--name", "kind", "--config", "../../cluster.yaml")
+		if err != nil {
+			log.Fatalf("failed to create kind cluster: %v", out)
+		}
+		log.Println(out)
+	} else {
+		log.Println("Kind cluster already running")
+	}
+
+	// this will add the kubeconfig for the kind cluster
+	out, err := runCommand("kind", "export", "kubeconfig", "--name", "kind")
+	if err != nil {
+		log.Fatalf("failed to export kubeconfig: %v", out)
+	}
+	log.Println(out)
+
+	// we want to make the kind cluster the current context
+	out, err = runCommand("kubectl", "config", "set-context", "kind-kind")
+	if err != nil {
+		log.Fatalf("failed to set context: %v", out)
+	}
+	log.Println(out)
+}
+
+func IsKindClusterRunning() bool {
+	out, err := runCommand("kind", "get", "clusters")
+	if err != nil {
+		return false
+	}
+	return strings.Contains(out, "kind")
+}
+
+func CheckPrerequisites() {
+	EnsureCommandExists("kubectl")
+	EnsureCommandExists("kind")
+}
+
+func EnsureCommandExists(command string) {
+	_, err := exec.LookPath(command)
+	if err != nil {
+		log.Fatalf("Command %s not found", command)
+	}
 }
 
 func runCommandWithInput(input string, name string, args ...string) (string, error) {
