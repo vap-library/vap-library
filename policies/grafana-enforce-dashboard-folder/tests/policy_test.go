@@ -60,7 +60,7 @@ func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
 			data:
 			  test: "test"`))
 
-		if !strings.HasSuffix(errorMessage, "exceeds the maximum of 4Gi") {
+		if !strings.HasSuffix(errorMessage, "metadata.annotations.grafana_folder must be set to the namespace of the ConfigMap/Secret\n") {
 			t.Errorf("Unexpected error message: %s", errorMessage)
 		}
 	})
