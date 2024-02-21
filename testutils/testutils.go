@@ -39,6 +39,7 @@ func CreateVapFromFile3(filename string, ctx context.Context, c *envconf.Config)
 	return o, nil
 }
 
+// Creates kubernetes resources from a YAML file.
 func CreateFromFile(filename string, t *testing.T) {
 	out, err := runCommand("kubectl", "apply", "-f", filename)
 	if err != nil {
@@ -47,27 +48,29 @@ func CreateFromFile(filename string, t *testing.T) {
 	t.Log(out)
 }
 
+// Deletes and recreates a namespace. If the namespace does not exist, it is just created.
 func RecreateNamespace(name string, t *testing.T) {
-	out, err := runCommand("kubectl", "delete", "namespace", name)
-	// ignore errors if namespace is not there
-	t.Log(out)
+	DeleteNamespace(name, t)
 
-	out, err = runCommand("kubectl", "create", "namespace", name)
+	out, err := runCommand("kubectl", "create", "namespace", name)
 	if err != nil {
 		t.Fatalf("failed to create namespace: %v", out)
 	}
 	t.Log(out)
 }
 
+// Deletes a namespace. Fails silently if the namespace does not exist.
 func DeleteNamespace(name string, t *testing.T) {
 	runCommand("kubectl", "delete", "namespace", name)
 	// ignore errors if namespace is not there
 }
 
-func Destroy(id string) {
+// Deletes the kubernetes resource specified in the YAML file
+func DeleteFromFile(id string) {
 	fmt.Println("Destroying", id)
 }
 
+// Creates a kubernetes resource from a YAML definition. Fail the test if the creation fails.
 func CreationShouldSucceed(t *testing.T, resourceDef string) {
 	out, err := runCommandWithInput(resourceDef, "kubectl", "apply", "-f", "-")
 	if err != nil {
@@ -75,6 +78,8 @@ func CreationShouldSucceed(t *testing.T, resourceDef string) {
 	}
 }
 
+// Creates a kubernetes resource from a YAML definition. Fail the test if the creation succeeds.
+// If the creation fails, return the error message.
 func CreationShouldFail(t *testing.T, resourceDef string) string {
 	out, err := runCommandWithInput(resourceDef, "kubectl", "apply", "-f", "-")
 	if err == nil {
@@ -83,6 +88,7 @@ func CreationShouldFail(t *testing.T, resourceDef string) string {
 	return out
 }
 
+// De-indents a string and replaces tabs with spaces.
 func Dedent(text string) string {
 	return strings.ReplaceAll(dedent.Dedent(text), "\t", "    ")
 }
