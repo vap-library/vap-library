@@ -19,7 +19,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestHttpRouteEnforceHostnames(t *testing.T) {
-	testutils.CreateFromFile("https://github.com/kubernetes-sigs/gateway-api/releases/download/v0.5.1/experimental-install.yaml", t) // enable kubernetes gateway api
+	enableGatewayApi(t)
 	testutils.CreateFromFile("policy.yaml", t)
 	testutils.CreateFromFile("crd-parameter.yaml", t)
 
@@ -96,4 +96,10 @@ func TestHttpRouteEnforceHostnames(t *testing.T) {
 			t.Errorf("Unexpected error message: %s", errorMessage)
 		}
 	})
+}
+
+func enableGatewayApi(t *testing.T) {
+	testutils.CreateFromFile("https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/experimental-install.yaml", t)
+	testutils.CreateFromFile("https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/standard-install.yaml", t)
+	testutils.CreateFromFile("https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/webhook-install.yaml", t)
 }
