@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: grafana-enforce-dashboard-folder-vap-library-test
-data:
-  test: "test"

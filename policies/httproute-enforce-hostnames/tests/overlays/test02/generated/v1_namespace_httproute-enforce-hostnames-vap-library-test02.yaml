@@ -1,6 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  labels:
-    vap-library.com/httproute-enforce-hostnames: deny
-  name: httproute-enforce-hostnames-vap-library-test02

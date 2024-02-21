@@ -1,9 +1,0 @@
-apiVersion: vap-library.com/v1beta1
-kind: HTTPRouteEnforceHostnamesParam
-metadata:
-  name: httproute-enforce-hostnames-vap-library-test
-  namespace: httproute-enforce-hostnames-vap-library-test02
-spec:
-  allowedHostnames:
-  - test.example.com
-  - test2.example.com
