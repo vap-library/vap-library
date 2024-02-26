@@ -1,0 +1,41 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: max-replicas-deployments
+spec:
+  policyName: max-replicas-deployments
+  validationActions:
+    - Deny---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: grafana-enforce-dashboard-folder-vap-library-test
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/grafana-enforce-dashboard-folder: deny
+    objectSelector: {}
+  policyName: grafana-enforce-dashboard-folder.vap-library.com
+  validationActions:
+  - Deny
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: httproute-enforce-hostnames-vap-library-test
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/httproute-enforce-hostnames: deny
+    objectSelector: {}
+  paramRef:
+    name: httproute-enforce-hostnames-vap-library-test
+    parameterNotFoundAction: Deny
+  policyName: httproute-enforce-hostnames.vap-library.com
+  validationActions:
+  - Deny
+---

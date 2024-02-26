@@ -1,0 +1,55 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: max-replicas-deployments
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments"]
+  validations:
+    - expression: "object.spec.replicas <= 3"
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "grafana-enforce-dashboard-folder.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["configmaps", "secrets"]
+  matchConditions:
+    - name: "filter-for-grafana-dashboard-label"
+      expression: 'has(object.metadata.labels) && has(object.metadata.labels.grafana_dashboard) && object.metadata.labels.grafana_dashboard == "1"'
+  validations:
+    - expression: "has(object.metadata.annotations) && has(object.metadata.annotations.grafana_folder) && object.metadata.annotations.grafana_folder == namespaceObject.metadata.name"
+      message: "metadata.annotations.grafana_folder must be set to the namespace of the ConfigMap/Secret"
+      reason: Invalid
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "httproute-enforce-hostnames.vap-library.com"
+spec:
+  failurePolicy: Fail
+  paramKind:
+    apiVersion: vap-library.com/v1beta1
+    kind: HTTPRouteEnforceHostnamesParam
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   ["gateway.networking.k8s.io"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["httproutes"]
+  validations:
+    - expression: "has(object.spec.hostnames) && has(params.spec.allowedHostnames) && object.spec.hostnames.all(h, h in params.spec.allowedHostnames)"
+      message: "spec.hostnames must be present and each item must be on the spec.allowedHostnames list in the policy parameter"
+      reason: Invalid
+---
