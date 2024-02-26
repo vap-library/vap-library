@@ -13,6 +13,8 @@ var testenv env.Environment
 
 func TestMain(m *testing.M) {
 	testenv = env.New()
+	testutils.CheckPrerequisites()
+	testutils.CreateKindCluster()
 	os.Exit(testenv.Run(m))
 }
 
