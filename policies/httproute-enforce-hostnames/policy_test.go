@@ -1,105 +1,50 @@
-package main
+package httproute_enforce_hostnames
 
 import (
+	"context"
+	"fmt"
 	"os"
-	"strings"
+	"sigs.k8s.io/e2e-framework/klient/decoder"
+	"sigs.k8s.io/e2e-framework/klient/k8s/resources"
+	"sigs.k8s.io/e2e-framework/pkg/envconf"
+	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
 	"vap-library/testutils"
 
 	"sigs.k8s.io/e2e-framework/pkg/env"
 )
 
-var testenv env.Environment
+var testEnv env.Environment
 
 func TestMain(m *testing.M) {
-	testenv = env.New()
-	testutils.CheckPrerequisites()
-	testutils.CreateKindCluster()
-	os.Exit(testenv.Run(m))
+	var err error
+	testEnv, err = testutils.CreateTestEnv("")
+	if err != nil {
+		fmt.Println("haho")
+		fmt.Print(err)
+		os.Exit(1)
+	} else {
+		fmt.Println("minden ok")
+	}
+
+	os.Exit(testEnv.Run(m))
 }
 
-func TestHttpRouteEnforceHostnames(t *testing.T) {
-	enableGatewayApi(t)
-	testutils.CreateFromFile("policy.yaml", t)
-	testutils.CreateFromFile("crd-parameter.yaml", t)
+func TestKindCluster(t *testing.T) {
+	feature := features.New("Testing applying resources").
+		Setup(func(ctx context.Context, t *testing.T, config *envconf.Config) context.Context {
+			r, err := resources.New(config.Client().RESTConfig())
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = decoder.ApplyWithManifestDir(ctx, r, "./", "*.yaml", []resources.CreateOption{})
+			if err != nil {
+				t.Fatal(err)
+			}
+			return ctx
+		}).Assess("Nginx pod can call github api", func(ctx context.Context, t *testing.T, c *envconf.Config) context.Context {
+		return ctx
+	}).Feature()
 
-	t.Run("HTTPRoute with allowed routes should be allowed", func(t *testing.T) {
-		testutils.DeleteNamespace("httproute-enforce-hostnames-vap-library-test0", t)
-		testutils.CreationShouldSucceed(t, testutils.Dedent(`
-			apiVersion: v1
-			kind: Namespace
-			metadata:
-				labels:
-					vap-library.com/httproute-enforce-hostnames: deny
-				name: httproute-enforce-hostnames-vap-library-test01`))
-
-		testutils.CreationShouldSucceed(t, testutils.Dedent(`
-			apiVersion: vap-library.com/v1beta1
-			kind: HTTPRouteEnforceHostnamesParam
-			metadata:
-				name: httproute-enforce-hostnames-vap-library-test
-				namespace: httproute-enforce-hostnames-vap-library-test01
-			spec:
-				allowedHostnames:
-				- test.example.com
-				- test2.example.com`))
-		testutils.CreateFromFile("binding.yaml", t)
-
-		testutils.CreationShouldSucceed(t, testutils.Dedent(`
-			apiVersion: gateway.networking.k8s.io/v1beta1
-			kind: HTTPRoute
-			metadata:
-				name: httproute-example-vap-library-test-test01
-				namespace: httproute-enforce-hostnames-vap-library-test01
-			spec:
-				hostnames:
-				- test.example.com
-				parentRefs:
-				- name: dummy`))
-	})
-
-	t.Run("HTTPRoute with forbidden routes should be denied", func(t *testing.T) {
-		testutils.DeleteNamespace("httproute-enforce-hostnames-vap-library-test02", t)
-		testutils.CreationShouldSucceed(t, testutils.Dedent(`
-			apiVersion: v1
-			kind: Namespace
-			metadata:
-				labels:
-					vap-library.com/httproute-enforce-hostnames: deny
-				name: httproute-enforce-hostnames-vap-library-test02`))
-
-		testutils.CreationShouldSucceed(t, testutils.Dedent(`
-			apiVersion: vap-library.com/v1beta1
-			kind: HTTPRouteEnforceHostnamesParam
-			metadata:
-				name: httproute-enforce-hostnames-vap-library-test
-				namespace: httproute-enforce-hostnames-vap-library-test02
-			spec:
-				allowedHostnames:
-				- test.example.com
-				- test2.example.com`))
-		testutils.CreateFromFile("binding.yaml", t)
-
-		errorMessage := testutils.CreationShouldFail(t, testutils.Dedent(`
-			apiVersion: gateway.networking.k8s.io/v1beta1
-			kind: HTTPRoute
-			metadata:
-				name: httproute-example-vap-library-test-test02
-				namespace: httproute-enforce-hostnames-vap-library-test02
-			spec:
-				hostnames:
-				- notallowed.example.com
-				parentRefs:
-				- name: dummy`))
-
-		if !strings.HasSuffix(errorMessage, "spec.hostnames must be present and each item must be on the spec.allowedHostnames list in the policy parameter\n") {
-			t.Errorf("Unexpected error message: %s", errorMessage)
-		}
-	})
-}
-
-func enableGatewayApi(t *testing.T) {
-	testutils.CreateFromFile("https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/experimental-install.yaml", t)
-	testutils.CreateFromFile("https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/standard-install.yaml", t)
-	testutils.CreateFromFile("https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/webhook-install.yaml", t)
+	_ = testEnv.Test(t, feature)
 }

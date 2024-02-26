@@ -18,3 +18,5 @@
 
 # Go workspace file
 go.work
+
+**/test-logs/
