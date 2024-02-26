@@ -9,6 +9,8 @@ jobs:
   build:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -18,4 +20,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            release/*
+            release/policies.yaml
+            release/bindings.yaml
+            release/crds.yaml
