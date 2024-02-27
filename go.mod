@@ -1,11 +1,8 @@
 module vap-library
 
-go 1.20
+go 1.21.6
 
-require (
-	k8s.io/api v0.29.2
-	sigs.k8s.io/e2e-framework v0.3.1-0.20240219071740-5a3820e25f34
-)
+require sigs.k8s.io/e2e-framework v0.3.1-0.20240219071740-5a3820e25f34
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -44,6 +41,7 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	k8s.io/api v0.29.2 // indirect
 	k8s.io/apimachinery v0.29.2 // indirect
 	k8s.io/client-go v0.29.2 // indirect
 	k8s.io/klog/v2 v2.120.1 // indirect

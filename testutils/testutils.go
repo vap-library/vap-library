@@ -19,11 +19,12 @@ const (
 
 func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string]string) (env.Environment, error) {
 
-	// Hard code a kind version as default
+	// Use the default Kind version if none is provided
 	if kindVersion == "" {
 		kindVersion = defaultKindVersion
 	}
 
+	// Create a new environment from the flags
 	var testEnv env.Environment
 	testEnv, _ = env.NewFromFlags()
 
@@ -75,9 +76,15 @@ func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string
 
 	testEnv.Setup(setupFuncs...)
 
+	// Remove the test namespace
+	finishFuncs = append(finishFuncs, envfuncs.DeleteNamespace(testNamespace))
+
+	// Keep the logs if the flag is set
 	if keepLogs {
 		finishFuncs = append(finishFuncs, envfuncs.ExportClusterLogs(kindClusterName, "./test-logs"))
 	}
+
+	// Destroy the cluster
 	finishFuncs = append(finishFuncs, envfuncs.DestroyCluster(kindClusterName))
 
 	testEnv.Finish(finishFuncs...)
