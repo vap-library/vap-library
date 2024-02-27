@@ -16,8 +16,9 @@ import (
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
+	var namespaceLabels = map[string]string{"vap-library.com/grafana-enforce-dashboard-folder": "deny"}
+
 	var err error
-	var namespaceLabels = map[string]string{"test": "true"}
 	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
