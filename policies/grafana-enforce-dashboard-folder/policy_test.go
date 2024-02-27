@@ -3,6 +3,7 @@ package httproute_enforce_hostnames
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
 	"sigs.k8s.io/e2e-framework/pkg/features"
@@ -16,16 +17,18 @@ var testEnv env.Environment
 
 func TestMain(m *testing.M) {
 	var err error
-	testEnv, err = testutils.CreateTestEnv("")
+	var namespaceLabels = map[string]string{"test": "true"}
+	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels)
 	if err != nil {
-		fmt.Print(err)
-		os.Exit(1)
+		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
 	}
 
 	os.Exit(testEnv.Run(m))
 }
 
-func TestKindCluster(t *testing.T) {
+func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
+
+	// Create a feature
 	feature := features.New("Testing applying resources").
 		Setup(func(ctx context.Context, t *testing.T, config *envconf.Config) context.Context {
 			//r, err := resources.New(config.Client().RESTConfig())
