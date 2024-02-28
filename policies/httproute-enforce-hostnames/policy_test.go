@@ -17,7 +17,7 @@ import (
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
-	var namespaceLabels = map[string]string{"vap-library.com/grafana-enforce-dashboard-folder": "deny"}
+	var namespaceLabels = map[string]string{"vap-library.com/httproute-enforce-hostnames": "deny"}
 
 	var err error
 	testEnv, err = testutils.CreateTestEnv("", true, namespaceLabels)
@@ -28,7 +28,7 @@ func TestMain(m *testing.M) {
 	os.Exit(testEnv.Run(m))
 }
 
-func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
+func TestVapHTTPRouteEnforceHostnames(t *testing.T) {
 
 	f := features.New("pod list").
 		Assess("pods from namespace", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
