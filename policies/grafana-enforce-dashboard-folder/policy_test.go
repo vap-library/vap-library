@@ -28,7 +28,7 @@ func TestMain(m *testing.M) {
 	os.Exit(testEnv.Run(m))
 }
 
-func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
+func TestVAPGrafanaEnforceDashboardFolder(t *testing.T) {
 
 	f := features.New("pod list").
 		Assess("pods from namespace", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
