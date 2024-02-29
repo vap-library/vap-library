@@ -8,17 +8,16 @@ This repo contains community maintained collection of [Kubernetes Validating Adm
 
 Prerequisites:
 - Go v1.22.x
-- kubectl v1.29.x
-- kind v0.22.x
+- Docker (for Kind)
 
 To run all the tests: 
 ```bash
-go test ./...
+go test ./policies/...
 ```
 
-To run tests for a single policy cd into that policy's directory and run 
+To run tests for a single policy 
 ```bash
-go test
+go test  ./policies/POLICY/
 ```
 
 # Releasing

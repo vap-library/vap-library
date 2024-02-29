@@ -56,7 +56,7 @@ func TestMain(m *testing.M) {
 	var namespaceLabels = map[string]string{"vap-library.com/httproute-enforce-hostnames": "deny"}
 
 	var err error
-	testEnv, err = testutils.CreateTestEnv("", true, namespaceLabels)
+	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
 	}
