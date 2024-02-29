@@ -152,3 +152,50 @@ func GetNamespaceKey(t *testing.T) NamespaceCtxKey {
 	// When pass t.Name() from inside a `testenv.BeforeEachTest` function, the name is just TestName
 	return NamespaceCtxKey(t.Name())
 }
+
+// ApplyK8sResourceFromYAML applies a k8s resource from a yaml string
+func ApplyK8sResourceFromYAML(ctx context.Context, cfg *envconf.Config, yaml string) error {
+	r, err := resources.New(cfg.Client().RESTConfig())
+	if err != nil {
+		return err
+	}
+
+	obj, err := decoder.DecodeAny(strings.NewReader(yaml))
+	if err != nil {
+		return err
+	}
+	handler := decoder.CreateHandler(r)
+	return handler(ctx, obj)
+}
+
+//func ApplyK8sResourceFromYAML(ctx context.Context, r *resources.Resources, yaml string) error {
+//	obj, err := decoder.DecodeAny(strings.NewReader(yaml))
+//	if err != nil {
+//		return err
+//	}
+//	handler := decoder.CreateHandler(r)
+//	return handler(ctx, obj)
+//}
+
+//r, err := resources.New(cfg.Client().RESTConfig())
+//if err != nil {
+//t.Fatal(err)
+//}
+//
+//// get namespace
+//namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+//
+//// decode CM yaml
+//cmObj, err := decoder.DecodeAny(strings.NewReader(fmt.Sprintf(dashboardCMYAML, namespace, namespace)))
+//if err != nil {
+//t.Fatal(err)
+//}
+//
+//// apply CM
+//handler := decoder.CreateHandler(r)
+//t.Logf("applying valid dashboard CM to namespace %s", namespace)
+//if err := handler(ctx, cmObj); err != nil {
+//t.Fatal(err)
+//}
+//
+//return ctx
