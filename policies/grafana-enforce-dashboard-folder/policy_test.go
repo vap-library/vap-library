@@ -1,77 +1,124 @@
-package main
+package httproute_enforce_hostnames
 
 import (
+	"context"
+	"fmt"
+	"log"
 	"os"
-	"strings"
+	"sigs.k8s.io/e2e-framework/pkg/envconf"
+	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
 	"vap-library/testutils"
 
 	"sigs.k8s.io/e2e-framework/pkg/env"
 )
 
-var testenv env.Environment
+var dashboardCMYAML string = `
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-dashboard
+  namespace: %s
+  labels:
+    grafana_dashboard: "1"
+  annotations:
+    grafana_folder: %s
+data:
+  test: "test"
+`
+
+var dashboardCMWithoutAnnotationYAML string = `
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-dashboard
+  namespace: %s
+  labels:
+    grafana_dashboard: "1"
+data:
+  test: "test"
+`
+
+var normalCMYAML string = `
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: test-dashboard
+  namespace: %s
+data:
+  test: "test"
+`
+
+var testEnv env.Environment
 
 func TestMain(m *testing.M) {
-	testenv = env.New()
-	testutils.CheckPrerequisites()
-	testutils.CreateKindCluster()
-	os.Exit(testenv.Run(m))
+	var namespaceLabels = map[string]string{"vap-library.com/grafana-enforce-dashboard-folder": "deny"}
+
+	var err error
+	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels)
+	if err != nil {
+		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
+	}
+
+	os.Exit(testEnv.Run(m))
 }
 
-func TestVapGrafanaEnforceDashboardFolder(t *testing.T) {
-	testutils.CreateFromFile("policy.yaml", t)
-	testutils.CreateFromFile("binding.yaml", t)
-	testutils.DeleteNamespace("grafana-enforce-dashboard-folder-vap-library-test", t)
-	testutils.CreateFromFile("namespace.yaml", t)
+func TestVAPGrafanaEnforceDashboardFolderValid(t *testing.T) {
 
-	t.Run("dashboard with folder corresponding to namespace should be allowed", func(t *testing.T) {
-		testutils.CreationShouldSucceed(t, testutils.Dedent(`
-			apiVersion: v1
-			kind: ConfigMap
-			metadata:
-				name: dashboard-in-correct-folder
-				namespace: grafana-enforce-dashboard-folder-vap-library-test
-				labels:
-					grafana_dashboard: "1"
-				annotations:
-					grafana_folder: grafana-enforce-dashboard-folder-vap-library-test
-			data:
-				test: "test"`))
-	})
+	f := features.New("Dashboard is accepted").
+		Assess("A valid dashboard ConfigMap is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-	t.Run("dashboard with folder different from namespace should be denied", func(t *testing.T) {
-		errorMessage := testutils.CreationShouldFail(t, testutils.Dedent(`
-			apiVersion: v1
-			kind: ConfigMap
-			metadata:
-				name: dashboard-in-wrong-folder
-				namespace: grafana-enforce-dashboard-folder-vap-library-test
-				labels:
-					grafana_dashboard: "1"
-				annotations:
-					grafana_folder: some-other-folder
-			data:
-				test: "test"`))
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dashboardCMYAML, namespace, namespace))
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		if !strings.HasSuffix(errorMessage, "metadata.annotations.grafana_folder must be set to the namespace of the ConfigMap/Secret\n") {
-			t.Errorf("Unexpected error message: %s", errorMessage)
-		}
-	})
+			return ctx
+		})
 
-	t.Run("dashboard with no folder specified should be denied", func(t *testing.T) {
-		errorMessage := testutils.CreationShouldFail(t, testutils.Dedent(`
-			apiVersion: v1
-			kind: ConfigMap
-			metadata:
-				name: grafana-enforce-dashboard-folder-vap-library-test
-				namespace: grafana-enforce-dashboard-folder-vap-library-test
-				labels:
-					grafana_dashboard: "1"
-			data:
-				test: "test"`))
+	_ = testEnv.Test(t, f.Feature())
 
-		if !strings.HasSuffix(errorMessage, "metadata.annotations.grafana_folder must be set to the namespace of the ConfigMap/Secret\n") {
-			t.Errorf("Unexpected error message: %s", errorMessage)
-		}
-	})
+}
+
+func TestVAPGrafanaEnforceDashboardFolderNormalCM(t *testing.T) {
+
+	f := features.New("Normal CM is accepted").
+		Assess("A non-dashboard CM is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(normalCMYAML, namespace))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		})
+
+	_ = testEnv.Test(t, f.Feature())
+
+}
+
+func TestVAPGrafanaEnforceDashboardFolderInvalidDashboardCM(t *testing.T) {
+
+	f := features.New("Normal CM is accepted").
+		Assess("A non-dashboard CM is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dashboardCMWithoutAnnotationYAML, namespace))
+			if err == nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		})
+
+	_ = testEnv.Test(t, f.Feature())
+
 }

@@ -1,172 +1,169 @@
 package testutils
 
 import (
-	"bytes"
 	"context"
 	"fmt"
-	"log"
-	"os"
-	"os/exec"
+	v1 "k8s.io/api/core/v1"
+	"sigs.k8s.io/e2e-framework/klient/decoder"
+	"sigs.k8s.io/e2e-framework/klient/k8s/resources"
+	"sigs.k8s.io/e2e-framework/pkg/env"
+	"sigs.k8s.io/e2e-framework/pkg/envconf"
+	"sigs.k8s.io/e2e-framework/pkg/envfuncs"
+	"sigs.k8s.io/e2e-framework/support/kind"
 	"strings"
 	"testing"
-
-	"github.com/lithammer/dedent"
-	"k8s.io/client-go/kubernetes/scheme"
-	"sigs.k8s.io/e2e-framework/klient/k8s"
-	"sigs.k8s.io/e2e-framework/pkg/envconf"
+	"time"
 )
 
-func CreateVapFromFile3(filename string, ctx context.Context, c *envconf.Config) (k8s.Object, error) {
-	fmt.Println("Creating VAP from file", filename)
+const (
+	defaultKindVersion = "v1.29.2"
+	kindNamePrefix     = "vaplibtest"
+	testNamespace      = "vap-testing"
+)
 
-	content, _ := os.ReadFile(filename)
-	object, _, err := scheme.Codecs.UniversalDeserializer().Decode(content, nil, nil)
+type (
+	NamespaceCtxKey string
+	ClusterCtxKey   string
+)
+
+func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string]string) (env.Environment, error) {
+
+	// Specifying a run ID so that multiple runs wouldn't collide.
+	runID := envconf.RandomName(testNamespace, 14)
+
+	// Use the default Kind version if none is provided
+	if kindVersion == "" {
+		kindVersion = defaultKindVersion
+	}
+
+	// Create a new environment from the flags
+	var testEnv env.Environment
+	testEnv, _ = env.NewFromFlags()
+
+	// Define an empty slice of EnvFunc type for Env setup and finish
+	var setupFuncs []env.Func
+	var finishFuncs []env.Func
+
+	// Create cluster
+	kindClusterName := envconf.RandomName(kindNamePrefix, 16)
+	setupFuncs = append(setupFuncs, envfuncs.CreateClusterWithConfig(kind.NewProvider(), kindClusterName, "../../testutils/kind-config.yaml", kind.WithImage("kindest/node:"+kindVersion)))
+
+	// Apply all yaml from the policy directory
+	setupFuncs = append(
+		setupFuncs,
+		func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
+			r, err := resources.New(cfg.Client().RESTConfig())
+			if err != nil {
+				return ctx, err
+			}
+			err = decoder.ApplyWithManifestDir(ctx, r, "./", "*.yaml", []resources.CreateOption{})
+			if err != nil {
+				return ctx, err
+			}
+
+			// Sleep 2 sec to make sure the API has the VAP and binding properly "registered"
+			time.Sleep(2 * time.Second)
+
+			return ctx, nil
+		},
+	)
+
+	// Apply the CRD for the parameter if we got one
+	//crdFileName := "./crd-parameter.yaml"
+	//setupFuncs = append(
+	//	setupFuncs,
+	//	func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
+	//		if p := utils.RunCommand(fmt.Sprintf("kubectl apply --server-side -f %s", crdFileName)); p.Err() != nil {
+	//			return ctx, p.Err()
+	//		}
+	//		return ctx, nil
+	//	},
+	//)
+
+	testEnv.Setup(setupFuncs...)
+
+	// Remove the applied resources
+	finishFuncs = append(
+		finishFuncs,
+		func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
+			r, err := resources.New(cfg.Client().RESTConfig())
+			if err != nil {
+				return ctx, err
+			}
+			err = decoder.DeleteWithManifestDir(ctx, r, "./", "*.yaml", []resources.DeleteOption{})
+			if err != nil {
+				return ctx, err
+			}
+			return ctx, nil
+		},
+	)
+
+	// Keep the logs if the flag is set
+	if keepLogs {
+		finishFuncs = append(finishFuncs, envfuncs.ExportClusterLogs(kindClusterName, "./test-logs"))
+	}
+
+	// Destroy the cluster
+	finishFuncs = append(finishFuncs, envfuncs.DestroyCluster(kindClusterName))
+
+	testEnv.Finish(finishFuncs...)
+
+	// Set the BeforeEachTest and AfterEachTest functions that creates and deletes a namespace for each test
+	testEnv.BeforeEachTest(func(ctx context.Context, cfg *envconf.Config, t *testing.T) (context.Context, error) {
+		return createNSForTest(ctx, cfg, t, runID, namespaceLabels)
+	})
+	testEnv.AfterEachTest(func(ctx context.Context, cfg *envconf.Config, t *testing.T) (context.Context, error) {
+		return deleteNSForTest(ctx, cfg, t, runID)
+	})
+
+	return testEnv, nil
+}
+
+// createNSForTest creates a random namespace with the runID as a prefix. It is stored in the context
+// so that the deleteNSForTest routine can look it up and delete it.
+func createNSForTest(ctx context.Context, cfg *envconf.Config, t *testing.T, runID string, namespaceLabels map[string]string) (context.Context, error) {
+	ns := envconf.RandomName(runID, 20)
+	ctx = context.WithValue(ctx, GetNamespaceKey(t), ns)
+
+	t.Logf("Creating NS %v for test %v", ns, t.Name())
+	nsObj := v1.Namespace{}
+	nsObj.Name = ns
+	nsObj.Labels = namespaceLabels
+	return ctx, cfg.Client().Resources().Create(ctx, &nsObj)
+}
+
+// deleteNSForTest looks up the namespace corresponding to the given test and deletes it.
+func deleteNSForTest(ctx context.Context, cfg *envconf.Config, t *testing.T, _ string) (context.Context, error) {
+	ns := fmt.Sprint(ctx.Value(GetNamespaceKey(t)))
+	t.Logf("Deleting NS %v for test %v", ns, t.Name())
+
+	nsObj := v1.Namespace{}
+	nsObj.Name = ns
+	return ctx, cfg.Client().Resources().Delete(ctx, &nsObj)
+}
+
+// GetNamespaceKey returns the context key for a given test
+func GetNamespaceKey(t *testing.T) NamespaceCtxKey {
+	// When we pass t.Name() from inside an `assess` step, the name is in the form TestName/Features/Assess
+	if strings.Contains(t.Name(), "/") {
+		return NamespaceCtxKey(strings.Split(t.Name(), "/")[0])
+	}
+
+	// When pass t.Name() from inside a `testenv.BeforeEachTest` function, the name is just TestName
+	return NamespaceCtxKey(t.Name())
+}
+
+// ApplyK8sResourceFromYAML applies a k8s resource from a yaml string
+func ApplyK8sResourceFromYAML(ctx context.Context, cfg *envconf.Config, yaml string) error {
+	r, err := resources.New(cfg.Client().RESTConfig())
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode VAP: %v", err)
+		return err
 	}
 
-	client, err := c.NewClient()
+	obj, err := decoder.DecodeAny(strings.NewReader(yaml))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create client: %v", err)
+		return err
 	}
-
-	o, _ := object.(k8s.Object)
-
-	err = client.Resources().Create(ctx, o)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create VAP: %v", err)
-	}
-
-	return o, nil
-}
-
-// Creates kubernetes resources from a YAML file.
-func CreateFromFile(filename string, t *testing.T) {
-	out, err := runCommand("kubectl", "apply", "-f", filename)
-	if err != nil {
-		t.Fatalf("failed to create kubernetes resources: %v", out)
-	}
-	t.Log(out)
-}
-
-// Deletes and recreates a namespace. If the namespace does not exist, it is just created.
-func RecreateNamespace(name string, t *testing.T) {
-	DeleteNamespace(name, t)
-
-	out, err := runCommand("kubectl", "create", "namespace", name)
-	if err != nil {
-		t.Fatalf("failed to create namespace: %v", out)
-	}
-	t.Log(out)
-}
-
-// Deletes a namespace. Fails silently if the namespace does not exist.
-func DeleteNamespace(name string, t *testing.T) {
-	runCommand("kubectl", "delete", "namespace", name)
-	// ignore errors if namespace is not there
-}
-
-// Deletes the kubernetes resource specified in the YAML file
-func DeleteFromFile(id string) {
-	fmt.Println("Destroying", id)
-}
-
-// Creates a kubernetes resource from a YAML definition. Fail the test if the creation fails.
-func CreationShouldSucceed(t *testing.T, resourceDef string) {
-	out, err := runCommandWithInput(resourceDef, "kubectl", "apply", "-f", "-")
-	if err != nil {
-		t.Fatalf("Creation failed: %v", out)
-	}
-}
-
-// Creates a kubernetes resource from a YAML definition. Fail the test if the creation succeeds.
-// If the creation fails, return the error message.
-func CreationShouldFail(t *testing.T, resourceDef string) string {
-	out, err := runCommandWithInput(resourceDef, "kubectl", "apply", "-f", "-")
-	if err == nil {
-		t.Fatalf("Creation should have failed, but it succeeded: %v", out)
-	}
-	return out
-}
-
-// De-indents a string and replaces tabs with spaces.
-func Dedent(text string) string {
-	return strings.ReplaceAll(dedent.Dedent(text), "\t", "    ")
-}
-
-func CreateKindCluster() {
-	if !IsKindClusterRunning() {
-		log.Println("Creating kind cluster")
-
-		out, err := runCommand("kind", "create", "cluster", "--name", "kind", "--config", "../../cluster.yaml")
-		if err != nil {
-			log.Fatalf("failed to create kind cluster: %v", out)
-		}
-		log.Println(out)
-	} else {
-		log.Println("Kind cluster already running")
-	}
-
-	// this will add the kubeconfig for the kind cluster
-	out, err := runCommand("kind", "export", "kubeconfig", "--name", "kind")
-	if err != nil {
-		log.Fatalf("failed to export kubeconfig: %v", out)
-	}
-	log.Println(out)
-
-	// we want to make the kind cluster the current context
-	out, err = runCommand("kubectl", "config", "set-context", "kind-kind")
-	if err != nil {
-		log.Fatalf("failed to set context: %v", out)
-	}
-	log.Println(out)
-}
-
-func IsKindClusterRunning() bool {
-	out, err := runCommand("kind", "get", "clusters")
-	if err != nil {
-		return false
-	}
-	return strings.Contains(out, "kind")
-}
-
-func CheckPrerequisites() {
-	EnsureCommandExists("kubectl")
-	EnsureCommandExists("kind")
-}
-
-func EnsureCommandExists(command string) {
-	_, err := exec.LookPath(command)
-	if err != nil {
-		log.Fatalf("Command %s not found", command)
-	}
-}
-
-func runCommandWithInput(input string, name string, args ...string) (string, error) {
-	cmd := exec.Command(name, args...)
-	cmd.Stdin = bytes.NewBufferString(input)
-	buf := new(bytes.Buffer)
-	errBuf := new(bytes.Buffer)
-	cmd.Stdout = buf
-	cmd.Stderr = errBuf
-	err := cmd.Run()
-	if err != nil {
-		return errBuf.String(), err
-	}
-
-	return buf.String(), nil
-}
-
-func runCommand(name string, args ...string) (string, error) {
-	cmd := exec.Command(name, args...)
-	buf := new(bytes.Buffer)
-	errBuf := new(bytes.Buffer)
-	cmd.Stdout = buf
-	cmd.Stderr = errBuf
-	err := cmd.Run()
-	if err != nil {
-		return errBuf.String(), err
-	}
-
-	return buf.String(), nil
+	handler := decoder.CreateHandler(r)
+	return handler(ctx, obj)
 }

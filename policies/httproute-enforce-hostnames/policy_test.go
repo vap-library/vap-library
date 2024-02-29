@@ -1,105 +1,79 @@
-package main
+package httproute_enforce_hostnames
 
 import (
+	"context"
+	"fmt"
+	"log"
 	"os"
-	"strings"
+	"sigs.k8s.io/e2e-framework/pkg/env"
+	"sigs.k8s.io/e2e-framework/pkg/envconf"
+	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
 	"vap-library/testutils"
-
-	"sigs.k8s.io/e2e-framework/pkg/env"
 )
 
-var testenv env.Environment
+var testParameterYAML string = `
+apiVersion: vap-library.com/v1beta1
+kind: HTTPRouteEnforceHostnamesParam
+metadata:
+  name: httproute-enforce-hostnames-vap-library-test
+  namespace: %s
+spec:
+  allowedHostnames:
+  - test.example.com
+  - test2.example.com
+`
+
+var validHostnameYAML string = `
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+	name: httproute-example-vap-library-test-test01
+	namespace: %s
+spec:
+	hostnames:
+	- test.example.com
+	parentRefs:
+	- name: dummy
+`
+
+var invalidHostnameYAML string = `
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+	name: httproute-example-vap-library-test-test01
+	namespace: %s
+spec:
+	hostnames:
+	- notallowed.example.com
+	parentRefs:
+	- name: dummy
+`
+
+var testEnv env.Environment
 
 func TestMain(m *testing.M) {
-	testenv = env.New()
-	testutils.CheckPrerequisites()
-	testutils.CreateKindCluster()
-	os.Exit(testenv.Run(m))
+	var namespaceLabels = map[string]string{"vap-library.com/httproute-enforce-hostnames": "deny"}
+
+	var err error
+	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels)
+	if err != nil {
+		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
+	}
+
+	os.Exit(testEnv.Run(m))
 }
 
-func TestHttpRouteEnforceHostnames(t *testing.T) {
-	enableGatewayApi(t)
-	testutils.CreateFromFile("policy.yaml", t)
-	testutils.CreateFromFile("crd-parameter.yaml", t)
+func TestVAPHTTPRouteEnforceHostnamesValidHostname(t *testing.T) {
 
-	t.Run("HTTPRoute with allowed routes should be allowed", func(t *testing.T) {
-		testutils.DeleteNamespace("httproute-enforce-hostnames-vap-library-test0", t)
-		testutils.CreationShouldSucceed(t, testutils.Dedent(`
-			apiVersion: v1
-			kind: Namespace
-			metadata:
-				labels:
-					vap-library.com/httproute-enforce-hostnames: deny
-				name: httproute-enforce-hostnames-vap-library-test01`))
+	f := features.New("HTTPRoute is accepted").
+		Assess("A valid HTTPRoute is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// Get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+			t.Logf("namespace: %s", namespace)
+			return ctx
+		})
 
-		testutils.CreationShouldSucceed(t, testutils.Dedent(`
-			apiVersion: vap-library.com/v1beta1
-			kind: HTTPRouteEnforceHostnamesParam
-			metadata:
-				name: httproute-enforce-hostnames-vap-library-test
-				namespace: httproute-enforce-hostnames-vap-library-test01
-			spec:
-				allowedHostnames:
-				- test.example.com
-				- test2.example.com`))
-		testutils.CreateFromFile("binding.yaml", t)
+	_ = testEnv.Test(t, f.Feature())
 
-		testutils.CreationShouldSucceed(t, testutils.Dedent(`
-			apiVersion: gateway.networking.k8s.io/v1beta1
-			kind: HTTPRoute
-			metadata:
-				name: httproute-example-vap-library-test-test01
-				namespace: httproute-enforce-hostnames-vap-library-test01
-			spec:
-				hostnames:
-				- test.example.com
-				parentRefs:
-				- name: dummy`))
-	})
-
-	t.Run("HTTPRoute with forbidden routes should be denied", func(t *testing.T) {
-		testutils.DeleteNamespace("httproute-enforce-hostnames-vap-library-test02", t)
-		testutils.CreationShouldSucceed(t, testutils.Dedent(`
-			apiVersion: v1
-			kind: Namespace
-			metadata:
-				labels:
-					vap-library.com/httproute-enforce-hostnames: deny
-				name: httproute-enforce-hostnames-vap-library-test02`))
-
-		testutils.CreationShouldSucceed(t, testutils.Dedent(`
-			apiVersion: vap-library.com/v1beta1
-			kind: HTTPRouteEnforceHostnamesParam
-			metadata:
-				name: httproute-enforce-hostnames-vap-library-test
-				namespace: httproute-enforce-hostnames-vap-library-test02
-			spec:
-				allowedHostnames:
-				- test.example.com
-				- test2.example.com`))
-		testutils.CreateFromFile("binding.yaml", t)
-
-		errorMessage := testutils.CreationShouldFail(t, testutils.Dedent(`
-			apiVersion: gateway.networking.k8s.io/v1beta1
-			kind: HTTPRoute
-			metadata:
-				name: httproute-example-vap-library-test-test02
-				namespace: httproute-enforce-hostnames-vap-library-test02
-			spec:
-				hostnames:
-				- notallowed.example.com
-				parentRefs:
-				- name: dummy`))
-
-		if !strings.HasSuffix(errorMessage, "spec.hostnames must be present and each item must be on the spec.allowedHostnames list in the policy parameter\n") {
-			t.Errorf("Unexpected error message: %s", errorMessage)
-		}
-	})
-}
-
-func enableGatewayApi(t *testing.T) {
-	testutils.CreateFromFile("https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/experimental-install.yaml", t)
-	testutils.CreateFromFile("https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/standard-install.yaml", t)
-	testutils.CreateFromFile("https://github.com/kubernetes-sigs/gateway-api/releases/download/v1.0.0/webhook-install.yaml", t)
 }
