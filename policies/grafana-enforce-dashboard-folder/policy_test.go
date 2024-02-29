@@ -5,11 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sigs.k8s.io/e2e-framework/klient/decoder"
-	"sigs.k8s.io/e2e-framework/klient/k8s/resources"
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
 	"sigs.k8s.io/e2e-framework/pkg/features"
-	"strings"
 	"testing"
 	"vap-library/testutils"
 
@@ -58,7 +55,7 @@ func TestMain(m *testing.M) {
 	var namespaceLabels = map[string]string{"vap-library.com/grafana-enforce-dashboard-folder": "deny"}
 
 	var err error
-	testEnv, err = testutils.CreateTestEnv("", true, namespaceLabels)
+	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
 	}
@@ -70,24 +67,12 @@ func TestVAPGrafanaEnforceDashboardFolderValid(t *testing.T) {
 
 	f := features.New("Dashboard is accepted").
 		Assess("A valid dashboard ConfigMap is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			r, err := resources.New(cfg.Client().RESTConfig())
-			if err != nil {
-				t.Fatal(err)
-			}
-
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-			// decode CM yaml
-			cmObj, err := decoder.DecodeAny(strings.NewReader(fmt.Sprintf(dashboardCMYAML, namespace, namespace)))
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dashboardCMYAML, namespace, namespace))
 			if err != nil {
-				t.Fatal(err)
-			}
-
-			// apply CM
-			handler := decoder.CreateHandler(r)
-			t.Logf("applying valid dashboard CM to namespace %s", namespace)
-			if err := handler(ctx, cmObj); err != nil {
 				t.Fatal(err)
 			}
 
@@ -102,24 +87,12 @@ func TestVAPGrafanaEnforceDashboardFolderNormalCM(t *testing.T) {
 
 	f := features.New("Normal CM is accepted").
 		Assess("A non-dashboard CM is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			r, err := resources.New(cfg.Client().RESTConfig())
-			if err != nil {
-				t.Fatal(err)
-			}
-
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-			// decode CM yaml
-			cmObj, err := decoder.DecodeAny(strings.NewReader(fmt.Sprintf(normalCMYAML, namespace)))
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(normalCMYAML, namespace))
 			if err != nil {
-				t.Fatal(err)
-			}
-
-			// apply CM
-			handler := decoder.CreateHandler(r)
-			t.Logf("applying a normal ConfigMap to namespace %s", namespace)
-			if err := handler(ctx, cmObj); err != nil {
 				t.Fatal(err)
 			}
 
@@ -134,25 +107,13 @@ func TestVAPGrafanaEnforceDashboardFolderInvalidDashboardCM(t *testing.T) {
 
 	f := features.New("Normal CM is accepted").
 		Assess("A non-dashboard CM is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			r, err := resources.New(cfg.Client().RESTConfig())
-			if err != nil {
-				t.Fatal(err)
-			}
-
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-			// decode CM yaml
-			cmObj, err := decoder.DecodeAny(strings.NewReader(fmt.Sprintf(dashboardCMWithoutAnnotationYAML, namespace)))
-			if err != nil {
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dashboardCMWithoutAnnotationYAML, namespace))
+			if err == nil {
 				t.Fatal(err)
-			}
-
-			// apply CM
-			handler := decoder.CreateHandler(r)
-			t.Logf("trying to apply an invalid ConfigMap to namespace %s", namespace)
-			if err := handler(ctx, cmObj); err == nil {
-				t.Fatal("expected error, but it was possible to apply an invalid dashboard ConfigMap")
 			}
 
 			return ctx
