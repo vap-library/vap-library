@@ -3,16 +3,52 @@ package httproute_enforce_hostnames
 import (
 	"context"
 	"fmt"
-	v1 "k8s.io/api/core/v1"
 	"log"
 	"os"
+	"sigs.k8s.io/e2e-framework/pkg/env"
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
 	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
 	"vap-library/testutils"
-
-	"sigs.k8s.io/e2e-framework/pkg/env"
 )
+
+var testParameterYAML string = `
+apiVersion: vap-library.com/v1beta1
+kind: HTTPRouteEnforceHostnamesParam
+metadata:
+  name: httproute-enforce-hostnames-vap-library-test
+  namespace: %s
+spec:
+  allowedHostnames:
+  - test.example.com
+  - test2.example.com
+`
+
+var validHostnameYAML string = `
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+	name: httproute-example-vap-library-test-test01
+	namespace: %s
+spec:
+	hostnames:
+	- test.example.com
+	parentRefs:
+	- name: dummy
+`
+
+var invalidHostnameYAML string = `
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+	name: httproute-example-vap-library-test-test01
+	namespace: %s
+spec:
+	hostnames:
+	- notallowed.example.com
+	parentRefs:
+	- name: dummy
+`
 
 var testEnv env.Environment
 
@@ -28,37 +64,16 @@ func TestMain(m *testing.M) {
 	os.Exit(testEnv.Run(m))
 }
 
-func TestVAPHTTPRouteEnforceHostnames(t *testing.T) {
+func TestVAPHTTPRouteEnforceHostnamesValidHostname(t *testing.T) {
 
-	f := features.New("pod list").
-		Assess("pods from namespace", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			var pods v1.PodList
+	f := features.New("HTTPRoute is accepted").
+		Assess("A valid HTTPRoute is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// Get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-			err := cfg.Client().Resources(namespace).List(context.TODO(), &pods)
-			if err != nil {
-				t.Fatal(err)
-			}
-			t.Logf("found %d pods in namespace %s", len(pods.Items), namespace)
+			t.Logf("namespace: %s", namespace)
 			return ctx
 		})
 
 	_ = testEnv.Test(t, f.Feature())
 
-	// Create a feature
-	//feature := features.New("Testing applying resources").
-	//	Setup(func(ctx context.Context, t *testing.T, config *envconf.Config) context.Context {
-	//		//r, err := resources.New(config.Client().RESTConfig())
-	//		//if err != nil {
-	//		//	t.Fatal(err)
-	//		//}
-	//		//err = decoder.ApplyWithManifestDir(ctx, r, "./", "*.yaml", []resources.CreateOption{})
-	//		//if err != nil {
-	//		//	t.Fatal(err)
-	//		//}
-	//		return ctx
-	//	}).Assess("Nginx pod can call github api", func(ctx context.Context, t *testing.T, c *envconf.Config) context.Context {
-	//	return ctx
-	//}).Feature()
-
-	//_ = testEnv.Test(t, feature)
 }
