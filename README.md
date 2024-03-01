@@ -17,39 +17,30 @@ go test ./policies/...
 
 To run tests for a single policy 
 ```bash
-go test  ./policies/POLICY/
+go test  ./policies/POLICYNAME/
 ```
 
-# Using the library
+# Installing and using the library
 *NOTE: Validating Admission Policy is beta in 1.28+ and disabled by default in most Kubernetes distributions. Follow the [official instructions](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/#before-you-begin) to enable it on your k8s cluster/distribution*
 
-**Every policy (and related parameter CRD if exists) has a name prefix of `vap-library.com` to avoid name collisions.**
+**Every CRD that is used for policy parameter has a name prefix of `VAPLib` and every resource that we create has a suffix of `.vap-library.com` to avoid name collisions. As such the resources can be safely applied from the release manifest files**
 
-## Download the policies
-Go to https://github.com/vap-library/vap-library/releases/latest and download the `policies.yaml`, `bindings.yaml` and `crds.yaml` files.
+Parameter CRDs, policies and policy bindings are available in separate yaml file as [release artifacts](https://github.com/vap-library/vap-library/releases/latest)
 
-
-## Install using kubectl
-These files contain all the policies, policy bindings and CRDs for parameters respectively. If you want to exclude a particular policy, you can remove it from the `bindings.yaml` file.
-
-### parameter CRDs
-Some policies that require complex parameters (that cannot be easily represented in a ConfigMap) has their own CRDs for parameters. Clone the repo with the selected `ref` and use following command to install the CRDs
+## To apply ALL
+It is possible to apply all policies, policy bindings and parameter CRDs available in the vap-library (this would not enforce anything without proper labels on the namespaces):
 ```
-kubectl apply -f install/vap-library-parameter-crds.yaml
+export VAPRELEASE=v0.1.1
+kubectl apply -k https://github.com/vap-library/vap-library.git/release?ref=${VAPRELEASE}
 ```
 
-### policies
+## Enforcing a policy
+Make sure that you create a parameter ConfigMap or CR in case the policy requires it. You can enforce the policy with applying the relevant label to the namespace with a `deny` value (to warn them use the `warn` value):
 ```
-kubectl apply -f install/vap-library-policies.yaml
+vap-library.com/POLICYNAME: deny
 ```
 
-## Create resources for parameters (if needed)
-Most of the policies require parameters which could be either a `ConfigMap` or a `Custom Resource`. Check the tests in the policy's directory for examples.
-
-## Create policy binding
-Create the [ValidatingAdmissionPolicyBinding](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/#what-resources-make-a-policy) to bind the policy (and reference the parameter) to selected resources.
-
-# Sources
-* We are planning to port some of the policies that are available in [ARMOS's](https://www.armosec.io/) [cel-admission-library](https://github.com/kubescape/cel-admission-library/tree/main). Great repo to review and learn from
+# Sources that can help for contribution
+* A great repo to review and learn CEL: [ARMOS's](https://www.armosec.io/) [cel-admission-library](https://github.com/kubescape/cel-admission-library/tree/main)
 * [Official VAP documentation](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/)
 * [Kubernetes CEL documenation](https://kubernetes.io/docs/reference/using-api/cel/)
