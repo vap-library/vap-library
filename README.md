@@ -1,8 +1,8 @@
 # Kubernetes Validating Admission Policy library
-This repo contains community maintained collection of [Kubernetes Validating Admission Policies](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/).
+This repo contains community maintained (NO WARRANTY) collection of [Kubernetes Validating Admission Policies](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/). That can be used with few commands and namespace labels.
 
 # Status
-**The directory structure and the test framework is under heavy development**
+**The test framework is still receiving improvements**
 
 # Testing
 
@@ -18,14 +18,6 @@ go test ./policies/...
 To run tests for a single policy 
 ```bash
 go test  ./policies/POLICY/
-```
-
-# Releasing
-
-In order to release a new version of the library, just create a tag and push it.
-```
-git tag -a v0.1.0 -m "Initial release"
-git push origin v0.1.0
 ```
 
 # Using the library
@@ -61,6 +53,3 @@ Create the [ValidatingAdmissionPolicyBinding](https://kubernetes.io/docs/referen
 * We are planning to port some of the policies that are available in [ARMOS's](https://www.armosec.io/) [cel-admission-library](https://github.com/kubescape/cel-admission-library/tree/main). Great repo to review and learn from
 * [Official VAP documentation](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/)
 * [Kubernetes CEL documenation](https://kubernetes.io/docs/reference/using-api/cel/)
-
-# NO WARRANTY INCLUDED
-**REMINDER: These policies are maintained by the k8s community. Use it at your own risk!**

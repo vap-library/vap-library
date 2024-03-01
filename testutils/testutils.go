@@ -12,7 +12,6 @@ import (
 	"sigs.k8s.io/e2e-framework/support/kind"
 	"strings"
 	"testing"
-	"time"
 )
 
 const (
@@ -26,7 +25,7 @@ type (
 	ClusterCtxKey   string
 )
 
-func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string]string) (env.Environment, error) {
+func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string]string, extraResourcesFromDir map[string]string) (env.Environment, error) {
 
 	// Specifying a run ID so that multiple runs wouldn't collide.
 	runID := envconf.RandomName(testNamespace, 14)
@@ -52,33 +51,19 @@ func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string
 	setupFuncs = append(
 		setupFuncs,
 		func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
-			r, err := resources.New(cfg.Client().RESTConfig())
-			if err != nil {
-				return ctx, err
-			}
-			err = decoder.ApplyWithManifestDir(ctx, r, "./", "*.yaml", []resources.CreateOption{})
-			if err != nil {
-				return ctx, err
-			}
-
-			// Sleep 2 sec to make sure the API has the VAP and binding properly "registered"
-			time.Sleep(2 * time.Second)
-
-			return ctx, nil
+			return applyResourcesFromDir(ctx, cfg, "./", "*.yaml")
 		},
 	)
 
-	// Apply the CRD for the parameter if we got one
-	//crdFileName := "./crd-parameter.yaml"
-	//setupFuncs = append(
-	//	setupFuncs,
-	//	func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
-	//		if p := utils.RunCommand(fmt.Sprintf("kubectl apply --server-side -f %s", crdFileName)); p.Err() != nil {
-	//			return ctx, p.Err()
-	//		}
-	//		return ctx, nil
-	//	},
-	//)
+	// Apply extra resources
+	for dir, pattern := range extraResourcesFromDir {
+		setupFuncs = append(
+			setupFuncs,
+			func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
+				return applyResourcesFromDir(ctx, cfg, dir, pattern)
+			},
+		)
+	}
 
 	testEnv.Setup(setupFuncs...)
 
@@ -86,15 +71,7 @@ func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string
 	finishFuncs = append(
 		finishFuncs,
 		func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
-			r, err := resources.New(cfg.Client().RESTConfig())
-			if err != nil {
-				return ctx, err
-			}
-			err = decoder.DeleteWithManifestDir(ctx, r, "./", "*.yaml", []resources.DeleteOption{})
-			if err != nil {
-				return ctx, err
-			}
-			return ctx, nil
+			return deleteResourcesFromDir(ctx, cfg, "./", "*.yaml")
 		},
 	)
 
@@ -117,6 +94,34 @@ func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string
 	})
 
 	return testEnv, nil
+}
+
+// applyResourcesFromDir applies all the resources from the given directory
+func applyResourcesFromDir(ctx context.Context, cfg *envconf.Config, dir string, pattern string) (context.Context, error) {
+	r, err := resources.New(cfg.Client().RESTConfig())
+	if err != nil {
+		return ctx, err
+	}
+	err = decoder.ApplyWithManifestDir(ctx, r, dir, pattern, []resources.CreateOption{})
+	if err != nil {
+		return ctx, err
+	}
+
+	return ctx, nil
+}
+
+// deleteResourcesFromDir removes all the resources from the given directory
+func deleteResourcesFromDir(ctx context.Context, cfg *envconf.Config, dir string, pattern string) (context.Context, error) {
+	r, err := resources.New(cfg.Client().RESTConfig())
+	if err != nil {
+		return ctx, err
+	}
+	err = decoder.DeleteWithManifestDir(ctx, r, dir, pattern, []resources.DeleteOption{})
+	if err != nil {
+		return ctx, err
+	}
+
+	return ctx, nil
 }
 
 // createNSForTest creates a random namespace with the runID as a prefix. It is stored in the context

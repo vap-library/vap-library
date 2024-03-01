@@ -1,0 +1,31 @@
+apiVersion: vendir.k14s.io/v1alpha1
+kind: Config
+
+# declaration of minimum required vendir binary version (optional)
+minimumRequiredVersion: 0.40.0
+
+# one or more directories to manage with vendir
+directories:
+- # path is relative to `vendir` CLI working directory
+  path: vendoring
+
+  # set the permissions for this directory (optional; v0.33.0+)
+  # by default directories will be created with 0700
+  # can be provided as octal, in which case it needs to be prefixed with a `0`
+  permissions: 0755
+
+  contents:
+  - # path lives relative to directory path # (required)
+    path: gateway-api
+    githubRelease:
+      # slug for repository (org/repo) (required)
+      slug: kubernetes-sigs/gateway-api
+      # use release tag (optional)
+      # optional if tagSelection is specified (available in v0.22.0+)
+      tag: v1.0.0
+      # only download specific assets (optional; v0.12.0+)
+      assetNames: ["experimental-install.yaml"]
+      # disables checking auto-found checksums for downloaded files (optional)
+      # (checksums are extracted from release's text body
+      # based on following format `<sha256>  <filename>`)
+      disableAutoChecksumValidation: true

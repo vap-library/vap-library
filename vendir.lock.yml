@@ -1,0 +1,9 @@
+apiVersion: vendir.k14s.io/v1alpha1
+directories:
+- contents:
+  - githubRelease:
+      tag: v1.0.0
+      url: https://api.github.com/repos/kubernetes-sigs/gateway-api/releases/127397429
+    path: gateway-api
+  path: vendoring
+kind: LockConfig

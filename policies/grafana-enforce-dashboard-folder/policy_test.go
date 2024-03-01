@@ -8,6 +8,7 @@ import (
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
 	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
+	"time"
 	"vap-library/testutils"
 
 	"sigs.k8s.io/e2e-framework/pkg/env"
@@ -55,15 +56,18 @@ func TestMain(m *testing.M) {
 	var namespaceLabels = map[string]string{"vap-library.com/grafana-enforce-dashboard-folder": "deny"}
 
 	var err error
-	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels)
+	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
 	}
 
+	// wait for the VAP and binding to be registered properly
+	time.Sleep(2 * time.Second)
+
 	os.Exit(testEnv.Run(m))
 }
 
-func TestVAPGrafanaEnforceDashboardFolderValid(t *testing.T) {
+func TestValidDashboard(t *testing.T) {
 
 	f := features.New("Dashboard is accepted").
 		Assess("A valid dashboard ConfigMap is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
@@ -83,7 +87,7 @@ func TestVAPGrafanaEnforceDashboardFolderValid(t *testing.T) {
 
 }
 
-func TestVAPGrafanaEnforceDashboardFolderNormalCM(t *testing.T) {
+func TestNonDashboardConfigMap(t *testing.T) {
 
 	f := features.New("Normal CM is accepted").
 		Assess("A non-dashboard CM is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
@@ -103,10 +107,10 @@ func TestVAPGrafanaEnforceDashboardFolderNormalCM(t *testing.T) {
 
 }
 
-func TestVAPGrafanaEnforceDashboardFolderInvalidDashboardCM(t *testing.T) {
+func TestInvalidDashboard(t *testing.T) {
 
-	f := features.New("Normal CM is accepted").
-		Assess("A non-dashboard CM is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+	f := features.New("Wrong dashboard").
+		Assess("A dashboard with missing label is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
