@@ -1,7 +1,8 @@
+---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
-  name: httprouteenforcehostnamesparams.vap-library.com
+  name: vaplibhttprouteenforcehostnamesparams.vap-library.com
 spec:
   group: vap-library.com
   versions:
@@ -44,7 +45,7 @@ spec:
                 - allowedHostnames
   scope: Namespaced
   names:
-    plural: httprouteenforcehostnamesparams
-    singular: httprouteenforcehostnamesparam
-    kind: HTTPRouteEnforceHostnamesParam
+    plural: vaplibhttprouteenforcehostnamesparams
+    singular: vaplibhttprouteenforcehostnamesparam
+    kind: VAPLibHTTPRouteEnforceHostnamesParam
 ---

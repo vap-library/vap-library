@@ -1,7 +1,8 @@
 #!/bin/bash
 
-rm -rf release
-mkdir release
+for onefile in policies bindings crds;do
+  rm -f release/${onefile}.yaml
+done
 
 # concatenates the source file to the destination file
 # also inserts the '---' separator
