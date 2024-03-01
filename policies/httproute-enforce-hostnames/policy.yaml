@@ -6,7 +6,7 @@ spec:
   failurePolicy: Fail
   paramKind:
     apiVersion: vap-library.com/v1beta1
-    kind: HTTPRouteEnforceHostnamesParam
+    kind: VAPLibHTTPRouteEnforceHostnamesParam
   matchConstraints:
     resourceRules:
     - apiGroups:   ["gateway.networking.k8s.io"]

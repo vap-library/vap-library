@@ -15,9 +15,9 @@ import (
 
 var testParameterYAML string = `
 apiVersion: vap-library.com/v1beta1
-kind: HTTPRouteEnforceHostnamesParam
+kind: VAPLibHTTPRouteEnforceHostnamesParam
 metadata:
-  name: httproute-enforce-hostnames-vap-library-test
+  name: httproute-enforce-hostnames.vap-library.com
   namespace: %s
 spec:
   allowedHostnames:
@@ -29,7 +29,7 @@ var validHostnameYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: httproute-example-vap-library-test-test01
+  name: test-httproute
   namespace: %s
 spec:
   hostnames:
@@ -42,7 +42,7 @@ var invalidHostnameYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: httproute-example-vap-library-test-test01
+  name: test-httproute
   namespace: %s
 spec:
   hostnames:
@@ -55,7 +55,7 @@ var noHostnameYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: httproute-example-vap-library-test-test01
+  name: test-httproute
   namespace: %s
 spec:
   parentRefs:
@@ -74,6 +74,7 @@ func TestMain(m *testing.M) {
 		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
 	}
 
+	// wait for the cluster to be ready
 	time.Sleep(2 * time.Second)
 
 	os.Exit(testEnv.Run(m))
@@ -111,7 +112,7 @@ func TestValidHostname(t *testing.T) {
 func TestInValidHostname(t *testing.T) {
 
 	f := features.New("Invalid HTTPRoute is rejected").
-		Assess("A HTTPRoute with invalid hostname is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("An HTTPRoute with invalid hostname is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -127,7 +128,7 @@ func TestInValidHostname(t *testing.T) {
 			// this should FAIL!
 			err = testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(invalidHostnameYAML, namespace))
 			if err == nil {
-				t.Fatal(err)
+				t.Fatal("An HTTPRoute with invalid hostname was accepted")
 			}
 
 			return ctx
@@ -147,7 +148,7 @@ func TestWithoutParameter(t *testing.T) {
 			// this should FAIL as we do not have a parameter for VAP!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(validHostnameYAML, namespace))
 			if err == nil {
-				t.Fatal(err)
+				t.Fatal("An HTTPRoute without the VAP parameter was accepted")
 			}
 
 			return ctx
@@ -176,7 +177,7 @@ func TestNoHostname(t *testing.T) {
 			// this should FAIL!
 			err = testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(noHostnameYAML, namespace))
 			if err == nil {
-				t.Fatal(err)
+				t.Fatal("An HTTPRoute without hostname was accepted")
 			}
 
 			return ctx

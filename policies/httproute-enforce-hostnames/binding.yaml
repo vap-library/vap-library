@@ -1,7 +1,8 @@
+---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
-  name: httproute-enforce-hostnames-vap-library-test
+  name: httproute-enforce-hostnames-deny.vap-library.com
 spec:
   matchResources:
     matchPolicy: Equivalent
@@ -10,8 +11,27 @@ spec:
         vap-library.com/httproute-enforce-hostnames: deny
     objectSelector: {}
   paramRef:
-    name: httproute-enforce-hostnames-vap-library-test
+    name: httproute-enforce-hostnames.vap-library.com
     parameterNotFoundAction: Deny
   policyName: httproute-enforce-hostnames.vap-library.com
   validationActions:
   - Deny
+  - Audit
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: httproute-enforce-hostnames-warn.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/httproute-enforce-hostnames: warn
+    objectSelector: {}
+  paramRef:
+    name: httproute-enforce-hostnames.vap-library.com
+    parameterNotFoundAction: Deny
+  policyName: httproute-enforce-hostnames.vap-library.com
+  validationActions:
+    - Warn

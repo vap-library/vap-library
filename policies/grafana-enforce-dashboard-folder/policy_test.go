@@ -8,6 +8,7 @@ import (
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
 	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
+	"time"
 	"vap-library/testutils"
 
 	"sigs.k8s.io/e2e-framework/pkg/env"
@@ -59,6 +60,9 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
 	}
+
+	// wait for the cluster to be ready
+	time.Sleep(2 * time.Second)
 
 	os.Exit(testEnv.Run(m))
 }
