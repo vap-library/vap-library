@@ -12,6 +12,7 @@ import (
 	"sigs.k8s.io/e2e-framework/support/kind"
 	"strings"
 	"testing"
+	"time"
 )
 
 const (
@@ -51,7 +52,7 @@ func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string
 	setupFuncs = append(
 		setupFuncs,
 		func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
-			return applyResourcesFromDir(ctx, cfg, "./", "*.yaml")
+			return applyResourcesFromDir(ctx, cfg, "./", "*.yaml", 2)
 		},
 	)
 
@@ -60,7 +61,7 @@ func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string
 		setupFuncs = append(
 			setupFuncs,
 			func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
-				return applyResourcesFromDir(ctx, cfg, dir, pattern)
+				return applyResourcesFromDir(ctx, cfg, dir, pattern, 1)
 			},
 		)
 	}
@@ -97,7 +98,7 @@ func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string
 }
 
 // applyResourcesFromDir applies all the resources from the given directory
-func applyResourcesFromDir(ctx context.Context, cfg *envconf.Config, dir string, pattern string) (context.Context, error) {
+func applyResourcesFromDir(ctx context.Context, cfg *envconf.Config, dir string, pattern string, waitSec time.Duration) (context.Context, error) {
 	r, err := resources.New(cfg.Client().RESTConfig())
 	if err != nil {
 		return ctx, err
@@ -106,6 +107,9 @@ func applyResourcesFromDir(ctx context.Context, cfg *envconf.Config, dir string,
 	if err != nil {
 		return ctx, err
 	}
+
+	// Wait for the resources to be registered properly
+	time.Sleep(waitSec * time.Second)
 
 	return ctx, nil
 }

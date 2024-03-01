@@ -8,7 +8,6 @@ import (
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
 	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
-	"time"
 	"vap-library/testutils"
 
 	"sigs.k8s.io/e2e-framework/pkg/env"
@@ -60,9 +59,6 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
 	}
-
-	// wait for the VAP and binding to be registered properly
-	time.Sleep(2 * time.Second)
 
 	os.Exit(testEnv.Run(m))
 }
@@ -117,7 +113,7 @@ func TestInvalidDashboard(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dashboardCMWithoutAnnotationYAML, namespace))
 			if err == nil {
-				t.Fatal(err)
+				t.Fatal("A dashboard without the required annotation was accepted")
 			}
 
 			return ctx

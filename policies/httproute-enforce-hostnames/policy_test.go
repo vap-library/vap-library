@@ -74,7 +74,6 @@ func TestMain(m *testing.M) {
 		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
 	}
 
-	// wait for the VAP and binding to be registered properly
 	time.Sleep(2 * time.Second)
 
 	os.Exit(testEnv.Run(m))
@@ -94,7 +93,7 @@ func TestValidHostname(t *testing.T) {
 			}
 
 			// wait for the parameter to be registered properly
-			time.Sleep(2 * time.Second)
+			time.Sleep(10 * time.Second)
 
 			// this should PASS!
 			err = testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(validHostnameYAML, namespace))
@@ -123,7 +122,7 @@ func TestInValidHostname(t *testing.T) {
 			}
 
 			// wait for the parameter to be registered properly
-			time.Sleep(2 * time.Second)
+			time.Sleep(10 * time.Second)
 
 			// this should FAIL!
 			err = testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(invalidHostnameYAML, namespace))
@@ -172,7 +171,7 @@ func TestNoHostname(t *testing.T) {
 			}
 
 			// wait for the parameter to be registered properly
-			time.Sleep(2 * time.Second)
+			time.Sleep(10 * time.Second)
 
 			// this should FAIL!
 			err = testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(noHostnameYAML, namespace))
