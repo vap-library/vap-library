@@ -49,7 +49,7 @@ var helmReleaseWrongSAYAML string = `
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: test-helmrelease
+  name: test-helmrelease-wrong-sa
   namespace: %s
 spec:
   chart:
@@ -79,7 +79,7 @@ var helmReleaseSingleYAML string = `
 apiVersion: helm.toolkit.fluxcd.io/v2beta2
 kind: HelmRelease
 metadata:
-  name: test-helmrelease
+  name: test-helmrelease-single-field
   namespace: %s
 spec:
   chart:

@@ -42,7 +42,7 @@ var invalidHostnameYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: test-httproute
+  name: test-httproute-invalid-hostname
   namespace: %s
 spec:
   hostnames:
@@ -55,7 +55,7 @@ var noHostnameYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: test-httproute
+  name: test-httproute-no-hostname
   namespace: %s
 spec:
   parentRefs:
