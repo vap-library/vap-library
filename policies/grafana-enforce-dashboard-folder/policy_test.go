@@ -32,7 +32,7 @@ var dashboardCMWithoutAnnotationYAML string = `
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: test-dashboard
+  name: test-dashboard-without-annotation
   namespace: %s
   labels:
     grafana_dashboard: "1"
@@ -44,7 +44,7 @@ var normalCMYAML string = `
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: test-dashboard
+  name: test-normal-yaml
   namespace: %s
 data:
   test: "test"
@@ -67,9 +67,9 @@ func TestMain(m *testing.M) {
 	os.Exit(testEnv.Run(m))
 }
 
-func TestValidDashboard(t *testing.T) {
+func TestDashboard(t *testing.T) {
 
-	f := features.New("Dashboard is accepted").
+	f := features.New("Dashboard tests").
 		Assess("A valid dashboard ConfigMap is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -81,15 +81,7 @@ func TestValidDashboard(t *testing.T) {
 			}
 
 			return ctx
-		})
-
-	_ = testEnv.Test(t, f.Feature())
-
-}
-
-func TestNonDashboardConfigMap(t *testing.T) {
-
-	f := features.New("Normal CM is accepted").
+		}).
 		Assess("A non-dashboard CM is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -101,15 +93,7 @@ func TestNonDashboardConfigMap(t *testing.T) {
 			}
 
 			return ctx
-		})
-
-	_ = testEnv.Test(t, f.Feature())
-
-}
-
-func TestInvalidDashboard(t *testing.T) {
-
-	f := features.New("Wrong dashboard").
+		}).
 		Assess("A dashboard with missing label is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)

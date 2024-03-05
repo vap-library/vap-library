@@ -80,10 +80,10 @@ func TestMain(m *testing.M) {
 	os.Exit(testEnv.Run(m))
 }
 
-func TestValidHostname(t *testing.T) {
+func TestWithParameter(t *testing.T) {
 
-	f := features.New("HTTPRoute is accepted").
-		Assess("A valid HTTPRoute is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+	f := features.New("HTTPRoute with parameter").
+		Setup(func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -96,39 +96,40 @@ func TestValidHostname(t *testing.T) {
 			// wait for the parameter to be registered properly
 			time.Sleep(10 * time.Second)
 
+			return ctx
+		}).
+		Assess("A valid HTTPRoute is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
 			// this should PASS!
-			err = testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(validHostnameYAML, namespace))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(validHostnameYAML, namespace))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
-		})
-
-	_ = testEnv.Test(t, f.Feature())
-
-}
-
-func TestInValidHostname(t *testing.T) {
-
-	f := features.New("Invalid HTTPRoute is rejected").
+		}).
 		Assess("An HTTPRoute with invalid hostname is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-			// apply parameter first
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(testParameterYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// wait for the parameter to be registered properly
-			time.Sleep(10 * time.Second)
-
 			// this should FAIL!
-			err = testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(invalidHostnameYAML, namespace))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(invalidHostnameYAML, namespace))
 			if err == nil {
 				t.Fatal("An HTTPRoute with invalid hostname was accepted")
+			}
+
+			return ctx
+		}).
+		Assess("A HTTPRoute which does not contain any hostname is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(noHostnameYAML, namespace))
+			if err == nil {
+				t.Fatal("An HTTPRoute without hostname was accepted")
 			}
 
 			return ctx
@@ -140,8 +141,8 @@ func TestInValidHostname(t *testing.T) {
 
 func TestWithoutParameter(t *testing.T) {
 
-	f := features.New("Requests without parameter are rejected").
-		Assess("A without the VAP parameter, HTTPRoutes are rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+	f := features.New("HTTPRoute without VAP parameter").
+		Assess("Without the VAP parameter, HTTPRoutes are rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -149,35 +150,6 @@ func TestWithoutParameter(t *testing.T) {
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(validHostnameYAML, namespace))
 			if err == nil {
 				t.Fatal("An HTTPRoute without the VAP parameter was accepted")
-			}
-
-			return ctx
-		})
-
-	_ = testEnv.Test(t, f.Feature())
-
-}
-
-func TestNoHostname(t *testing.T) {
-
-	f := features.New("HTTPRoute without hostname is rejected").
-		Assess("A HTTPRoute which does not contain any hostname is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// apply parameter first
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(testParameterYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// wait for the parameter to be registered properly
-			time.Sleep(10 * time.Second)
-
-			// this should FAIL!
-			err = testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(noHostnameYAML, namespace))
-			if err == nil {
-				t.Fatal("An HTTPRoute without hostname was accepted")
 			}
 
 			return ctx
