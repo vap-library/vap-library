@@ -2,6 +2,47 @@
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
+  name: vaplibhelmreleaseenforcefieldsparams.vap-library.com
+spec:
+  group: vap-library.com
+  versions:
+    - name: v1beta1
+      additionalPrinterColumns:
+      - jsonPath: .spec.targetNamespace
+        name: TargetNamespace
+        type: string
+      - jsonPath: .spec.serviceAccountName
+        name: ServiceAccountName
+        type: string
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                targetNamespace:
+                  description: "TargetNamespace to target when performing operations
+                    for the HelmRelease. Defaults to the namespace of the HelmRelease."
+                  maxLength: 63
+                  minLength: 1
+                  type: string
+                serviceAccountName:
+                  description: "The name of the Kubernetes service account to impersonate
+                    when reconciling this HelmRelease."
+                  type: string
+  scope: Namespaced
+  names:
+    plural: vaplibhelmreleaseenforcefieldsparams
+    singular: vaplibhelmreleaseenforcefieldsparam
+    kind: VAPLibHelmReleaseEnforceFieldsParam
+---
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
   name: vaplibhttprouteenforcehostnamesparams.vap-library.com
 spec:
   group: vap-library.com
