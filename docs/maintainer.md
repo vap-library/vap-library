@@ -2,8 +2,9 @@
 
 In order to release a new version of the library, just create a tag and push it.
 ```
-git tag -a v0.1.0 -m "Initial release"
-git push origin v0.1.0
+export GTAG=v0.1.4
+git tag -a ${GTAG} -m "Initial release"
+git push origin ${GTAG}
 ```
 
 # Vendoring
