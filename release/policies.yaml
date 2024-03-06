@@ -70,3 +70,26 @@ spec:
       message: "spec.hostnames must be present and each item must be on the spec.allowedHostnames list in the policy parameter"
       reason: Invalid
 ---
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "service-enforce-type.vap-library.com"
+spec:
+  failurePolicy: Fail
+  paramKind:
+    apiVersion: vap-library.com/v1beta1
+    kind: VAPLibServiceEnforceTypeParam
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["services"]
+  validations:
+    - expression: >
+        (!(has(object.spec.type)) && "ClusterIP" in params.spec.allowedTypes) ||
+        has(object.spec.type) && object.spec.type in params.spec.allowedTypes
+      message: "spec.type must be present and must be on the spec.allowedTypes list or must not be present and 'ClusterIP' must be in the spec.allowedTypes list in the policy parameter"
+      reason: Invalid
+---

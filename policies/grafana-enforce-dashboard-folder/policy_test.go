@@ -1,4 +1,4 @@
-package httproute_enforce_hostnames
+package grafana_enforce_dashboard_folder
 
 import (
 	"context"

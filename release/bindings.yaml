@@ -106,3 +106,41 @@ spec:
   validationActions:
     - Warn
 ---
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: service-enforce-type-deny.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/service-enforce-type: deny
+    objectSelector: {}
+  paramRef:
+    name: service-enforce-type.vap-library.com
+    parameterNotFoundAction: Deny
+  policyName: service-enforce-type.vap-library.com
+  validationActions:
+  - Deny
+  - Audit
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: service-enforce-type-warn.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/service-enforce-type: warn
+    objectSelector: {}
+  paramRef:
+    name: service-enforce-type.vap-library.com
+    parameterNotFoundAction: Deny
+  policyName: service-enforce-type.vap-library.com
+  validationActions:
+    - Warn
+---
