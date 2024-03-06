@@ -1,21 +1,20 @@
 # Description
-This policy enforces that the HTTPRoute defines the `spec.hostnames` field and it only contains hostnames that are in
-the `spec.allowedHostnames` list of the parameter custom resource. When there is no parameter custom resource the policy
-denys.
+This policy enforces that Service resources can only use allowed types that are in the `spec.allowedTypes` list of the
+parameter custom resource. When there is no parameter custom resource the policy denys.
 
 # Parameter used by the policy
-The policy is using a mandatory custom resource (CR) kind called `VAPLibHTTPRouteEnforceHostnamesParam`. The CR has to
-list the allowed hostnames in an array of strings field called `spec.allowedHostnames`.
+The policy is using a mandatory custom resource (CR) kind called `VAPLibServiceEnforceTypeParam`. The CR has to list the
+allowed types in an array of strings field called `spec.allowedTypes`.
 
 # Example parameter
 ```
 apiVersion: vap-library.com/v1beta1
-kind: VAPLibHTTPRouteEnforceHostnamesParam
+kind: VAPLibServiceEnforceTypeParam
 metadata:
-  name: example
-  namespace: example
+  name: service-enforce-type.vap-library.com
+  namespace: test
 spec:
-  allowedHostnames:
-  - test.example.com
-  - test2.exmaple.com
+  allowedTypes:
+  - ClusterIP
+  - NodePort
 ```
