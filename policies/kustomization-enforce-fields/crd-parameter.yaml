@@ -1,0 +1,40 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: vaplibkustomizationenforcefieldsparams.vap-library.com
+spec:
+  group: vap-library.com
+  versions:
+    - name: v1beta1
+      additionalPrinterColumns:
+      - jsonPath: .spec.targetNamespace
+        name: TargetNamespace
+        type: string
+      - jsonPath: .spec.serviceAccountName
+        name: ServiceAccountName
+        type: string
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                targetNamespace:
+                  description: "TargetNamespace to target when performing operations
+                    for the Kustomization. Defaults to the namespace of the Kustomization."
+                  maxLength: 63
+                  minLength: 1
+                  type: string
+                serviceAccountName:
+                  description: "The name of the Kubernetes service account to impersonate
+                    when reconciling this Kustomization."
+                  type: string
+  scope: Namespaced
+  names:
+    plural: vaplibkustomizationenforcefieldsparams
+    singular: vaplibkustomizationenforcefieldsparam
+    kind: VAPLibKustomizationEnforceFieldsParam

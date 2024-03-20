@@ -110,6 +110,44 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
+  name: kustomization-enforce-fields-deny.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/kustomization-enforce-fields: deny
+    objectSelector: {}
+  paramRef:
+    name: kustomization-enforce-fields.vap-library.com
+    parameterNotFoundAction: Deny
+  policyName: kustomization-enforce-fields.vap-library.com
+  validationActions:
+  - Deny
+  - Audit
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: kustomization-enforce-fields-warn.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/kustomization-enforce-fields: warn
+    objectSelector: {}
+  paramRef:
+    name: kustomization-enforce-fields.vap-library.com
+    parameterNotFoundAction: Deny
+  policyName: kustomization-enforce-fields.vap-library.com
+  validationActions:
+    - Warn
+---
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
   name: service-enforce-type-deny.vap-library.com
 spec:
   matchResources:
