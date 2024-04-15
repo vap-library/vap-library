@@ -1,4 +1,3 @@
----
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
 metadata:
@@ -18,7 +17,6 @@ spec:
     - expression: "has(object.metadata.annotations) && has(object.metadata.annotations.grafana_folder) && object.metadata.annotations.grafana_folder == namespaceObject.metadata.name"
       message: "metadata.annotations.grafana_folder must be set to the namespace of the ConfigMap/Secret"
       reason: Invalid
----
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
@@ -49,7 +47,6 @@ spec:
       message: "spec.serviceAccountName must be set to the service account specified in the Validating Admission Policy parameter"
       reason: Invalid
 ---
----
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
 metadata:
@@ -69,7 +66,6 @@ spec:
     - expression: "has(object.spec.hostnames) && has(params.spec.allowedHostnames) && object.spec.hostnames.all(h, h in params.spec.allowedHostnames)"
       message: "spec.hostnames must be present and each item must be on the spec.allowedHostnames list in the policy parameter"
       reason: Invalid
----
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
@@ -99,7 +95,6 @@ spec:
       messageExpression: "'spec.serviceAccountName must be set to ' + string(params.spec.serviceAccountName) + '. It is: ' + string(object.spec.serviceAccountName)"
       message: "spec.serviceAccountName must be set to the service account specified in the Validating Admission Policy parameter"
       reason: Invalid
----
 ---
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
