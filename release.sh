@@ -4,11 +4,20 @@ for onefile in policies bindings crds;do
   rm -f release/${onefile}.yaml
 done
 
+function remove_leading_separator() {
+    if [[ $(head -n 1 "$1") == "---" ]]; then
+        tail -n +2 "$1"
+    else
+        cat "$1"
+    fi
+}
+
 # concatenates the source file to the destination file
 # also inserts the '---' separator
 function concat() {
   if [ -e $1 ]; then
-    cat $1 >> $2
+    content=$(remove_leading_separator $1)
+    echo "$content" >> $2
     echo "---" >> $2
   fi
 }
