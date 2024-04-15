@@ -27,6 +27,7 @@ jobs:
       # we want to keep the releases in the git repo too
       - name: Push to git        
         run: |
+          git checkout main
           git config --local user.email "${{ env.CI_COMMIT_AUTHOR }}"
           git config --local user.name "github-actions[bot]"
           git add release
