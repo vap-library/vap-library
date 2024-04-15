@@ -29,3 +29,4 @@ jobs:
         uses: EndBug/add-and-commit@v9
         with:
           add: 'release'
+          push: main
