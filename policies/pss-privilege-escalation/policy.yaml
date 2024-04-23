@@ -1,0 +1,24 @@
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "pss-privilege-escalation.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["*"]
+  matchConditions:
+    - name: "check-security-context-false"
+      expression: "has(spec.containers[*].securityContext.allowPrivilegeEscalation) || 
+      has(spec.initContainers[*].securityContext.allowPrivilegeEscalation) ||
+      has(spec.ephemeralContainers[*].securityContext.allowPrivilegeEscalation)"
+  validations:
+    - expression: "has(spec.containers[*].securityContext.allowPrivilegeEscalation) && spec.containers[*].securityContext.allowPrivilegeEscalation == false || 
+      has(spec.initContainers[*].securityContext.allowPrivilegeEscalation) && spec.initContainers[*].securityContext.allowPrivilegeEscalation == false ||
+      has(spec.ephemeralContainers[*].securityContext.allowPrivilegeEscalation) && spec.ephemeralContainers[*].securityContext.allowPrivilegeEscalation == false "
+      message: "securityContext.allowPrivilegeEscalation must be set to false"
+      reason: Invalid
