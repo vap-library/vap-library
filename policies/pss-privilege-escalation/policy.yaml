@@ -10,15 +10,25 @@ spec:
     - apiGroups:   [""]
       apiVersions: ["v1"]
       operations:  ["CREATE", "UPDATE"]
-      resources:   ["*"]
-  matchConditions:
-    - name: "check-security-context-false"
-      expression: "has(spec.containers[*].securityContext.allowPrivilegeEscalation) || 
-      has(spec.initContainers[*].securityContext.allowPrivilegeEscalation) ||
-      has(spec.ephemeralContainers[*].securityContext.allowPrivilegeEscalation)"
-  validations:
-    - expression: "has(spec.containers[*].securityContext.allowPrivilegeEscalation) && spec.containers[*].securityContext.allowPrivilegeEscalation == false || 
-      has(spec.initContainers[*].securityContext.allowPrivilegeEscalation) && spec.initContainers[*].securityContext.allowPrivilegeEscalation == false ||
-      has(spec.ephemeralContainers[*].securityContext.allowPrivilegeEscalation) && spec.ephemeralContainers[*].securityContext.allowPrivilegeEscalation == false "
-      message: "securityContext.allowPrivilegeEscalation must be set to false"
+      resources:   ["pods"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations: 
+    - expression: "object.kind != 'Pod' || 
+      (!has(object.spec.initContainers) || (has(object.spec.initContainers) && object.spec.initContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) &&
+      (!has(object.spec.ephemeralContainers) || (has(object.spec.ephemeralContainers) && object.spec.ephemeralContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) && 
+      (object.spec.containers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) &&  container.securityContext.allowPrivilegeEscalation == false))"
+      message: "securityContext.allowPrivilegeEscalation must be set to false on any containers, initContainers, and ephemeralContainers in Pods"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job'].all(kind, object.kind != kind) || object.spec.template.spec.containers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) &&  container.securityContext.allowPrivilegeEscalation == false)"
+      message: "securityContext.allowPrivilegeEscalation must be set to false on containers in Workloads"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' || object.spec.jobTemplate.spec.template.spec.containers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) &&  container.securityContext.allowPrivilegeEscalation == false)"
+      message: "securityContext.allowPrivilegeEscalation must be set to false on containers in CronJobs"
       reason: Invalid
