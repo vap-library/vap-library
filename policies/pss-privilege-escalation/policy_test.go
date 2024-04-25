@@ -265,8 +265,44 @@ spec:
         securityContext:
           allowPrivilegeEscalation: %s
 `
+var containerJobYAML string = `
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: busybox-job-%s
+  namespace: %s
+spec:
+  template:
+    spec:
+      containers:
+      - name: privilege-escalation-%s
+        image: busybox:1.28
+        securityContext:
+          allowPrivilegeEscalation: %s
+      restartPolicy: Never
+`
 
-
+var initContainerJobYAML string = `
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: init-busybox-job-%s
+  namespace: %s
+spec:
+  template:
+    spec:
+      containers:
+      - name: privilege-escalation-%s
+        image: busybox:1.28
+        securityContext:
+          allowPrivilegeEscalation: %s
+      initContainers:
+      - name: init-privilege-escalation-%s
+        image: busybox:1.28
+        securityContext:
+          allowPrivilegeEscalation: %s
+      restartPolicy: Never
+`
 
 var testEnv env.Environment
 
@@ -527,6 +563,55 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerSSYAML, "rejected", namespace, "rejected", "false", "rejected", "true"))
+			if err == nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		// JOB TESTS
+		Assess("Successful deployment of a Job with container as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobYAML, "success", namespace, "success", "false"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Rejected deployment of a Job with container as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobYAML, "rejected", namespace, "rejected", "true"))
+			if err == nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a Job with initContainer as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobYAML, "success", namespace, "success", "false", "success", "false"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Rejected deployment of a Job with initContainer as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobYAML, "rejected", namespace, "rejected", "false", "rejected", "true"))
 			if err == nil {
 				t.Fatal(err)
 			}
