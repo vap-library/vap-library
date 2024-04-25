@@ -157,6 +157,7 @@ spec:
         securityContext:
           allowPrivilegeEscalation: %s
 `
+
 var containerDSYAML string = `
 apiVersion: apps/v1
 kind: DaemonSet
@@ -346,6 +347,55 @@ spec:
             securityContext:
               allowPrivilegeEscalation: %s
           restartPolicy: OnFailure
+`
+
+var containerRCYAML string = `
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: busybox-replicationcontroller-%s
+  namespace: %s
+  labels:
+    app: busybox
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      containers:
+      - name: privilege-escalation-%s
+        image: busybox:1.28
+        securityContext:
+          allowPrivilegeEscalation: %s
+`
+
+var initContainerRCYAML string = `
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: init-busybox-replicationcontroller-%s
+  namespace: %s
+  labels:
+    app: busybox
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      containers:
+      - name: privilege-escalation-%s
+        image: busybox:1.28
+        securityContext:
+          allowPrivilegeEscalation: %s
+      initContainers:
+      - name: init-privilege-escalation-%s
+        image: busybox:1.28
+        securityContext:
+          allowPrivilegeEscalation: %s
 `
 
 var testEnv env.Environment
@@ -705,6 +755,55 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobYAML, "rejected", namespace, "rejected", "false", "rejected", "true"))
+			if err == nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		// REPLICATIONCONTROLLER TESTS
+		Assess("Successful deployment of a ReplicationController with container as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCYAML, "success", namespace, "success", "false"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Rejected deployment of a ReplicationController with container as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCYAML, "rejected", namespace, "rejected", "true"))
+			if err == nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a ReplicationController with initContainer as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCYAML, "success", namespace, "success", "false", "success", "false"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Rejected deployment of a ReplicationController with initContainer as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCYAML, "rejected", namespace, "rejected", "false", "rejected", "true"))
 			if err == nil {
 				t.Fatal(err)
 			}
