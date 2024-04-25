@@ -10,7 +10,7 @@ spec:
     - apiGroups:   [""]
       apiVersions: ["v1"]
       operations:  ["CREATE", "UPDATE"]
-      resources:   ["pods","replicationcontrollers"]
+      resources:   ["pods","replicationcontrollers","podtemplates"]
     - apiGroups:   ["apps"]
       apiVersions: ["v1"]
       operations:  ["CREATE", "UPDATE"]
@@ -37,4 +37,10 @@ spec:
       (!has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) || (has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) && object.spec.jobTemplate.spec.template.spec.ephemeralContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) && 
       (object.spec.jobTemplate.spec.template.spec.containers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) &&  container.securityContext.allowPrivilegeEscalation == false))"
       message: "securityContext.allowPrivilegeEscalation must be set to false on containers in CronJobs"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      (!has(object.template.spec.initContainers) || (has(object.template.spec.initContainers) && object.template.spec.initContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) &&
+      (!has(object.template.spec.ephemeralContainers) || (has(object.template.spec.ephemeralContainers) && object.template.spec.ephemeralContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) && 
+      (object.template.spec.containers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) &&  container.securityContext.allowPrivilegeEscalation == false))"
+      message: "securityContext.allowPrivilegeEscalation must be set to false on containers in PodTemplates"
       reason: Invalid
