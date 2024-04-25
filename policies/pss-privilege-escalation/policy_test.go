@@ -304,6 +304,50 @@ spec:
       restartPolicy: Never
 `
 
+var containerCronJobYAML string = `
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: busybox-cronjob-%s
+  namespace: %s
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: privilege-escalation-%s
+            image: busybox:1.28
+            securityContext:
+              allowPrivilegeEscalation: %s
+          restartPolicy: OnFailure
+`
+var initContainerCronJobYAML string = `
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: init-busybox-cronjob-%s
+  namespace: %s
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: privilege-escalation-%s
+            image: busybox:1.28
+            securityContext:
+              allowPrivilegeEscalation: %s
+          initContainers:
+          - name: init-privilege-escalation-%s
+            image: busybox:1.28
+            securityContext:
+              allowPrivilegeEscalation: %s
+          restartPolicy: OnFailure
+`
+
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
@@ -612,6 +656,55 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobYAML, "rejected", namespace, "rejected", "false", "rejected", "true"))
+			if err == nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		// CRONJOB TESTS
+		Assess("Successful deployment of a CronJob with container as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobYAML, "success", namespace, "success", "false"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Rejected deployment of a CronJob with container as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobYAML, "rejected", namespace, "rejected", "true"))
+			if err == nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a CronJob with initContainer as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobYAML, "success", namespace, "success", "false", "success", "false"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Rejected deployment of a CronJob with initContainer as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobYAML, "rejected", namespace, "rejected", "false", "rejected", "true"))
 			if err == nil {
 				t.Fatal(err)
 			}
