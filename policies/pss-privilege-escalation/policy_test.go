@@ -48,7 +48,60 @@ spec:
 `
 
 // ToDo: Add test data for non-pod objects
+var containerDeploymentYAML string = `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-deployment-%s
+  namespace: %s
+  labels:
+    app: busybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      containers:
+      - name: privilege-escalation-%s
+        image: busybox:1.28
+        securityContext:
+          allowPrivilegeEscalation: %s
+`
 
+var initContainerDeploymentYAML string = `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: init-busybox-deployment-%s
+  namespace: %s
+  labels:
+    app: busybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      containers:
+      - name: privilege-escalation-%s
+        image: busybox:1.28
+        securityContext:
+          allowPrivilegeEscalation: %s
+      initContainers:
+      - name: init-privilege-escalation-%s
+        image: busybox:1.28
+        securityContext:
+          allowPrivilegeEscalation: %s
+`
 
 var testEnv env.Environment
 
@@ -70,7 +123,8 @@ func TestMain(m *testing.M) {
 func TestPrivilegeEscalation(t *testing.T) {
 
 	f := features.New("Privilege Escalation tests").
-		Assess("Successful deployment of a pod as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		// POD TESTS
+		Assess("Successful deployment of a Pod with container as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -82,7 +136,7 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a pod as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Pod with container as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -94,7 +148,7 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of an init container as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Pod with init container as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -106,7 +160,7 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Rejected deployment of an init container as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Pod with initContainer as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -117,11 +171,59 @@ func TestPrivilegeEscalation(t *testing.T) {
 			}
 
 			return ctx
+		}).
+		// DEPLOYMENT TESTS
+		Assess("Successful deployment of a Deployment with container as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentYAML, "success", namespace, "success", "false"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Rejected deployment of a Deployment with container as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentYAML, "rejected", namespace, "rejected", "true"))
+			if err == nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a Deployment with initContainer as allowPrivilegeEscalation is set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentYAML, "success", namespace, "success", "false", "success", "false"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Rejected deployment of a Deployment with initContainer as allowPrivilegeEscalation is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentYAML, "rejected", namespace, "rejected", "false", "rejected", "true"))
+			if err == nil {
+				t.Fatal(err)
+			}
+
+			return ctx
 		})
-		
 		// ToDo: Add tests for ephemeral containers if possible
 
-		// ToDo: Add tests for non-pod objects
+		// ToDo: Add tests for further non-pod objects
 
 	_ = testEnv.Test(t, f.Feature())
 
