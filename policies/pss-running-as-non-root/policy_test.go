@@ -44,6 +44,20 @@ spec:
       runAsNonRoot: %s
 `
 
+var containerOnlyDefaultYAML string = `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: running-as-non-root-%s
+  namespace: %s
+spec:
+  securityContext:
+    runAsNonRoot: %s
+  containers:
+  - name: running-as-non-root-%s
+    image: busybox:1.28
+`
+
 var initContainerYAML string = `
 apiVersion: v1
 kind: Pod
@@ -537,6 +551,30 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerWithDefaultYAML, "rejected-default-false", namespace, "false", "rejected", "false"))
+			if err == nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a Pod with container as container.runAsNonRoot is not defined and spec.runAsNonRoot set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerOnlyDefaultYAML, "success-only-default-true", namespace, "true", "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Rejected deployment of a Pod with container as container.runAsNonRoot is set to false, and spec.runAsNonRoot set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerOnlyDefaultYAML, "rejected-only-default-false", namespace, "false", "rejected"))
 			if err == nil {
 				t.Fatal(err)
 			}
