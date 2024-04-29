@@ -1,3 +1,7 @@
+// Policies have been defined, outstanding are the tests.
+// Current tests defined:
+// Only covered a pod with a containers block (no init or ephemeral) so need to expand for these use cases as well as all additional objects
+
 package pss_running_as_non_root
 
 import (
