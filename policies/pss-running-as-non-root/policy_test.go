@@ -569,7 +569,7 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Pod with container as container.runAsNonRoot is set to false, and spec.runAsNonRoot set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Pod with container as container.runAsNonRoot is not defined, and spec.runAsNonRoot set to false", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
