@@ -7,8 +7,8 @@ This policy uses the `runAsUser` parameter which takes in the user ID to run the
 That's to say, the only case where the request will be rejected is where `securityContext.runAsRoot: 0` is specified, either at the spec level, or within spec.containers, spec.initContainers or spec.ephemeralContainers.
 
 # Example parameter
+### Pass
 Pass due to no runAsUser parameter being defined.
-**Pass**
 ```
 apiVersion: v1
 kind: Pod
@@ -20,7 +20,7 @@ spec:
   - name: example
     image: example
 ```
-**Pass**
+### Pass
 Pass as the runAsUser parameter isn't set to 0.
 ```
 apiVersion: v1
@@ -35,7 +35,7 @@ spec:
   - name: example
     image: example
 ```
-**Pass**
+### Pass
 Pass as the runAsUser parameter isn't set to 0.
 ```
 apiVersion: v1
@@ -50,7 +50,7 @@ spec:
     securityContext:
       runAsUser: 1000
 ```
-**Pass**
+### Pass
 Pass as all runAsUser parameters aren't set to 0.
 ```
 apiVersion: v1
@@ -69,7 +69,7 @@ spec:
     securityContext:
       runAsUser: 1000
 ```
-**Fail**
+### Fail
 Failure due to runAsUser being set to 0.
 ```
 apiVersion: v1
