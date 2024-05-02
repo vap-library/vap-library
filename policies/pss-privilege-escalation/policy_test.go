@@ -3,8 +3,11 @@ package pss_privilege_escalation
 import (
 	"context"
 	"fmt"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"log"
 	"os"
+	"sigs.k8s.io/e2e-framework/klient/k8s"
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
 	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
@@ -598,7 +601,7 @@ func TestPrivilegeEscalation(t *testing.T) {
 			if err == nil {
 				t.Fatal(err)
 			}
-			
+
 			return ctx
 		}).
 		// DAEMONSET TESTS
@@ -895,9 +898,129 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 			return ctx
 		})
-		// ToDo: Add tests for ephemeral containers if possible
+	// ToDo: Add tests for further non-pod objects
 
-		// ToDo: Add tests for further non-pod objects
+	_ = testEnv.Test(t, f.Feature())
+
+}
+
+func TestEphemeralContainers(t *testing.T) {
+
+	f := features.New("Pods with ephemeral containers").
+		Setup(func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// create a pod that will be used for ephemeral container tests
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, "ephemeral", namespace, "ephemeral", "false"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// wait for the pod
+			time.Sleep(2 * time.Second)
+
+			return ctx
+		}).
+		Assess("An invalid ephemeral container is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// get client
+			client, err := cfg.NewClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// get the pod that was created in setup to attach an ephemeral container to it
+			pod := &v1.Pod{}
+			err = client.Resources(namespace).Get(ctx, "privilege-escalation-ephemeral", namespace, pod)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// define patch type
+			patchType := types.StrategicMergePatchType
+
+			// define patch data
+			patchData := []byte(`
+			{
+    			"spec": {
+        			"ephemeralContainers": [
+            			{
+                			"image": "public.ecr.aws/docker/library/busybox:latest",
+                			"name": "ephemeral",
+                			"resources": {},
+                			"stdin": true,
+                			"targetContainerName": "privilege-escalation-ephemeral",
+                			"terminationMessagePolicy": "File",
+                			"tty": true
+            			}
+        			]
+    			}
+			}`)
+
+			patch := k8s.Patch{patchType, patchData}
+
+			// patch the pod, this should FAIL!
+			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+			if err == nil {
+				t.Fatal("ephemeral container without securityContext.allowPrivilegeEscalation field should be rejected")
+			}
+
+			return ctx
+		}).
+		Assess("A valid ephemeral container is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// get client
+			client, err := cfg.NewClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// get the pod that was created in setup to attach an ephemeral container to it
+			pod := &v1.Pod{}
+			err = client.Resources(namespace).Get(ctx, "privilege-escalation-ephemeral", namespace, pod)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// define patch type
+			patchType := types.StrategicMergePatchType
+
+			// define patch data
+			patchData := []byte(`
+			{
+    			"spec": {
+        			"ephemeralContainers": [
+            			{
+                			"image": "public.ecr.aws/docker/library/busybox:latest",
+                			"name": "ephemeral",
+                			"resources": {},
+                			"securityContext": {
+                    			"allowPrivilegeEscalation": false
+                			},
+                			"stdin": true,
+                			"targetContainerName": "privilege-escalation-ephemeral",
+                			"terminationMessagePolicy": "File",
+                			"tty": true
+            			}
+        			]
+    			}
+			}`)
+
+			patch := k8s.Patch{patchType, patchData}
+
+			// patch the pod
+			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		})
 
 	_ = testEnv.Test(t, f.Feature())
 
