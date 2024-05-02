@@ -26,7 +26,7 @@ metadata:
 spec:
   containers:
   - name: privilege-escalation-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
     securityContext:
       allowPrivilegeEscalation: %s
 `
@@ -40,12 +40,12 @@ metadata:
 spec:
   containers:
   - name: privilege-escalation-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
     securityContext:
       allowPrivilegeEscalation: %s
   initContainers:
   - name: init-privilege-escalation-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
     securityContext:
       allowPrivilegeEscalation: %s
 `
@@ -71,7 +71,7 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
 `
@@ -96,12 +96,12 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
       initContainers:
       - name: init-privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
 `
@@ -126,7 +126,7 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
 `
@@ -151,12 +151,12 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
       initContainers:
       - name: init-privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
 `
@@ -181,7 +181,7 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
 `
@@ -206,12 +206,12 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
       initContainers:
       - name: init-privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
 `
@@ -236,7 +236,7 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
 `
@@ -260,12 +260,12 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
       initContainers:
       - name: init-privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
 `
@@ -280,7 +280,7 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
       restartPolicy: Never
@@ -297,12 +297,12 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
       initContainers:
       - name: init-privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
       restartPolicy: Never
@@ -322,7 +322,7 @@ spec:
         spec:
           containers:
           - name: privilege-escalation-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
             securityContext:
               allowPrivilegeEscalation: %s
           restartPolicy: OnFailure
@@ -341,12 +341,12 @@ spec:
         spec:
           containers:
           - name: privilege-escalation-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
             securityContext:
               allowPrivilegeEscalation: %s
           initContainers:
           - name: init-privilege-escalation-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
             securityContext:
               allowPrivilegeEscalation: %s
           restartPolicy: OnFailure
@@ -369,7 +369,7 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
 `
@@ -391,12 +391,12 @@ spec:
     spec:
       containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
       initContainers:
       - name: init-privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
 `
@@ -410,7 +410,7 @@ template:
   spec:
     containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
     restartPolicy: Always
@@ -426,13 +426,13 @@ template:
   spec:
     containers:
       - name: privilege-escalation-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           allowPrivilegeEscalation: %s
     restartPolicy: Always
     initContainers:
     - name: init-privilege-escalation-%s
-      image: busybox:1.28
+      image: public.ecr.aws/docker/library/busybox:1.36
       securityContext:
         allowPrivilegeEscalation: %s
 `
@@ -996,7 +996,7 @@ func TestEphemeralContainers(t *testing.T) {
     			"spec": {
         			"ephemeralContainers": [
             			{
-                			"image": "public.ecr.aws/docker/library/busybox:latest",
+                			"image": "public.ecr.aws/docker/library/busybox:1.36",
                 			"name": "ephemeral",
                 			"resources": {},
                 			"securityContext": {
