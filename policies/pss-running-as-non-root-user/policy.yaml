@@ -9,7 +9,7 @@ spec:
     - apiGroups:   [""]
       apiVersions: ["v1"]
       operations:  ["CREATE", "UPDATE"]
-      resources:   ["pods","replicationcontrollers","podtemplates"]
+      resources:   ["pods","replicationcontrollers","podtemplates", "pods/ephemeralcontainers"]
     - apiGroups:   ["apps"]
       apiVersions: ["v1"]
       operations:  ["CREATE", "UPDATE"]
@@ -34,10 +34,10 @@ spec:
       message: "securityContext.runAsUser must not equal 0 (root user id) on containers in Workloads"
       reason: Invalid
     - expression: "object.kind != 'CronJob' ||
-      !(has(object.spec.jobTemplate.spec.securityContext) && has(object.spec.jobTemplate.spec.securityContext.runAsUser) && object.spec.jobTemplate.spec.securityContext.runAsUser == 0) &&
-      !(has(object.spec.jobTemplate.spec.initContainers) && object.spec.jobTemplate.spec.initContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
-      !(has(object.spec.jobTemplate.spec.ephemeralContainers) && object.spec.jobTemplate.spec.ephemeralContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
-      !(object.spec.jobTemplate.spec.containers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0))"
+      !(has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.runAsUser) && object.spec.jobTemplate.spec.template.spec.securityContext.runAsUser == 0) &&
+      !(has(object.spec.jobTemplate.spec.template.spec.initContainers) && object.spec.jobTemplate.spec.template.spec.initContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) && object.spec.jobTemplate.spec.template.spec.ephemeralContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(object.spec.jobTemplate.spec.template.spec.containers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0))"
       message: "securityContext.runAsUser must not equal 0 (root user id) on containers in CronJobs"
       reason: Invalid
     - expression: "object.kind != 'PodTemplate' ||
