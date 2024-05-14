@@ -461,7 +461,7 @@ spec:
         image: public.ecr.aws/docker/library/busybox:1.36
 `
 
-// TEST DATA FOR DEPLOYMENTSET TESTS
+// TEST DATA FOR DAEMONSET TESTS
 
 var containerDSYAML string = `
 apiVersion: apps/v1
