@@ -13,10 +13,12 @@ import (
 	"time"
 	"vap-library/testutils"
 
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/e2e-framework/klient/k8s"
+	"sigs.k8s.io/e2e-framework/pkg/env"
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
 	"sigs.k8s.io/e2e-framework/pkg/features"
-
-	"sigs.k8s.io/e2e-framework/pkg/env"
 )
 
 // TEST DATA FOR POD TESTS
@@ -30,7 +32,7 @@ metadata:
 spec:
   containers:
   - name: running-as-non-root-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
     securityContext:
       runAsNonRoot: %s
 `
@@ -46,7 +48,7 @@ spec:
     runAsNonRoot: %s
   containers:
   - name: running-as-non-root-with-default-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
     securityContext:
       runAsNonRoot: %s
 `
@@ -62,7 +64,7 @@ spec:
     runAsNonRoot: %s
   containers:
   - name: running-as-non-root-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 var initContainerYAML string = `
@@ -74,12 +76,12 @@ metadata:
 spec:
   containers:
   - name: running-as-non-root-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
     securityContext:
       runAsNonRoot: %s
   initContainers:
   - name: init-running-as-non-root-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
     securityContext:
       runAsNonRoot: %s
 `
@@ -95,12 +97,12 @@ spec:
     runAsNonRoot: %s
   containers:
   - name: running-as-non-root-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
     securityContext:
       runAsNonRoot: %s
   initContainers:
   - name: init-running-as-non-root-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
     securityContext:
       runAsNonRoot: %s
 `
@@ -116,10 +118,10 @@ spec:
     runAsNonRoot: %s
   containers:
   - name: running-as-non-root-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
   initContainers:
   - name: init-running-as-non-root-%s
-    image: busybox:1.28
+    image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 // TEST DATA FOR DEPLOYMENT TESTS
@@ -144,7 +146,7 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -171,7 +173,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -198,7 +200,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 var initContainerDeploymentYAML string = `
@@ -221,12 +223,12 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -253,12 +255,12 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -285,10 +287,10 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
 `
 // TEST DATA FOR REPLICASET TESTS
 
@@ -312,7 +314,7 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -339,7 +341,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -366,7 +368,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 var initContainerRSYAML string = `
@@ -389,12 +391,12 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -421,12 +423,12 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -453,10 +455,10 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 // TEST DATA FOR DEPLOYMENTSET TESTS
@@ -481,7 +483,7 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -509,7 +511,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -537,7 +539,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 var initContainerDSYAML string = `
@@ -560,12 +562,12 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -592,12 +594,12 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -624,10 +626,10 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 // TEST DATA FOR STATEFULSET TESTS
@@ -652,7 +654,7 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -679,7 +681,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -706,7 +708,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 var initContainerSSYAML string = `
@@ -729,12 +731,12 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -761,12 +763,12 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -793,10 +795,10 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 // TEST DATA FOR JOB TESTS
@@ -812,7 +814,7 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       restartPolicy: Never
@@ -831,7 +833,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       restartPolicy: Never
@@ -850,7 +852,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
       restartPolicy: Never
 `
 
@@ -865,12 +867,12 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       restartPolicy: Never
@@ -889,12 +891,12 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       restartPolicy: Never
@@ -913,10 +915,10 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
       restartPolicy: Never
 `
 
@@ -936,7 +938,7 @@ spec:
         spec:
           containers:
           - name: running-as-non-root-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
             securityContext:
               runAsNonRoot: %s
           restartPolicy: OnFailure
@@ -958,7 +960,7 @@ spec:
             runAsNonRoot: %s
           containers:
           - name: running-as-non-root-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
             securityContext:
               runAsNonRoot: %s
           restartPolicy: OnFailure
@@ -980,7 +982,7 @@ spec:
             runAsNonRoot: %s
           containers:
           - name: running-as-non-root-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
           restartPolicy: OnFailure
 `
 
@@ -998,12 +1000,12 @@ spec:
         spec:
           containers:
           - name: running-as-non-root-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
             securityContext:
               runAsNonRoot: %s
           initContainers:
           - name: init-running-as-non-root-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
             securityContext:
               runAsNonRoot: %s
           restartPolicy: OnFailure
@@ -1025,12 +1027,12 @@ spec:
             runAsNonRoot: %s
           containers:
           - name: running-as-non-root-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
             securityContext:
               runAsNonRoot: %s
           initContainers:
           - name: init-running-as-non-root-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
             securityContext:
               runAsNonRoot: %s
           restartPolicy: OnFailure
@@ -1052,10 +1054,10 @@ spec:
             runAsNonRoot: %s
           containers:
           - name: running-as-non-root-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
           initContainers:
           - name: init-running-as-non-root-%s
-            image: busybox:1.28
+            image: public.ecr.aws/docker/library/busybox:1.36
           restartPolicy: OnFailure
 `
 
@@ -1078,7 +1080,7 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -1102,7 +1104,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -1126,7 +1128,7 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 var initContainerRCYAML string = `
@@ -1146,12 +1148,12 @@ spec:
     spec:
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -1175,12 +1177,12 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
         securityContext:
           runAsNonRoot: %s
 `
@@ -1204,10 +1206,10 @@ spec:
         runAsNonRoot: %s
       containers:
       - name: running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
       initContainers:
       - name: init-running-as-non-root-%s
-        image: busybox:1.28
+        image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 // TEST DATA FOR PODTEMPLATE TESTS
@@ -1222,7 +1224,7 @@ template:
   spec:
     containers:
     - name: running-as-non-root-%s
-      image: busybox:1.28
+      image: public.ecr.aws/docker/library/busybox:1.36
       securityContext:
         runAsNonRoot: %s
     restartPolicy: Always
@@ -1240,7 +1242,7 @@ template:
       runAsNonRoot: %s
     containers:
     - name: running-as-non-root-%s
-      image: busybox:1.28
+      image: public.ecr.aws/docker/library/busybox:1.36
       securityContext:
         runAsNonRoot: %s
     restartPolicy: Always
@@ -1258,7 +1260,7 @@ template:
       runAsNonRoot: %s
     containers:
     - name: running-as-non-root-%s
-      image: busybox:1.28
+      image: public.ecr.aws/docker/library/busybox:1.36
     restartPolicy: Always
 `
 
@@ -1272,13 +1274,13 @@ template:
   spec:
     containers:
     - name: running-as-non-root-%s
-      image: busybox:1.28
+      image: public.ecr.aws/docker/library/busybox:1.36
       securityContext:
         runAsNonRoot: %s
     restartPolicy: Always
     initContainers:
     - name: init-running-as-non-root-%s
-      image: busybox:1.28
+      image: public.ecr.aws/docker/library/busybox:1.36
       securityContext:
         runAsNonRoot: %s
 `
@@ -1295,13 +1297,13 @@ template:
       runAsNonRoot: %s
     containers:
     - name: running-as-non-root-%s
-      image: busybox:1.28
+      image: public.ecr.aws/docker/library/busybox:1.36
       securityContext:
         runAsNonRoot: %s
     restartPolicy: Always
     initContainers:
     - name: init-running-as-non-root-%s
-      image: busybox:1.28
+      image: public.ecr.aws/docker/library/busybox:1.36
       securityContext:
         runAsNonRoot: %s
 `
@@ -1318,11 +1320,11 @@ template:
       runAsNonRoot: %s
     containers:
     - name: running-as-non-root-%s
-      image: busybox:1.28
+      image: public.ecr.aws/docker/library/busybox:1.36
     restartPolicy: Always
     initContainers:
     - name: init-running-as-non-root-%s
-      image: busybox:1.28
+      image: public.ecr.aws/docker/library/busybox:1.36
 `
 
 var testEnv env.Environment
@@ -1342,7 +1344,7 @@ func TestMain(m *testing.M) {
 	os.Exit(testEnv.Run(m))
 }
 
-func TestPrivilegeEscalation(t *testing.T) {
+func TestRunAsNonRoot(t *testing.T) {
 
 	f := features.New("Running as Non-Root tests").
 		// POD TESTS
@@ -3082,7 +3084,127 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 			return ctx
 		})
-		// ToDo: Add tests for ephemeral containers
+		_ = testEnv.Test(t, f.Feature())
+
+	}
+	
+	func TestEphemeralContainers(t *testing.T) {
+	
+		f := features.New("Pods with ephemeral containers").
+			Setup(func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+				// get namespace
+				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+	
+				// create a pod that will be used for ephemeral container tests
+				err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, "ephemeral", namespace, "ephemeral", "true"))
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				// wait for the pod
+				time.Sleep(2 * time.Second)
+	
+				return ctx
+			}).
+			Assess("An invalid ephemeral container is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+				// get namespace
+				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+	
+				// get client
+				client, err := cfg.NewClient()
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				// get the pod that was created in setup to attach an ephemeral container to it
+				pod := &v1.Pod{}
+				err = client.Resources(namespace).Get(ctx, "running-as-non-root-ephemeral", namespace, pod)
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				// define patch type
+				patchType := types.StrategicMergePatchType
+	
+				// define patch data
+				patchData := []byte(`
+				{
+					"spec": {
+						"ephemeralContainers": [
+							{
+								"image": "public.ecr.aws/docker/library/busybox:latest",
+								"name": "ephemeral",
+								"resources": {},
+								"stdin": true,
+								"targetContainerName": "running-as-non-root-ephemeral",
+								"terminationMessagePolicy": "File",
+								"tty": true
+							}
+						]
+					}
+				}`)
+	
+				patch := k8s.Patch{patchType, patchData}
+	
+				// patch the pod, this should FAIL!
+				err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+				if err == nil {
+					t.Fatal("ephemeral container without securityContext.runAsNonRoot field should be rejected")
+				}
+	
+				return ctx
+			}).
+			Assess("A valid ephemeral container is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+				// get namespace
+				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+	
+				// get client
+				client, err := cfg.NewClient()
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				// get the pod that was created in setup to attach an ephemeral container to it
+				pod := &v1.Pod{}
+				err = client.Resources(namespace).Get(ctx, "running-as-non-root-ephemeral", namespace, pod)
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				// define patch type
+				patchType := types.StrategicMergePatchType
+	
+				// define patch data
+				patchData := []byte(`
+				{
+					"spec": {
+						"ephemeralContainers": [
+							{
+								"image": "public.ecr.aws/docker/library/busybox:latest",
+								"name": "ephemeral",
+								"resources": {},
+								"securityContext": {
+									"runAsNonRoot": true
+								},
+								"stdin": true,
+								"targetContainerName": "running-as-non-root-ephemeral",
+								"terminationMessagePolicy": "File",
+								"tty": true
+							}
+						]
+					}
+				}`)
+	
+				patch := k8s.Patch{patchType, patchData}
+	
+				// patch the pod
+				err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				return ctx
+			})
 	_ = testEnv.Test(t, f.Feature())
 
 }
