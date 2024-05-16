@@ -1,0 +1,73 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "pss-volume-types.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["pods","replicationcontrollers","podtemplates"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations: 
+    - expression: "object.kind != 'Pod' ||
+      !has(object.spec.volumes) ||
+      (has(object.spec.volumes) && object.spec.volumes.all(volume, has(volume.configMap) ||
+      has(volume.csi) ||
+      has(volume.downwardAPI) ||
+      has(volume.emptyDir) ||
+      has(volume.ephemeral) ||
+      has(volume.persistentVolumeClaim) ||
+      has(volume.projected) ||
+      has(volume.secret)))"
+      message: "Every item in a spec.volumes[*] list (if present) must set one of the following fields to a non-null value:
+      spec.volumes[*].configMap, spec.volumes[*].csi, spec.volumes[*].downwardAPI, spec.volumes[*].emptyDir, spec.volumes[*].ephemeral, spec.volumes[*].persistentVolumeClaim, spec.volumes[*].projected, spec.volumes[*].secret"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job','ReplicationController'].all(kind, object.kind != kind) ||
+      !has(object.spec.template.spec.volumes) ||
+      (has(object.spec.template.spec.volumes) && object.spec.template.spec.volumes.all(volume, has(volume.configMap) ||
+      has(volume.csi) ||
+      has(volume.downwardAPI) ||
+      has(volume.emptyDir) ||
+      has(volume.ephemeral) ||
+      has(volume.persistentVolumeClaim) ||
+      has(volume.projected) ||
+      has(volume.secret)))"
+      message: "Every item in a spec.volumes[*] list (if present) must set one of the following fields to a non-null value:
+      spec.volumes[*].configMap, spec.volumes[*].csi, spec.volumes[*].downwardAPI, spec.volumes[*].emptyDir, spec.volumes[*].ephemeral, spec.volumes[*].persistentVolumeClaim, spec.volumes[*].projected, spec.volumes[*].secret"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' ||
+      !has(object.spec.jobTemplate.spec.template.spec.volumes) ||
+      (has(object.spec.jobTemplate.spec.template.spec.volumes) && object.spec.jobTemplate.spec.template.spec.volumes.all(volume, has(volume.configMap) ||
+      has(volume.csi) ||
+      has(volume.downwardAPI) ||
+      has(volume.emptyDir) ||
+      has(volume.ephemeral) ||
+      has(volume.persistentVolumeClaim) ||
+      has(volume.projected) ||
+      has(volume.secret)))"
+      message: "Every item in a spec.volumes[*] list (if present) must set one of the following fields to a non-null value:
+      spec.volumes[*].configMap, spec.volumes[*].csi, spec.volumes[*].downwardAPI, spec.volumes[*].emptyDir, spec.volumes[*].ephemeral, spec.volumes[*].persistentVolumeClaim, spec.volumes[*].projected, spec.volumes[*].secret"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      !has(object.template.spec.volumes) ||
+      (has(object.template.spec.volumes) && object.template.spec.volumes.all(volume, has(volume.configMap) ||
+      has(volume.csi) ||
+      has(volume.downwardAPI) ||
+      has(volume.emptyDir) ||
+      has(volume.ephemeral) ||
+      has(volume.persistentVolumeClaim) ||
+      has(volume.projected) ||
+      has(volume.secret)))"
+      message: "Every item in a spec.volumes[*] list (if present) must set one of the following fields to a non-null value:
+      spec.volumes[*].configMap, spec.volumes[*].csi, spec.volumes[*].downwardAPI, spec.volumes[*].emptyDir, spec.volumes[*].ephemeral, spec.volumes[*].persistentVolumeClaim, spec.volumes[*].projected, spec.volumes[*].secret"
+      reason: Invalid
