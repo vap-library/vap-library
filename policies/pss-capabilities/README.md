@@ -5,7 +5,7 @@ This policy is part of the Pod Security Standards provided by Kubernetes, found 
 # Parameter used by the policy
 This policy evaluates securityContext.capabilities.drop[] and securityContext.capabilities.add[] within spec.containers[*], spec.initContainers[*] and spec.ephemeralContainers[*]. For the API call to be accepted then for each and every container: securityContext.capabilities.drop[] must be specified and include 'ALL', and securityContext.capabilities.add[] can only include 'NET_BIND_SERVICE' (or be unspecified).
 
-# Example parameter
+# Examples
 ### Pass
 Pass as the ALL capability is dropped.
 ```
