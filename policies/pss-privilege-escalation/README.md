@@ -3,7 +3,7 @@ This Validating Admission Policy ensures that containers explicitly disallow pri
 This policy is part of the Pod Security Standards provided by Kubernetes, found here - https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted.
 
 # Parameter used by the policy
-This policy evaluates securityContext.allowPrivilegeEscalation within spec.containers[*], spec.initContainers[*] and spec.ephemeralContainers[*]. For the API call to be accepted then for each and every container: securityContext.allowPrivilegeEscalation must be set to false.
+This policy evaluates securityContext.allowPrivilegeEscalation within spec.containers[\*], spec.initContainers[\*] and spec.ephemeralContainers[\*]. For the API call to be accepted then for each and every container: securityContext.allowPrivilegeEscalation must be set to false.
 
 # Examples
 ### Pass
