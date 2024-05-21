@@ -1434,7 +1434,7 @@ func TestSeccomp(t *testing.T) {
 
 	f := features.New("Seccomp tests").
 		// POD TESTS
-		Assess("Successful deployment of a Pod with container as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Pod with container as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -1446,31 +1446,31 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Pod with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Pod with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Pod with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Pod with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Pod with initContainer as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Pod with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -1482,24 +1482,24 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Pod with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Pod with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Pod with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Pod with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1513,19 +1513,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, "rejected", namespace, "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Pod with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Pod with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -1537,7 +1537,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -1549,19 +1549,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Pod with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Pod with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -1573,19 +1573,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerYAML, "rejected", namespace, "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Pod with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Pod with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -1597,7 +1597,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -1609,25 +1609,25 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected", "rejected"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Pod with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Pod with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerWithDefaultYAML, "success-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
 		// DEPLOYMENT TESTS
-		Assess("Successful deployment of a Deployment with container as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Deployment with container as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -1639,31 +1639,31 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Deployment with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Deployment with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Deployment with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Deployment with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Deployment with initContainer as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Deployment with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -1675,24 +1675,24 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Deployment with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Deployment with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Deployment with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Deployment with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1706,19 +1706,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentYAML, "rejected", namespace, "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Deployment with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Deployment with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -1730,7 +1730,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -1742,19 +1742,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Deployment with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Deployment with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -1766,19 +1766,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentYAML, "rejected", namespace, "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Deployment with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Deployment with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -1790,7 +1790,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -1802,25 +1802,25 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Deployment with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Deployment with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentWithDefaultYAML, "success-default-unconfined", namespace, "Unconfined", "success", "RuntimeDefault", "success", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
 		// REPLICASET TESTS
-		Assess("Successful deployment of a ReplicaSet with container as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicaSet with container as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -1832,31 +1832,31 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a ReplicaSet with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicaSet with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a ReplicaSet with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicaSet with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a ReplicaSet with initContainer as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicaSet with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -1868,24 +1868,24 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a ReplicaSet with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicaSet with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRSWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRSWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a ReplicaSet with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicaSet with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRSOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRSOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1899,19 +1899,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSYAML, "rejected", namespace, "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a ReplicaSet with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a ReplicaSet with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -1923,7 +1923,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -1935,19 +1935,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a ReplicaSet with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a ReplicaSet with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -1959,19 +1959,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRSYAML, "rejected", namespace, "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a ReplicaSet with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a ReplicaSet with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRSWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRSWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -1983,7 +1983,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -1995,25 +1995,25 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRSOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a ReplicaSet with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a ReplicaSet with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
 		// DAEMONSET TESTS
-		Assess("Successful deployment of a DaemonSet with container as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a DaemonSet with container as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -2025,31 +2025,31 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a DaemonSet with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a DaemonSet with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a DaemonSet with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a DaemonSet with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a DaemonSet with initContainer as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a DaemonSet with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -2061,24 +2061,24 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a DaemonSet with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a DaemonSet with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDSWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDSWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a DaemonSet with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a DaemonSet with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDSOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDSOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2092,19 +2092,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSYAML, "rejected", namespace, "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a DaemonSet with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a DaemonSet with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -2116,7 +2116,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2128,19 +2128,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a DaemonSet with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a DaemonSet with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2152,19 +2152,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDSYAML, "rejected", namespace, "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a DaemonSet with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a DaemonSet with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDSWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDSWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -2176,7 +2176,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2188,25 +2188,25 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDSOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a DaemonSet with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a DaemonSet with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
 		// STATEFULSET TESTS
-		Assess("Successful deployment of a Stateful Set with container as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Stateful Set with container as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -2218,31 +2218,31 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Stateful Set with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Stateful Set with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Stateful Set with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Stateful Set with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Stateful Set with initContainer as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Stateful Set with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -2254,24 +2254,24 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Stateful Set with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Stateful Set with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerSSWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerSSWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Stateful Set with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Stateful Set with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerSSOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerSSOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2285,19 +2285,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSYAML, "rejected", namespace, "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Stateful Set with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Stateful Set with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -2309,7 +2309,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2321,19 +2321,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Stateful Set with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Stateful Set with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2345,19 +2345,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerSSYAML, "rejected", namespace, "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Stateful Set with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Stateful Set with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerSSWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerSSWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -2369,7 +2369,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerSSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2381,25 +2381,25 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerSSOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Stateful Set with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Stateful Set with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerSSWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
 		// JOB TESTS
-		Assess("Successful deployment of a Job with container as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Job with container as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -2411,31 +2411,31 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Job with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Job with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Job with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Job with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Job with initContainer as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Job with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -2447,24 +2447,24 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Job with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Job with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a Job with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a Job with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2478,19 +2478,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobYAML, "rejected", namespace, "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Job with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Job with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -2502,7 +2502,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2514,19 +2514,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Job with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Job with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2538,19 +2538,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobYAML, "rejected", namespace, "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Job with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Job with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -2562,7 +2562,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2574,25 +2574,25 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a Job with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a Job with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerJobWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
 		// CRONJOB TESTS
-		Assess("Successful deployment of a CronJob with container as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a CronJob with container as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -2604,31 +2604,31 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a CronJob with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a CronJob with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a CronJob with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a CronJob with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a CronJob with initContainer as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a CronJob with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -2640,24 +2640,24 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a CronJob with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a CronJob with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a CronJob with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a CronJob with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2671,19 +2671,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobYAML, "rejected", namespace, "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a CronJob with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a CronJob with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -2695,7 +2695,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2707,19 +2707,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a CronJob with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a CronJob with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2731,19 +2731,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobYAML, "rejected", namespace, "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a CronJob with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a CronJob with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -2755,7 +2755,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2767,37 +2767,37 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a CronJob with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a CronJob with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a CronJob with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a CronJob with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
 		// REPLICATIONCONTROLLER TESTS
-		Assess("Successful deployment of a ReplicationController with container as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicationController with container as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -2809,31 +2809,31 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a ReplicationController with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicationController with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a ReplicationController with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicationController with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a ReplicationController with initContainer as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicationController with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -2845,24 +2845,24 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a ReplicationController with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicationController with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a ReplicationController with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a ReplicationController with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2876,19 +2876,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCYAML, "rejected", namespace, "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a ReplicationController with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a ReplicationController with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -2900,7 +2900,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2912,19 +2912,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a ReplicationController with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a ReplicationController with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2936,19 +2936,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCYAML, "rejected", namespace, "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a ReplicationController with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a ReplicationController with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -2960,7 +2960,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -2972,25 +2972,25 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a ReplicationController with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a ReplicationController with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerRCWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
 		// PODTEMPLATE TESTS
-		Assess("Successful deployment of a PodTemplate with container as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a PodTemplate with container as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -3002,31 +3002,31 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a PodTemplate with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a PodTemplate with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a PodTemplate with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a PodTemplate with container as container.seccompProfile.type is not defined and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a PodTemplate with initContainer as seccompProfile.type is set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a PodTemplate with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -3038,24 +3038,24 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("Successful deployment of a PodTemplate with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a PodTemplate with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateWithDefaultYAML, "success-default-runtimedefault", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateWithDefaultYAML, "success-default-rd", namespace, "RuntimeDefault", "success", "RuntimeDefault", "success", "RuntimeDefault"))
 			if err != nil {
 				t.Fatal(err)
 			}
 
 			return ctx
 		}).
-		Assess("Successful deployment of a PodTemplate with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Successful deployment of a PodTemplate with initContainer as initContainer.seccompProfile.type is not defined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateOnlyDefaultYAML, "success-only-default-runtimedefault", namespace, "RuntimeDefault", "success", "success"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -3069,19 +3069,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateYAML, "rejected", namespace, "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a PodTemplate with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a PodTemplate with container as container.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("containers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -3093,7 +3093,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -3105,19 +3105,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a PodTemplate with container as container.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a PodTemplate with container as container.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -3129,19 +3129,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateYAML, "rejected", namespace, "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a PodTemplate with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or LocalHost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a PodTemplate with initContainer as initContainer.seccompProfile.type is set to Unconfined, and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateWithDefaultYAML, "rejected-default-runtimedefault", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateWithDefaultYAML, "rejected-default-rd", namespace, "RuntimeDefault", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or LocalHost")
+				t.Fatal("initContainers with securityContext.seccompProfile.type field set to Unconfined were accepted, when the lower-priority spec.securityContext.seccompProfile.type was set to RuntimeDefault or Localhost")
 			}
 
 			return ctx
@@ -3153,7 +3153,7 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "Unconfined"))
 			if err == nil {
-				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("initContainers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
@@ -3165,19 +3165,19 @@ func TestSeccomp(t *testing.T) {
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected", "rejected"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
 		}).
-		Assess("Rejected deployment of a PodTemplate with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or LocalHost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("Rejected deployment of a PodTemplate with initContainer as initContainer.seccompProfile.type is set to RuntimeDefault or Localhost and spec.seccompProfile.type set to Unconfined", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateWithDefaultYAML, "rejected-default-unconfined", namespace, "Unconfined", "rejected", "RuntimeDefault", "rejected", "RuntimeDefault"))
 			if err == nil {
-				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or LocalHost were accepted")
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
 
 			return ctx
