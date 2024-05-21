@@ -3,19 +3,22 @@ package pss_privilege_escalation
 import (
 	"context"
 	"fmt"
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	"log"
 	"os"
-	"sigs.k8s.io/e2e-framework/klient/k8s"
-	"sigs.k8s.io/e2e-framework/pkg/envconf"
-	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
 	"time"
 	"vap-library/testutils"
 
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"sigs.k8s.io/e2e-framework/klient/k8s"
+	"sigs.k8s.io/e2e-framework/pkg/envconf"
+	"sigs.k8s.io/e2e-framework/pkg/features"
+
 	"sigs.k8s.io/e2e-framework/pkg/env"
 )
+
+// TEST DATA FOR POD TESTS
 
 var containerYAML string = `
 apiVersion: v1
@@ -50,7 +53,8 @@ spec:
       allowPrivilegeEscalation: %s
 `
 
-// ToDo: Add test data for non-pod objects
+// TEST DATA FOR DEPLOYMENT TESTS
+
 var containerDeploymentYAML string = `
 apiVersion: apps/v1
 kind: Deployment
@@ -105,6 +109,8 @@ spec:
         securityContext:
           allowPrivilegeEscalation: %s
 `
+
+// TEST DATA FOR REPLICASET TESTS
 
 var containerRSYAML string = `
 apiVersion: apps/v1
@@ -161,6 +167,8 @@ spec:
           allowPrivilegeEscalation: %s
 `
 
+// TEST DATA FOR DAEMONSET TESTS
+
 var containerDSYAML string = `
 apiVersion: apps/v1
 kind: DaemonSet
@@ -216,6 +224,8 @@ spec:
           allowPrivilegeEscalation: %s
 `
 
+// TEST DATA FOR STATEFULSET TESTS
+
 var containerSSYAML string = `
 apiVersion: apps/v1
 kind: StatefulSet
@@ -269,6 +279,9 @@ spec:
         securityContext:
           allowPrivilegeEscalation: %s
 `
+
+// TEST DATA FOR JOB TESTS
+
 var containerJobYAML string = `
 apiVersion: batch/v1
 kind: Job
@@ -307,6 +320,8 @@ spec:
           allowPrivilegeEscalation: %s
       restartPolicy: Never
 `
+
+// TEST DATA FOR CRONJOB TESTS
 
 var containerCronJobYAML string = `
 apiVersion: batch/v1
@@ -351,6 +366,8 @@ spec:
               allowPrivilegeEscalation: %s
           restartPolicy: OnFailure
 `
+
+// TEST DATA FOR REPLICATIONCONTROLLER TESTS
 
 var containerRCYAML string = `
 apiVersion: v1
@@ -400,6 +417,9 @@ spec:
         securityContext:
           allowPrivilegeEscalation: %s
 `
+
+// TEST DATA FOR PODTEMPLATE TESTS
+
 var containerPodTemplateYAML string = `
 apiVersion: v1
 kind: PodTemplate
@@ -898,7 +918,6 @@ func TestPrivilegeEscalation(t *testing.T) {
 
 			return ctx
 		})
-	// ToDo: Add tests for further non-pod objects
 
 	_ = testEnv.Test(t, f.Feature())
 
