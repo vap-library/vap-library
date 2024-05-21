@@ -3,7 +3,7 @@ This Validating Admission Policy ensures that any defined volumes can only be of
 This policy is part of the Pod Security Standards provided by Kubernetes, found here - https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted.
 
 # Parameter used by the policy
-This policy evaluates spec.volumes[*]. For the API call to be accepted then for each and every volume: one of the following fields must be set to a non-null value:
+This policy evaluates spec.volumes[\*]. For the API call to be accepted then for each and every volume: one of the following fields must be set to a non-null value:
 
 * spec.volumes[*].configMap
 * spec.volumes[*].csi
