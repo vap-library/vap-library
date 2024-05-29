@@ -457,6 +457,29 @@ template:
         allowPrivilegeEscalation: %s
 `
 
+// TEST DATA FOR PATCHING A POD TO ADD AN EPHEMERAL CONTAINER
+
+var containerEphemeralPatchYAML string = `
+{
+	"spec": {
+			"ephemeralContainers": [
+					{
+							"image": "public.ecr.aws/docker/library/busybox:1.36",
+							"name": "ephemeral",
+							"resources": {},
+							"securityContext": {
+									"allowPrivilegeEscalation": %s
+							},
+							"stdin": true,
+							"targetContainerName": "privilege-escalation-ephemeral",
+							"terminationMessagePolicy": "File",
+							"tty": true
+					}
+			]
+	}
+}
+`
+
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
@@ -962,22 +985,7 @@ func TestEphemeralContainers(t *testing.T) {
 			patchType := types.StrategicMergePatchType
 
 			// define patch data
-			patchData := []byte(`
-			{
-    			"spec": {
-        			"ephemeralContainers": [
-            			{
-                			"image": "public.ecr.aws/docker/library/busybox:latest",
-                			"name": "ephemeral",
-                			"resources": {},
-                			"stdin": true,
-                			"targetContainerName": "privilege-escalation-ephemeral",
-                			"terminationMessagePolicy": "File",
-                			"tty": true
-            			}
-        			]
-    			}
-			}`)
+			patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "true"))
 
 			patch := k8s.Patch{patchType, patchData}
 
@@ -1010,25 +1018,7 @@ func TestEphemeralContainers(t *testing.T) {
 			patchType := types.StrategicMergePatchType
 
 			// define patch data
-			patchData := []byte(`
-			{
-    			"spec": {
-        			"ephemeralContainers": [
-            			{
-                			"image": "public.ecr.aws/docker/library/busybox:1.36",
-                			"name": "ephemeral",
-                			"resources": {},
-                			"securityContext": {
-                    			"allowPrivilegeEscalation": false
-                			},
-                			"stdin": true,
-                			"targetContainerName": "privilege-escalation-ephemeral",
-                			"terminationMessagePolicy": "File",
-                			"tty": true
-            			}
-        			]
-    			}
-			}`)
+			patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "false"))
 
 			patch := k8s.Patch{patchType, patchData}
 
