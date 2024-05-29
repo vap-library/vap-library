@@ -463,20 +463,20 @@ var containerEphemeralPatchYAML string = `
 {
   "spec": {
     "ephemeralContainers": [
-    {
-       "image": "public.ecr.aws/docker/library/busybox:1.36",
-       "name": "ephemeral",
-       "resources": {},
-       "securityContext": {
-         "allowPrivilegeEscalation": %s
-		},
-       "stdin": true,
-       "targetContainerName": "privilege-escalation-ephemeral",
-       "terminationMessagePolicy": "File",
-       "tty": true
-    }
+      {
+         "image": "public.ecr.aws/docker/library/busybox:1.36",
+         "name": "ephemeral",
+         "resources": {},
+         "securityContext": {
+           "allowPrivilegeEscalation": %s
+         },
+         "stdin": true,
+         "targetContainerName": "privilege-escalation-ephemeral",
+         "terminationMessagePolicy": "File",
+         "tty": true
+      }
     ]
-	}
+  }
 }
 `
 
