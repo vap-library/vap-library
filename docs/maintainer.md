@@ -21,3 +21,29 @@ version we need to remove the comments from the vendored resources:
 yq '... comments=""' -i vendoring/gateway-api/experimental-install.yaml
 ```
 
+# rootless podman issues with testing
+Verify that you have all cgroups controllers
+```
+$ podman info --format json|jq '.host.cgroupControllers'
+[
+  "cpuset",
+  "cpu",
+  "io",
+  "memory",
+  "pids"
+]
+```
+
+If not then make sure that you have the delegate configured:
+```
+$ cat /etc/systemd/system/user@.service.d/delegate.conf
+[Service]
+Delegate=yes
+$ sudo systemctl daemon-reload
+```
+
+If still not then create a bash with systemd-run and run the tests from this bash:
+```
+$ systemd-run --scope --user bash
+Running scope as unit: run-rd115f5ba51634ba898cf07275d493fe5.scope
+```
