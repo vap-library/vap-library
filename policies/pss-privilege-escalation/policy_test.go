@@ -461,21 +461,21 @@ template:
 
 var containerEphemeralPatchYAML string = `
 {
-	"spec": {
-			"ephemeralContainers": [
-					{
-							"image": "public.ecr.aws/docker/library/busybox:1.36",
-							"name": "ephemeral",
-							"resources": {},
-							"securityContext": {
-									"allowPrivilegeEscalation": %s
-							},
-							"stdin": true,
-							"targetContainerName": "privilege-escalation-ephemeral",
-							"terminationMessagePolicy": "File",
-							"tty": true
-					}
-			]
+  "spec": {
+    "ephemeralContainers": [
+    {
+       "image": "public.ecr.aws/docker/library/busybox:1.36",
+       "name": "ephemeral",
+       "resources": {},
+       "securityContext": {
+         "allowPrivilegeEscalation": %s
+		},
+       "stdin": true,
+       "targetContainerName": "privilege-escalation-ephemeral",
+       "terminationMessagePolicy": "File",
+       "tty": true
+    }
+    ]
 	}
 }
 `
@@ -488,7 +488,7 @@ func TestMain(m *testing.M) {
 	var err error
 	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
+		log.Fatalf("Unable to create Kind cluster for test. Error msg: %s", err)
 	}
 
 	// wait for the cluster to be ready
