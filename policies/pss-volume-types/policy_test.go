@@ -2085,7 +2085,7 @@ func TestMain(m *testing.M) {
     var err error
     testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil)
     if err != nil {
-        log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
+        log.Fatalf("Unable to create Kind cluster for test. Error msg: %s", err)
     }
 
     // wait for the cluster to be ready
