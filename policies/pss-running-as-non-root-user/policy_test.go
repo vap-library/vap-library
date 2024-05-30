@@ -839,6 +839,29 @@ template:
         runAsUser: %s
 `
 
+// TEST DATA FOR PATCHING A POD TO ADD AN EPHEMERAL CONTAINER
+
+var containerEphemeralPatchYAML string = `
+{
+  "spec": {
+    "ephemeralContainers": [
+      {
+         "image": "public.ecr.aws/docker/library/busybox:1.36",
+         "name": "ephemeral",
+         "resources": {},
+         "securityContext": {
+           "runAsUser": %s
+         },
+         "stdin": true,
+         "targetContainerName": "running-as-non-root-user-ephemeral",
+         "terminationMessagePolicy": "File",
+         "tty": true
+      }
+    ]
+  }
+}
+`
+
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
@@ -847,7 +870,7 @@ func TestMain(m *testing.M) {
 	var err error
 	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
+		log.Fatalf("Unable to create Kind cluster for test. Error msg: %s", err)
 	}
 
 	// wait for the cluster to be ready
@@ -1444,25 +1467,7 @@ func TestRunningAsNonRoot(t *testing.T) {
 				patchType := types.StrategicMergePatchType
 	
 				// define patch data
-				patchData := []byte(`
-				{
-					"spec": {
-						"ephemeralContainers": [
-							{
-								"image": "public.ecr.aws/docker/library/busybox:latest",
-								"name": "ephemeral",
-								"resources": {},
-								"securityContext": {
-									"runAsUser": 0
-								},
-								"stdin": true,
-								"targetContainerName": "running-as-non-root-user-ephemeral",
-								"terminationMessagePolicy": "File",
-								"tty": true
-							}
-						]
-					}
-				}`)
+        patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "0"))
 	
 				patch := k8s.Patch{patchType, patchData}
 	
@@ -1495,25 +1500,7 @@ func TestRunningAsNonRoot(t *testing.T) {
 				patchType := types.StrategicMergePatchType
 	
 				// define patch data
-				patchData := []byte(`
-				{
-					"spec": {
-						"ephemeralContainers": [
-							{
-								"image": "public.ecr.aws/docker/library/busybox:latest",
-								"name": "ephemeral",
-								"resources": {},
-								"securityContext": {
-									"runAsUser": 100
-								},
-								"stdin": true,
-								"targetContainerName": "running-as-non-root-user-ephemeral",
-								"terminationMessagePolicy": "File",
-								"tty": true
-							}
-						]
-					}
-				}`)
+        patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "100"))
 	
 				patch := k8s.Patch{patchType, patchData}
 	
