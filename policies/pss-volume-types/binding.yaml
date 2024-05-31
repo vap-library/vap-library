@@ -24,7 +24,7 @@ spec:
     matchPolicy: Equivalent
     namespaceSelector:
       matchLabels:
-        vap-library.com/pss-volume-types: warn
+        vap-library.com/pss-running-as-non-root-user: warn
     objectSelector: {}
   policyName: pss-volume-types.vap-library.com
   validationActions:

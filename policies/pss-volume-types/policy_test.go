@@ -2080,1005 +2080,1006 @@ template:
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
-	var namespaceLabels = map[string]string{"vap-library.com/pss-volume-types": "deny"}
+    var namespaceLabels = map[string]string{"vap-library.com/pss-volume-types": "deny"}
 
-	var err error
-	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil)
-	if err != nil {
-		log.Fatalf("Unable to create Kind cluster for test. Error msg: %s", err)
-	}
+    var err error
+    testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil)
+    if err != nil {
+        log.Fatalf("Unable to create Kind cluster for test. Error msg: %s", err)
+    }
 
-	// wait for the cluster to be ready
-	time.Sleep(2 * time.Second)
+    // wait for the cluster to be ready
+    time.Sleep(2 * time.Second)
 
-	os.Exit(testEnv.Run(m))
+    os.Exit(testEnv.Run(m))
 }
 
-func TestVolumeTypes(t *testing.T) {
-
-	f := features.New("Volume Types tests").
-		// POD TESTS
-		Assess("Successful deployment of a Pod with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(configMapYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Pod with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(downwardAPIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Pod with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(emptyDirYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Pod with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(emphemeralYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Pod with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(pvcYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Pod with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(secretYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Pod with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(projectedYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Pod with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(csiYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Rejected deployment of a Pod with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, namespace))
-			if err == nil {
-				t.Fatal("pods with a prohibited volume type were accepted")
-			}
-
-			return ctx
-		}).
-		// DEPLOYMENT TESTS
-		Assess("Successful deployment of a Deployment with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentConfigMapYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Deployment with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentDownwardAPIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Deployment with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentEmptyDirYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Deployment with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentEmphemeralYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Deployment with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentPVCYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Deployment with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentSecretYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Deployment with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentProjectedYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Deployment with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentCSIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Rejected deployment of a Deployment with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentYAML, namespace))
-			if err == nil {
-				t.Fatal("pods with a prohibited volume type were accepted")
-			}
-
-			return ctx
-		}).
-		// // REPLICASET TESTS
-		Assess("Successful deployment of a ReplicaSet with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsConfigMapYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicaSet with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsDownwardAPIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicaSet with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsEmptyDirYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicaSet with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsEphemeralYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicaSet with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsPVCYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicaSet with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsSecretYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicaSet with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsProjectedYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicaSet with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsCSIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Rejected deployment of a ReplicaSet with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsYAML, namespace))
-			if err == nil {
-				t.Fatal("pods with a prohibited volume type were accepted")
-			}
-
-			return ctx
-		}).
-		// // DAEMONSET TESTS
-		Assess("Successful deployment of a DaemonSet with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsConfigMapYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a DaemonSet with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsDownwardAPIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a DaemonSet with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsEmptyDirYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a DaemonSet with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsEphemeralYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a DaemonSet with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsPVCYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a DaemonSet with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsSecretYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a DaemonSet with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsProjectedYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a DaemonSet with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsCSIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Rejected deployment of a DaemonSet with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsYAML, namespace))
-			if err == nil {
-				t.Fatal("pods with a prohibited volume type were accepted")
-			}
-
-			return ctx
-		}).
-		// // STATEFULSET TESTS
-		Assess("Successful deployment of a StatefulSet with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssConfigMapYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a StatefulSet with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssDownwardAPIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a StatefulSet with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssEmptyDirYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a StatefulSet with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssEphemeralYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a StatefulSet with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssPVCYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a StatefulSet with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssSecretYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a StatefulSet with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssProjectedYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a StatefulSet with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssCSIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Rejected deployment of a StatefulSet with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssYAML, namespace))
-			if err == nil {
-				t.Fatal("pods with a prohibited volume type were accepted")
-			}
-
-			return ctx
-		}).
-		// // JOB TESTS
-		Assess("Successful deployment of a Job with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobConfigMapYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Job with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobDownwardAPIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Job with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobEmptyDirYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Job with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobEphemeralYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Job with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobPVCYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Job with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobSecretYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Job with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobProjectedYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Job with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobCSIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Rejected deployment of a Job with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobYAML, namespace))
-			if err == nil {
-				t.Fatal("pods with a prohibited volume type were accepted")
-			}
-
-			return ctx
-		}).
-		// // CRONJOB TESTS
-		Assess("Successful deployment of a CronJob with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobConfigMapYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a CronJob with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobDownwardAPIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a CronJob with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobEmptyDirYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a CronJob with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobEphemeralYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a CronJob with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobPVCYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a CronJob with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobSecretYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a CronJob with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobProjectedYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a CronJob with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobCSIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Rejected deployment of a CronJob with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobYAML, namespace))
-			if err == nil {
-				t.Fatal("pods with a prohibited volume type were accepted")
-			}
-
-			return ctx
-		}).
-		// REPLICATIONCONTROLLER TESTS
-		Assess("Successful deployment of a ReplicationController with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcConfigMapYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicationController with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcDownwardAPIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicationController with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcEmptyDirYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicationController with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcEphemeralYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicationController with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcPVCYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicationController with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcSecretYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicationController with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcProjectedYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a ReplicationController with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcCSIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Rejected deployment of a ReplicationController with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcYAML, namespace))
-			if err == nil {
-				t.Fatal("pods with a prohibited volume type were accepted")
-			}
-
-			return ctx
-		}).
-		// PODTEMPLATE TESTS
-		Assess("Successful deployment of a PodTemplate with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateConfigMapYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a PodTemplate with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateDownwardAPIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a PodTemplate with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateEmptyDirYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a PodTemplate with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateEphemeralYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a PodTemplate with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplatePVCYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a PodTemplate with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateSecretYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a PodTemplate with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateProjectedYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a PodTemplate with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateCSIYAML, namespace))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Rejected deployment of a PodTemplate with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateYAML, namespace))
-			if err == nil {
-				t.Fatal("pods with a prohibited volume type were accepted")
-			}
-
-			return ctx
-		})
-
-	_ = testEnv.Test(t, f.Feature())
-
-}
+
+func TestRunningAsNonRoot(t *testing.T) {
+
+    f := features.New("Volume Types tests").
+        // POD TESTS
+        Assess("Successful deployment of a Pod with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(configMapYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Pod with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(downwardAPIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Pod with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(emptyDirYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Pod with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(emphemeralYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Pod with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(pvcYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Pod with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(secretYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Pod with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(projectedYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Pod with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(csiYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Rejected deployment of a Pod with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should FAIL!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, namespace))
+            if err == nil {
+                t.Fatal("pods with a prohibited volume type were accepted")
+            }
+
+            return ctx
+        }).
+        // DEPLOYMENT TESTS
+        Assess("Successful deployment of a Deployment with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentConfigMapYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Deployment with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentDownwardAPIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Deployment with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentEmptyDirYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Deployment with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentEmphemeralYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Deployment with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentPVCYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Deployment with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentSecretYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Deployment with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentProjectedYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Deployment with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentCSIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Rejected deployment of a Deployment with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should FAIL!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(deploymentYAML, namespace))
+            if err == nil {
+                t.Fatal("pods with a prohibited volume type were accepted")
+            }
+
+            return ctx
+        }).
+        // // REPLICASET TESTS
+        Assess("Successful deployment of a ReplicaSet with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsConfigMapYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicaSet with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsDownwardAPIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicaSet with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsEmptyDirYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicaSet with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsEphemeralYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicaSet with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsPVCYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicaSet with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsSecretYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicaSet with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsProjectedYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicaSet with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsCSIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Rejected deployment of a ReplicaSet with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should FAIL!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rsYAML, namespace))
+            if err == nil {
+                t.Fatal("pods with a prohibited volume type were accepted")
+            }
+
+            return ctx
+        }).
+        // // DAEMONSET TESTS
+        Assess("Successful deployment of a DaemonSet with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsConfigMapYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a DaemonSet with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsDownwardAPIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a DaemonSet with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsEmptyDirYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a DaemonSet with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsEphemeralYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a DaemonSet with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsPVCYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a DaemonSet with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsSecretYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a DaemonSet with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsProjectedYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a DaemonSet with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsCSIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Rejected deployment of a DaemonSet with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should FAIL!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(dsYAML, namespace))
+            if err == nil {
+                t.Fatal("pods with a prohibited volume type were accepted")
+            }
+
+            return ctx
+        }).
+        // // STATEFULSET TESTS
+        Assess("Successful deployment of a StatefulSet with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssConfigMapYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a StatefulSet with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssDownwardAPIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a StatefulSet with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssEmptyDirYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a StatefulSet with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssEphemeralYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a StatefulSet with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssPVCYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a StatefulSet with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssSecretYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a StatefulSet with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssProjectedYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a StatefulSet with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssCSIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Rejected deployment of a StatefulSet with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should FAIL!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(ssYAML, namespace))
+            if err == nil {
+                t.Fatal("pods with a prohibited volume type were accepted")
+            }
+
+            return ctx
+        }).
+        // // JOB TESTS
+        Assess("Successful deployment of a Job with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobConfigMapYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Job with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobDownwardAPIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Job with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobEmptyDirYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Job with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobEphemeralYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Job with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobPVCYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Job with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobSecretYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Job with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobProjectedYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a Job with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobCSIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Rejected deployment of a Job with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should FAIL!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(jobYAML, namespace))
+            if err == nil {
+                t.Fatal("pods with a prohibited volume type were accepted")
+            }
+
+            return ctx
+        }).
+        // // CRONJOB TESTS
+        Assess("Successful deployment of a CronJob with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobConfigMapYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a CronJob with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobDownwardAPIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a CronJob with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobEmptyDirYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a CronJob with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobEphemeralYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a CronJob with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobPVCYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a CronJob with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobSecretYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a CronJob with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobProjectedYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a CronJob with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobCSIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Rejected deployment of a CronJob with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should FAIL!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(cronJobYAML, namespace))
+            if err == nil {
+                t.Fatal("pods with a prohibited volume type were accepted")
+            }
+
+            return ctx
+        }).
+        // REPLICATIONCONTROLLER TESTS
+        Assess("Successful deployment of a ReplicationController with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcConfigMapYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicationController with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcDownwardAPIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicationController with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcEmptyDirYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicationController with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcEphemeralYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicationController with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcPVCYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicationController with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcSecretYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicationController with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcProjectedYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a ReplicationController with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcCSIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Rejected deployment of a ReplicationController with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should FAIL!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(rcYAML, namespace))
+            if err == nil {
+                t.Fatal("pods with a prohibited volume type were accepted")
+            }
+
+            return ctx
+        }).
+        // PODTEMPLATE TESTS
+        Assess("Successful deployment of a PodTemplate with a valid configMap volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateConfigMapYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a PodTemplate with a valid downwardAPI volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateDownwardAPIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a PodTemplate with a valid emptyDir volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateEmptyDirYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a PodTemplate with a valid ephemeral volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateEphemeralYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a PodTemplate with a valid pvc volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplatePVCYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a PodTemplate with a valid secret volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateSecretYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a PodTemplate with a valid projected volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateProjectedYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Successful deployment of a PodTemplate with a valid csi volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should PASS!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateCSIYAML, namespace))
+            if err != nil {
+                t.Fatal(err)
+            }
+
+            return ctx
+        }).
+        Assess("Rejected deployment of a PodTemplate with a prohibited volume configuration", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+            // get namespace
+            namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+            // this should FAIL!
+            err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(podTemplateYAML, namespace))
+            if err == nil {
+                t.Fatal("pods with a prohibited volume type were accepted")
+            }
+
+            return ctx
+        })
+
+        _ = testEnv.Test(t, f.Feature())
+
+    }
