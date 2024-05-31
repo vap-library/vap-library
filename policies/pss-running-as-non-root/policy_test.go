@@ -33,6 +33,18 @@ spec:
       runAsNonRoot: %s
 `
 
+var containerWithoutYAML string = `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: running-as-non-root-%s
+  namespace: %s
+spec:
+  containers:
+  - name: running-as-non-root-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+`
+
 var containerWithDefaultYAML string = `
 apiVersion: v1
 kind: Pod
@@ -60,6 +72,24 @@ spec:
     runAsNonRoot: %s
   containers:
   - name: running-as-non-root-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+`
+
+var twoContainersWithDefaultOnlyOneYAML string = `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: running-as-non-root-two-with-default-only-one-%s
+  namespace: %s
+spec:
+  securityContext:
+    runAsNonRoot: %s
+  containers:
+  - name: running-as-non-root-two-with-default-only-one-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+    securityContext:
+      runAsNonRoot: %s
+  - name: running-as-non-root-two-with-default-only-one-%s
     image: public.ecr.aws/docker/library/busybox:1.36
 `
 
@@ -288,6 +318,7 @@ spec:
       - name: init-running-as-non-root-%s
         image: public.ecr.aws/docker/library/busybox:1.36
 `
+
 // TEST DATA FOR REPLICASET TESTS
 
 var containerRSYAML string = `
@@ -484,7 +515,6 @@ spec:
           runAsNonRoot: %s
 `
 
-
 var containerDSWithDefaultYAML string = `
 apiVersion: apps/v1
 kind: DaemonSet
@@ -511,7 +541,6 @@ spec:
         securityContext:
           runAsNonRoot: %s
 `
-
 
 var containerDSOnlyDefaultYAML string = `
 apiVersion: apps/v1
@@ -1415,6 +1444,18 @@ func TestRunAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).
+		Assess("Successful deployment of a Pod with two containers as spec.runAsNonRoot set to true and container.runAsNonRoot is set to true for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoContainersWithDefaultOnlyOneYAML, "success", namespace, "true", "success-01", "true", "success-02"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
 		Assess("Successful deployment of a Pod with initContainer as runAsNonRoot is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1471,6 +1512,18 @@ func TestRunAsNonRoot(t *testing.T) {
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, "rejected", namespace, "rejected", "false"))
 			if err == nil {
 				t.Fatal("containers without securityContext.runAsNonRoot field set to true were accepted")
+			}
+
+			return ctx
+		}).
+		Assess("Rejected deployment of a Pod without runAsNonRoot is set", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerWithoutYAML, "rejected", namespace, "rejected"))
+			if err == nil {
+				t.Fatal("containers without any of the runAsNonRoot fields set to true were accepted")
 			}
 
 			return ctx
@@ -3103,94 +3156,94 @@ func TestRunAsNonRoot(t *testing.T) {
 
 			return ctx
 		})
-		_ = testEnv.Test(t, f.Feature())
+	_ = testEnv.Test(t, f.Feature())
 
-	}
-	
-	func TestEphemeralContainers(t *testing.T) {
-	
-		f := features.New("Pods with ephemeral containers").
-			Setup(func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-				// get namespace
-				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-	
-				// create a pod that will be used for ephemeral container tests
-				err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, "ephemeral", namespace, "ephemeral", "true"))
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				// wait for the pod
-				time.Sleep(2 * time.Second)
-	
-				return ctx
-			}).
-			Assess("An invalid ephemeral container is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-				// get namespace
-				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-	
-				// get client
-				client, err := cfg.NewClient()
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				// get the pod that was created in setup to attach an ephemeral container to it
-				pod := &v1.Pod{}
-				err = client.Resources(namespace).Get(ctx, "running-as-non-root-ephemeral", namespace, pod)
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				// define patch type
-				patchType := types.StrategicMergePatchType
-	
-				// define patch data
-			  patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "false"))
-	
-				patch := k8s.Patch{patchType, patchData}
-	
-				// patch the pod, this should FAIL!
-				err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
-				if err == nil {
-					t.Fatal("ephemeral container without securityContext.runAsNonRoot field should be rejected")
-				}
-	
-				return ctx
-			}).
-			Assess("A valid ephemeral container is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-				// get namespace
-				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-	
-				// get client
-				client, err := cfg.NewClient()
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				// get the pod that was created in setup to attach an ephemeral container to it
-				pod := &v1.Pod{}
-				err = client.Resources(namespace).Get(ctx, "running-as-non-root-ephemeral", namespace, pod)
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				// define patch type
-				patchType := types.StrategicMergePatchType
-	
-				// define patch data
-			  patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "true"))
-	
-				patch := k8s.Patch{patchType, patchData}
-	
-				// patch the pod
-				err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				return ctx
-			})
+}
+
+func TestEphemeralContainers(t *testing.T) {
+
+	f := features.New("Pods with ephemeral containers").
+		Setup(func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// create a pod that will be used for ephemeral container tests
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, "ephemeral", namespace, "ephemeral", "true"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// wait for the pod
+			time.Sleep(2 * time.Second)
+
+			return ctx
+		}).
+		Assess("An invalid ephemeral container is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// get client
+			client, err := cfg.NewClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// get the pod that was created in setup to attach an ephemeral container to it
+			pod := &v1.Pod{}
+			err = client.Resources(namespace).Get(ctx, "running-as-non-root-ephemeral", namespace, pod)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// define patch type
+			patchType := types.StrategicMergePatchType
+
+			// define patch data
+			patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "false"))
+
+			patch := k8s.Patch{patchType, patchData}
+
+			// patch the pod, this should FAIL!
+			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+			if err == nil {
+				t.Fatal("ephemeral container without securityContext.runAsNonRoot field should be rejected")
+			}
+
+			return ctx
+		}).
+		Assess("A valid ephemeral container is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// get client
+			client, err := cfg.NewClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// get the pod that was created in setup to attach an ephemeral container to it
+			pod := &v1.Pod{}
+			err = client.Resources(namespace).Get(ctx, "running-as-non-root-ephemeral", namespace, pod)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// define patch type
+			patchType := types.StrategicMergePatchType
+
+			// define patch data
+			patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "true"))
+
+			patch := k8s.Patch{patchType, patchData}
+
+			// patch the pod
+			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		})
 	_ = testEnv.Test(t, f.Feature())
 
 }
