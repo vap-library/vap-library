@@ -2,17 +2,20 @@
 This Validating Admission Policy ensures that any defined volumes can only be of one of the allowed types.
 This policy is part of the Pod Security Standards provided by Kubernetes, found here - https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted.
 
-# Parameter used by the policy
-This policy evaluates spec.volumes[\*]. For the API call to be accepted then for each and every volume: one of the following fields must be set to a non-null value:
+# Policy logic
+This policy evaluates `spec.volumes[\*]`. For the API call to be accepted then for each and every volume: one of the following fields must be set to a non-null value:
 
-* spec.volumes[*].configMap
-* spec.volumes[*].csi
-* spec.volumes[*].downwardAPI
-* spec.volumes[*].emptyDir
-* spec.volumes[*].ephemeral
-* spec.volumes[*].persistentVolumeClaim
-* spec.volumes[*].projected
-* spec.volumes[*].secret
+* `spec.volumes[*].configMap`
+* `spec.volumes[*].csi`
+* `spec.volumes[*].downwardAPI`
+* `spec.volumes[*].emptyDir`
+* `spec.volumes[*].ephemeral`
+* `spec.volumes[*].persistentVolumeClaim`
+* `spec.volumes[*].projected`
+* `spec.volumes[*].secret`
+
+# Parameter used by the policy
+This policy does not use parameters. Rules that are outlined by the PSS Restricted profile are enforced. 
 
 # Examples
 ### Pass
