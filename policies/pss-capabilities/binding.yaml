@@ -1,0 +1,31 @@
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: pss-capabilities-deny.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/pss-capabilities: deny
+    objectSelector: {}
+  policyName: pss-capabilities.vap-library.com
+  validationActions:
+  - Deny
+  - Audit
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: pss-capabilies-warn.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/pss-capabilities: warn
+    objectSelector: {}
+  policyName: pss-capabilities.vap-library.com
+  validationActions:
+    - Warn

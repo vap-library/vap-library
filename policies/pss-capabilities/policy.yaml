@@ -1,0 +1,46 @@
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "pss-capabilities.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["pods","replicationcontrollers","podtemplates", "pods/ephemeralcontainers"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations: 
+    - expression: "object.kind != 'Pod' || 
+      (!has(object.spec.initContainers) || (has(object.spec.initContainers) && (object.spec.initContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      (!has(object.spec.ephemeralContainers) || (has(object.spec.ephemeralContainers) && (object.spec.ephemeralContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      ((object.spec.containers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))"
+      message: "securityContext.capabilities.drop must include ALL and securityContext.capabilities.add can only include NET_BIND_SERVICE on containers in Pods"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job','ReplicationController'].all(kind, object.kind != kind) ||       
+      (!has(object.spec.template.spec.initContainers) || (has(object.spec.template.spec.initContainers) && (object.spec.template.spec.initContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      (!has(object.spec.template.spec.ephemeralContainers) || (has(object.spec.template.spec.ephemeralContainers) && (object.spec.template.spec.ephemeralContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      ((object.spec.template.spec.containers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))"
+      message: "securityContext.capabilities.drop must include ALL and securityContext.capabilities.add can only include NET_BIND_SERVICE on containers in Workloads"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' || 
+      (!has(object.spec.jobTemplate.spec.template.spec.initContainers) || (has(object.spec.jobTemplate.spec.template.spec.initContainers) && (object.spec.jobTemplate.spec.template.spec.initContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      (!has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) || (has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) && (object.spec.jobTemplate.spec.template.spec.ephemeralContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      ((object.spec.jobTemplate.spec.template.spec.containers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))"
+      message: "securityContext.capabilities.drop must include ALL and securityContext.capabilities.add can only include NET_BIND_SERVICE on containers in CronJobs"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      (!has(object.template.spec.initContainers) || (has(object.template.spec.initContainers) && (object.template.spec.initContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      (!has(object.template.spec.ephemeralContainers) || (has(object.template.spec.ephemeralContainers) && (object.template.spec.ephemeralContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      ((object.template.spec.containers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))"
+      message: "securityContext.capabilities.drop must include ALL and securityContext.capabilities.add can only include NET_BIND_SERVICE on containers in PodTemplates"
+      reason: Invalid
