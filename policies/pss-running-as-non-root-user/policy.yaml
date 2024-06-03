@@ -1,0 +1,49 @@
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "pss-running-as-non-root-user.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["pods","replicationcontrollers","podtemplates", "pods/ephemeralcontainers"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations: 
+    - expression: "object.kind != 'Pod' ||
+      !(has(object.spec.securityContext) && has(object.spec.securityContext.runAsUser) && object.spec.securityContext.runAsUser == 0) &&
+      !(has(object.spec.initContainers) && object.spec.initContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(has(object.spec.ephemeralContainers) && object.spec.ephemeralContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(object.spec.containers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0))"
+      message: "securityContext.runAsUser must not equal 0, root user id, on any containers, initContainers, and ephemeralContainers in Pods"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job','ReplicationController'].all(kind, object.kind != kind) ||
+      !(has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.runAsUser) && object.spec.template.spec.securityContext.runAsUser == 0) &&
+      !(has(object.spec.template.spec.initContainers) && object.spec.template.spec.initContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(has(object.spec.template.spec.ephemeralContainers) && object.spec.template.spec.ephemeralContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(object.spec.template.spec.containers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0))"
+      message: "securityContext.runAsUser must not equal 0 (root user id) on containers in Workloads"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' ||
+      !(has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.runAsUser) && object.spec.jobTemplate.spec.template.spec.securityContext.runAsUser == 0) &&
+      !(has(object.spec.jobTemplate.spec.template.spec.initContainers) && object.spec.jobTemplate.spec.template.spec.initContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) && object.spec.jobTemplate.spec.template.spec.ephemeralContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(object.spec.jobTemplate.spec.template.spec.containers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0))"
+      message: "securityContext.runAsUser must not equal 0 (root user id) on containers in CronJobs"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      !(has(object.template.spec.securityContext) && has(object.template.spec.securityContext.runAsUser) && object.template.spec.securityContext.runAsUser == 0) &&
+      !(has(object.template.spec.initContainers) && object.template.spec.initContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(has(object.template.spec.ephemeralContainers) && object.template.spec.ephemeralContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(object.template.spec.containers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0))"
+      message: "securityContext.runAsUser must not equal 0 (root user id) on containers in PodTemplates"
+      reason: Invalid
