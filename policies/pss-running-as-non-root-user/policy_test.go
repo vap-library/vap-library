@@ -47,20 +47,6 @@ spec:
     image: public.ecr.aws/docker/library/busybox:1.36
 `
 
-var containerOnlyDefaultYAML string = `
-apiVersion: v1
-kind: Pod
-metadata:
-  name: running-as-non-root-user-with-default-%s
-  namespace: %s
-spec:
-  securityContext:
-    runAsUser: %s
-  containers:
-  - name: running-as-non-root-user-with-default-%s
-    image: public.ecr.aws/docker/library/busybox:1.36
-`
-
 var containerWithDefaultYAML string = `
 apiVersion: v1
 kind: Pod
@@ -661,6 +647,7 @@ spec:
           restartPolicy: OnFailure
 `
 
+
 var initContainerCronJobYAML string = `
 apiVersion: batch/v1
 kind: CronJob
@@ -892,6 +879,7 @@ func TestMain(m *testing.M) {
 	os.Exit(testEnv.Run(m))
 }
 
+
 func TestRunningAsNonRoot(t *testing.T) {
 
 	f := features.New("Running as Non-Root tests").
@@ -907,37 +895,12 @@ func TestRunningAsNonRoot(t *testing.T) {
 			}
 
 			return ctx
-		}).
-		Assess("Successful deployment of a Pod with container as runAsUser is not set", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		}).Assess("Successful deployment of a Pod with container as runAsUser is not set", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerNoRunAsUserYAML, "success", namespace, "success"))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Pod as spec.securityContext.runAsUser is set to 0 however container[*].runAsUser is set to 100", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerWithDefaultYAML, "success", namespace, "0", "success", "100"))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Successful deployment of a Pod as spec.securityContext.runAsUser is set to 100", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerOnlyDefaultYAML, "success", namespace, "100", "success"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -956,6 +919,18 @@ func TestRunningAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).
+		Assess("Rejected deployment of a Pod as spec.securityContext.runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerWithDefaultYAML, "rejected", namespace, "0", "rejected", "100"))
+			if err == nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
 		Assess("Rejected deployment of a Pod with initContainer as initContainer[*].runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -964,30 +939,6 @@ func TestRunningAsNonRoot(t *testing.T) {
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerYAML, "rejected", namespace, "rejected", "100", "rejected", "0"))
 			if err == nil {
 				t.Fatal(err)
-			}
-
-			return ctx
-		}).
-		Assess("Rejected deployment of a Pod as spec.securityContext.runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerOnlyDefaultYAML, "rejected", namespace, "0", "rejected"))
-			if err == nil {
-				t.Fatal("Pod got deployed even though spec.securityContext.runAsUser is set to 0")
-			}
-
-			return ctx
-		}).
-		Assess("Rejected deployment of a Pod as spec.securityContext.runAsUser is set to 100 however container[*].runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerWithDefaultYAML, "rejected", namespace, "100", "rejected", "0"))
-			if err == nil {
-				t.Fatal("Pod got deployed even though container[*].runAsUser is set to 0")
 			}
 
 			return ctx
@@ -1005,17 +956,17 @@ func TestRunningAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).Assess("Successful deployment of a Deployment with container as runAsUser is not set", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-		// get namespace
-		namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-		// this should PASS!
-		err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentNoRunAsUserYAML, "success", namespace, "success"))
-		if err != nil {
-			t.Fatal(err)
-		}
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDeploymentNoRunAsUserYAML, "success", namespace, "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		return ctx
-	}).
+			return ctx
+		}).
 		Assess("Rejected deployment of a Deployment with container as container[*].runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1065,17 +1016,17 @@ func TestRunningAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).Assess("Successful deployment of a ReplicaSet with container as runAsUser is not set", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-		// get namespace
-		namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-		// this should PASS!
-		err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSNoRunAsUserYAML, "success", namespace, "success"))
-		if err != nil {
-			t.Fatal(err)
-		}
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRSNoRunAsUserYAML, "success", namespace, "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		return ctx
-	}).
+			return ctx
+		}).
 		Assess("Rejected deployment of a ReplicaSet with container as container[*].runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1125,17 +1076,17 @@ func TestRunningAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).Assess("Successful deployment of a DaemonSet with container as runAsUser is not set", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-		// get namespace
-		namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-		// this should PASS!
-		err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSNoRunAsUserYAML, "success", namespace, "success"))
-		if err != nil {
-			t.Fatal(err)
-		}
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerDSNoRunAsUserYAML, "success", namespace, "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		return ctx
-	}).
+			return ctx
+		}).
 		Assess("Rejected deployment of a DaemonSet with container as container[*].runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1185,17 +1136,17 @@ func TestRunningAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).Assess("Successful deployment of a StatefulSet with container as runAsUser is not set", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-		// get namespace
-		namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-		// this should PASS!
-		err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSNoRunAsUserYAML, "success", namespace, "success"))
-		if err != nil {
-			t.Fatal(err)
-		}
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerSSNoRunAsUserYAML, "success", namespace, "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		return ctx
-	}).
+			return ctx
+		}).
 		Assess("Rejected deployment of a StatefulSet with container as container[*].runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1245,17 +1196,17 @@ func TestRunningAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).Assess("Successful deployment of a Job with container as runAsUser is not set", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-		// get namespace
-		namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-		// this should PASS!
-		err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobNoRunAsUserYAML, "success", namespace, "success"))
-		if err != nil {
-			t.Fatal(err)
-		}
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerJobNoRunAsUserYAML, "success", namespace, "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		return ctx
-	}).
+			return ctx
+		}).
 		Assess("Rejected deployment of a Job with container as container[*].runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1305,17 +1256,17 @@ func TestRunningAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).Assess("Successful deployment of a CronJob with container as runAsUser is not set", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-		// get namespace
-		namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-		// this should PASS!
-		err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobNoRunAsUserYAML, "success", namespace, "success"))
-		if err != nil {
-			t.Fatal(err)
-		}
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerCronJobNoRunAsUserYAML, "success", namespace, "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		return ctx
-	}).
+			return ctx
+		}).
 		Assess("Rejected deployment of a CronJob with container as container[*].runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1365,17 +1316,17 @@ func TestRunningAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).Assess("Successful deployment of a ReplicationController with container as runAsUser is not set", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-		// get namespace
-		namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-		// this should PASS!
-		err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCNoRunAsUserYAML, "success", namespace, "success"))
-		if err != nil {
-			t.Fatal(err)
-		}
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerRCNoRunAsUserYAML, "success", namespace, "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		return ctx
-	}).
+			return ctx
+		}).
 		Assess("Rejected deployment of a ReplicationController with container as container[*].runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1425,17 +1376,17 @@ func TestRunningAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).Assess("Successful deployment of a PodTemplate with container as runAsUser is not set", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-		// get namespace
-		namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-		// this should PASS!
-		err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateNoRunAsUserYAML, "success", namespace, "success"))
-		if err != nil {
-			t.Fatal(err)
-		}
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateNoRunAsUserYAML, "success", namespace, "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		return ctx
-	}).
+			return ctx
+		}).
 		Assess("Rejected deployment of a PodTemplate with container as container[*].runAsUser is set to 0", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1473,94 +1424,94 @@ func TestRunningAsNonRoot(t *testing.T) {
 			return ctx
 		})
 
-	_ = testEnv.Test(t, f.Feature())
+		_ = testEnv.Test(t, f.Feature())
 
-}
+	}
 
-func TestEphemeralContainers(t *testing.T) {
-
-	f := features.New("Pods with ephemeral containers").
-		Setup(func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// create a pod that will be used for ephemeral container tests
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, "ephemeral", namespace, "ephemeral", "100"))
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// wait for the pod
-			time.Sleep(2 * time.Second)
-
-			return ctx
-		}).
-		Assess("An invalid ephemeral container is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// get client
-			client, err := cfg.NewClient()
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// get the pod that was created in setup to attach an ephemeral container to it
-			pod := &v1.Pod{}
-			err = client.Resources(namespace).Get(ctx, "running-as-non-root-user-ephemeral", namespace, pod)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// define patch type
-			patchType := types.StrategicMergePatchType
-
-			// define patch data
-			patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "0"))
-
-			patch := k8s.Patch{patchType, patchData}
-
-			// patch the pod, this should FAIL!
-			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
-			if err == nil {
-				t.Fatal("ephemeral container with securityContext.runAsUser field set to 0 should be rejected")
-			}
-
-			return ctx
-		}).
-		Assess("A valid ephemeral container is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-			// get namespace
-			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-
-			// get client
-			client, err := cfg.NewClient()
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// get the pod that was created in setup to attach an ephemeral container to it
-			pod := &v1.Pod{}
-			err = client.Resources(namespace).Get(ctx, "running-as-non-root-user-ephemeral", namespace, pod)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// define patch type
-			patchType := types.StrategicMergePatchType
-
-			// define patch data
-			patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "100"))
-
-			patch := k8s.Patch{patchType, patchData}
-
-			// patch the pod
-			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			return ctx
-		})
+	func TestEphemeralContainers(t *testing.T) {
+	
+		f := features.New("Pods with ephemeral containers").
+			Setup(func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+				// get namespace
+				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+	
+				// create a pod that will be used for ephemeral container tests
+				err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, "ephemeral", namespace, "ephemeral", "100"))
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				// wait for the pod
+				time.Sleep(2 * time.Second)
+	
+				return ctx
+			}).
+			Assess("An invalid ephemeral container is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+				// get namespace
+				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+	
+				// get client
+				client, err := cfg.NewClient()
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				// get the pod that was created in setup to attach an ephemeral container to it
+				pod := &v1.Pod{}
+				err = client.Resources(namespace).Get(ctx, "running-as-non-root-user-ephemeral", namespace, pod)
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				// define patch type
+				patchType := types.StrategicMergePatchType
+	
+				// define patch data
+        patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "0"))
+	
+				patch := k8s.Patch{patchType, patchData}
+	
+				// patch the pod, this should FAIL!
+				err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+				if err == nil {
+					t.Fatal("ephemeral container with securityContext.runAsUser field set to 0 should be rejected")
+				}
+	
+				return ctx
+			}).
+			Assess("A valid ephemeral container is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+				// get namespace
+				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+	
+				// get client
+				client, err := cfg.NewClient()
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				// get the pod that was created in setup to attach an ephemeral container to it
+				pod := &v1.Pod{}
+				err = client.Resources(namespace).Get(ctx, "running-as-non-root-user-ephemeral", namespace, pod)
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				// define patch type
+				patchType := types.StrategicMergePatchType
+	
+				// define patch data
+        patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "100"))
+	
+				patch := k8s.Patch{patchType, patchData}
+	
+				// patch the pod
+				err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+				if err != nil {
+					t.Fatal(err)
+				}
+	
+				return ctx
+			})
 	_ = testEnv.Test(t, f.Feature())
 
 }
