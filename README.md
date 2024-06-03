@@ -5,8 +5,8 @@ and a **testing framework** that can be used to verify that admission policies a
 **The policies in the library can be installed with a few commands and can be enforced with namespace labels.**
 
 # Installing and using the library
-> **_NOTE:_** Validating Admission Policy is beta in 1.28+ and disabled by default in most Kubernetes distributions. Follow the
-> [official instructions](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/#before-you-begin)
+> **_NOTE:_** Validating Admission Policy is beta in 1.28+ and disabled by default in most Kubernetes distributions up
+> to 1.30 (in which it turned to GA and got enabled by default). Follow the [official instructions](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/#before-you-begin)
 > to enable it on your k8s cluster/distribution*
 
 Every CRD that is used for policy parameter has a name prefix of `VAPLib` and every resource that the library creates
@@ -19,7 +19,7 @@ Parameter CRDs, policies and policy bindings are available in separate yaml file
 It is possible to apply all policies, policy bindings and parameter CRDs available in the vap-library (this would not
 enforce anything without proper labels on the namespaces):
 ```
-export VAPRELEASE=v0.1.1
+export VAPRELEASE=v0.1.6
 kubectl apply -k https://github.com/vap-library/vap-library.git/release?ref=${VAPRELEASE}
 ```
 
@@ -37,12 +37,12 @@ Prerequisites:
 - Go v1.22.x
 - Docker (for Kind)
 
-To run all the tests: 
+To run all the tests (use -v for verbose output): 
 ```bash
-go test ./policies/...
+go test -p 2 ./policies/...
 ```
 
-To run tests for a single policy 
+To run tests for a single policy (use -v for verbose output)
 ```bash
 go test  ./policies/POLICYNAME/
 ```
