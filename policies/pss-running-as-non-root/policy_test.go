@@ -65,7 +65,7 @@ var containerOnlyDefaultYAML string = `
 apiVersion: v1
 kind: Pod
 metadata:
-  name: running-as-non-root-%s
+  name: running-as-non-root-only-default-%s
   namespace: %s
 spec:
   securityContext:
@@ -90,6 +90,29 @@ spec:
     securityContext:
       runAsNonRoot: %s
   - name: running-as-non-root-two-with-default-only-one-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+`
+
+var twoInitContainersWithDefaultOnlyOneYAML string = `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-running-as-non-root-two-with-default-only-one-%s
+  namespace: %s
+spec:
+  securityContext:
+    runAsNonRoot: %s
+  containers:
+  - name: running-as-non-root-two-with-default-only-one-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+    securityContext:
+      runAsNonRoot: %s
+  initContainers:
+  - name: init-running-as-non-root-two-with-default-only-one-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+    securityContext:
+      runAsNonRoot: %s
+  - name: init-running-as-non-root-two-with-default-only-one-%s
     image: public.ecr.aws/docker/library/busybox:1.36
 `
 
@@ -229,6 +252,35 @@ spec:
         image: public.ecr.aws/docker/library/busybox:1.36
 `
 
+var twoContainersDeploymentWithDefaultOnlyOneYAML string = `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-deployment-%s
+  namespace: %s
+  labels:
+    app: busybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      securityContext:
+        runAsNonRoot: %s
+      containers:
+      - name: running-as-non-root-%s
+        image: public.ecr.aws/docker/library/busybox:1.36
+        securityContext:
+          runAsNonRoot: %s
+      - name: running-as-non-root-2-%s
+        image: public.ecr.aws/docker/library/busybox:1.36
+`
+
 var initContainerDeploymentYAML string = `
 apiVersion: apps/v1
 kind: Deployment
@@ -316,6 +368,40 @@ spec:
         image: public.ecr.aws/docker/library/busybox:1.36
       initContainers:
       - name: init-running-as-non-root-%s
+        image: public.ecr.aws/docker/library/busybox:1.36
+`
+
+var twoInitContainersDeploymentWithDefaultOnlyOneYAML string = `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: init-busybox-deployment-%s
+  namespace: %s
+  labels:
+    app: busybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      securityContext:
+        runAsNonRoot: %s
+      containers:
+      - name: running-as-non-root-%s
+        image: public.ecr.aws/docker/library/busybox:1.36
+        securityContext:
+          runAsNonRoot: %s
+      initContainers:
+      - name: init-running-as-non-root-%s
+        image: public.ecr.aws/docker/library/busybox:1.36
+        securityContext:
+          runAsNonRoot: %s
+      - name: init-running-as-non-root-2-%s
         image: public.ecr.aws/docker/library/busybox:1.36
 `
 
@@ -1011,6 +1097,30 @@ spec:
           restartPolicy: OnFailure
 `
 
+var twoContainersCronJobWithDefaultOnlyOneYAML string = `
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: busybox-cronjob-%s
+  namespace: %s
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            runAsNonRoot: %s
+          containers:
+          - name: running-as-non-root-%s
+            image: public.ecr.aws/docker/library/busybox:1.36
+            securityContext:
+              runAsNonRoot: %s
+          - name: running-as-non-root-2-%s
+            image: public.ecr.aws/docker/library/busybox:1.36
+          restartPolicy: OnFailure
+`
+
 var initContainerCronJobYAML string = `
 apiVersion: batch/v1
 kind: CronJob
@@ -1082,6 +1192,35 @@ spec:
             image: public.ecr.aws/docker/library/busybox:1.36
           initContainers:
           - name: init-running-as-non-root-%s
+            image: public.ecr.aws/docker/library/busybox:1.36
+          restartPolicy: OnFailure
+`
+
+var twoInitContainersCronJobWithDefaultOnlyOneYAML string = `
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: init-busybox-cronjob-%s
+  namespace: %s
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            runAsNonRoot: %s
+          containers:
+          - name: running-as-non-root-%s
+            image: public.ecr.aws/docker/library/busybox:1.36
+            securityContext:
+              runAsNonRoot: %s
+          initContainers:
+          - name: init-running-as-non-root-%s
+            image: public.ecr.aws/docker/library/busybox:1.36
+            securityContext:
+              runAsNonRoot: %s
+          - name: init-running-as-non-root-2-%s
             image: public.ecr.aws/docker/library/busybox:1.36
           restartPolicy: OnFailure
 `
@@ -1289,6 +1428,26 @@ template:
     restartPolicy: Always
 `
 
+var twoContainersPodTemplateWithDefaultOnlyOneYAML string = `
+apiVersion: v1
+kind: PodTemplate
+metadata:
+  name: busybox-podtemplate-%s
+  namespace: %s
+template:
+  spec:
+    securityContext:
+      runAsNonRoot: %s
+    containers:
+    - name: running-as-non-root-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+      securityContext:
+        runAsNonRoot: %s
+    - name: running-as-non-root-2-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+    restartPolicy: Always
+`
+
 var initContainerPodTemplateYAML string = `
 apiVersion: v1
 kind: PodTemplate
@@ -1352,6 +1511,31 @@ template:
       image: public.ecr.aws/docker/library/busybox:1.36
 `
 
+var twoInitContainersPodTemplateWithDefaultOnlyOneYAML string = `
+apiVersion: v1
+kind: PodTemplate
+metadata:
+  name: init-busybox-podtemplate-%s
+  namespace: %s
+template:
+  spec:
+    securityContext:
+      runAsNonRoot: %s
+    containers:
+    - name: running-as-non-root-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+      securityContext:
+        runAsNonRoot: %s
+    restartPolicy: Always
+    initContainers:
+    - name: init-running-as-non-root-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+      securityContext:
+        runAsNonRoot: %s
+    - name: init-running-as-non-root-2-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+`
+
 // TEST DATA FOR PATCHING A POD TO ADD AN EPHEMERAL CONTAINER
 
 var containerEphemeralPatchYAML string = `
@@ -1370,6 +1554,69 @@ var containerEphemeralPatchYAML string = `
          "terminationMessagePolicy": "File",
          "tty": true
       }
+    ]
+  }
+}
+`
+
+var twoContainersEphemeralPatchYAML string = `
+{
+  "spec": {
+    "ephemeralContainers": [
+      {
+         "image": "public.ecr.aws/docker/library/busybox:1.36",
+         "name": "ephemeral",
+         "resources": {},
+         "securityContext": {
+           "runAsNonRoot": %s
+         },
+         "stdin": true,
+         "targetContainerName": "running-as-non-root-ephemeral",
+         "terminationMessagePolicy": "File",
+         "tty": true
+      },
+      {
+        "image": "public.ecr.aws/docker/library/busybox:1.36",
+        "name": "ephemeral-two",
+        "resources": {},
+        "securityContext": {
+          "runAsNonRoot": %s
+        },
+        "stdin": true,
+        "targetContainerName": "running-as-non-root-ephemeral",
+        "terminationMessagePolicy": "File",
+        "tty": true
+     }
+    ]
+  }
+}
+`
+
+var twoContainersEphemeralOneUnsetPatchYAML string = `
+{
+  "spec": {
+    "ephemeralContainers": [
+      {
+         "image": "public.ecr.aws/docker/library/busybox:1.36",
+         "name": "ephemeral",
+         "resources": {},
+         "securityContext": {
+           "runAsNonRoot": %s
+         },
+         "stdin": true,
+         "targetContainerName": "running-as-non-root-ephemeral",
+         "terminationMessagePolicy": "File",
+         "tty": true
+      },
+      {
+        "image": "public.ecr.aws/docker/library/busybox:1.36",
+        "name": "ephemeral-two",
+        "resources": {},
+        "stdin": true,
+        "targetContainerName": "running-as-non-root-ephemeral",
+        "terminationMessagePolicy": "File",
+        "tty": true
+     }
     ]
   }
 }
@@ -1498,6 +1745,18 @@ func TestRunAsNonRoot(t *testing.T) {
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerOnlyDefaultYAML, "success-only-default-false", namespace, "true", "success", "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a Pod with two initContainers as spec.runAsNonRoot set to true and container.runAsNonRoot is set to true for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoInitContainersWithDefaultOnlyOneYAML, "success", namespace, "true", "success-01", "true", "success-02", "true", "success-03"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1661,6 +1920,18 @@ func TestRunAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).
+		Assess("Successful deployment of a Deployment with two containers as spec.runAsNonRoot set to true and container.runAsNonRoot is set to true for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoContainersDeploymentWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "true", "success-01", "true", "success-02"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
 		Assess("Successful deployment of a Deployment with initContainer as runAsNonRoot is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1703,6 +1974,18 @@ func TestRunAsNonRoot(t *testing.T) {
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentOnlyDefaultYAML, "success-only-default-false", namespace, "true", "success", "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a Deployment with two initContainers as spec.runAsNonRoot set to true and container.runAsNonRoot is set to true for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoInitContainersDeploymentWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "true", "success-01", "true", "success-02", "true", "success-03"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2626,6 +2909,18 @@ func TestRunAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).
+		Assess("Successful deployment of a CronJob with two containers as spec.runAsNonRoot set to true and container.runAsNonRoot is set to true for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoContainersCronJobWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "true", "success-01", "true", "success-02"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
 		Assess("Successful deployment of a CronJob with initContainer as runAsNonRoot is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -2668,6 +2963,18 @@ func TestRunAsNonRoot(t *testing.T) {
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobOnlyDefaultYAML, "success-only-default-false", namespace, "true", "success", "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a CronJob with two initContainers as spec.runAsNonRoot set to true and container.runAsNonRoot is set to true for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoInitContainersCronJobWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "true", "success-01", "true", "success-02", "true", "success-03"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -3012,6 +3319,18 @@ func TestRunAsNonRoot(t *testing.T) {
 
 			return ctx
 		}).
+		Assess("Successful deployment of a PodTemplate with two containers as spec.runAsNonRoot set to true and container.runAsNonRoot is set to true for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoContainersPodTemplateWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "true", "success-01", "true", "success-02"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
 		Assess("Successful deployment of a PodTemplate with initContainer as runAsNonRoot is set to true", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -3054,6 +3373,18 @@ func TestRunAsNonRoot(t *testing.T) {
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateOnlyDefaultYAML, "success-only-default-false", namespace, "true", "success", "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a PodTemplate with two initContainers as spec.runAsNonRoot set to true and container.runAsNonRoot is set to true for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoInitContainersPodTemplateWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "true", "success-01", "true", "success-02", "true", "success-03"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -3167,8 +3498,17 @@ func TestEphemeralContainers(t *testing.T) {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
-			// create a pod that will be used for ephemeral container tests
+			// create a pod that will be used for certain ephemeral container tests
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, "ephemeral", namespace, "ephemeral", "true"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// wait for the pod
+			time.Sleep(2 * time.Second)
+
+			// create a pod with spec.securityContext.runAsNonRoot that will be used for certain ephemeral container tests
+			err = testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerOnlyDefaultYAML, "ephemeral", namespace, "true", "ephemeral"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -3233,6 +3573,72 @@ func TestEphemeralContainers(t *testing.T) {
 
 			// define patch data
 			patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "true"))
+
+			patch := k8s.Patch{patchType, patchData}
+
+			// patch the pod
+			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Two valid ephemeral containers are accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// get client
+			client, err := cfg.NewClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// get the pod that was created in setup to attach an ephemeral container to it
+			pod := &v1.Pod{}
+			err = client.Resources(namespace).Get(ctx, "running-as-non-root-ephemeral", namespace, pod)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// define patch type
+			patchType := types.StrategicMergePatchType
+
+			// define patch data
+			patchData := []byte(fmt.Sprintf(twoContainersEphemeralPatchYAML, "true", "true"))
+
+			patch := k8s.Patch{patchType, patchData}
+
+			// patch the pod
+			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Two ephemeral containers are accepted, where spec.runAsNonRoot set to true and container.runAsNonRoot is set to true for one ephemeral container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// get client
+			client, err := cfg.NewClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// get the pod that was created in setup to attach an ephemeral container to it
+			pod := &v1.Pod{}
+			err = client.Resources(namespace).Get(ctx, "running-as-non-root-only-default-ephemeral", namespace, pod)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// define patch type
+			patchType := types.StrategicMergePatchType
+
+			// define patch data
+			patchData := []byte(fmt.Sprintf(twoContainersEphemeralOneUnsetPatchYAML, "true"))
 
 			patch := k8s.Patch{patchType, patchData}
 
