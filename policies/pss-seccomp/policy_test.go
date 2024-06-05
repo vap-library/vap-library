@@ -67,6 +67,23 @@ spec:
     image: public.ecr.aws/docker/library/busybox:1.36
 `
 
+var containerOnlyDefaultWithOtherSecurityContextYAML string = `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: seccomp-%s
+  namespace: %s
+spec:
+  securityContext:
+    seccompProfile:
+      type: %s
+  containers:
+  - name: seccomp-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+    securityContext:
+      runAsNonRoot: false
+`
+
 var initContainerYAML string = `
 apiVersion: v1
 kind: Pod
@@ -308,6 +325,7 @@ spec:
       - name: init-seccomp-%s
         image: public.ecr.aws/docker/library/busybox:1.36
 `
+
 // TEST DATA FOR REPLICASET TESTS
 
 var containerRSYAML string = `
@@ -515,7 +533,6 @@ spec:
             type: %s
 `
 
-
 var containerDSWithDefaultYAML string = `
 apiVersion: apps/v1
 kind: DaemonSet
@@ -544,7 +561,6 @@ spec:
           seccompProfile:
             type: %s
 `
-
 
 var containerDSOnlyDefaultYAML string = `
 apiVersion: apps/v1
@@ -1495,6 +1511,18 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
+		Assess("Successful deployment of a Pod with container as container.seccompProfile.type is not defined, container.securityContext is defined for something else and spec.seccompProfile.type set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerOnlyDefaultWithOtherSecurityContextYAML, "success-only-default-with-other-rd", namespace, "RuntimeDefault", "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
 		Assess("Successful deployment of a Pod with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1573,6 +1601,18 @@ func TestSeccomp(t *testing.T) {
 
 			// this should FAIL!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "Unconfined", "rejected"))
+			if err == nil {
+				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
+			}
+
+			return ctx
+		}).
+		Assess("Rejected deployment of a Pod with container as container.seccompProfile.type is not defined, and spec.seccompProfile.type set to something else then the allowed values", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerOnlyDefaultYAML, "rejected-only-default-unconfined", namespace, "SomethingElseThanAllowed", "rejected"))
 			if err == nil {
 				t.Fatal("containers without securityContext.seccompProfile.type field set to RuntimeDefault or Localhost were accepted")
 			}
@@ -3207,94 +3247,94 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		})
-		_ = testEnv.Test(t, f.Feature())
+	_ = testEnv.Test(t, f.Feature())
 
-	}
-	
-	func TestEphemeralContainers(t *testing.T) {
-	
-		f := features.New("Pods with ephemeral containers").
-			Setup(func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-				// get namespace
-				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-	
-				// create a pod that will be used for ephemeral container tests
-				err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, "ephemeral", namespace, "ephemeral", "RuntimeDefault"))
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				// wait for the pod
-				time.Sleep(2 * time.Second)
-	
-				return ctx
-			}).
-			Assess("An invalid ephemeral container is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-				// get namespace
-				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-	
-				// get client
-				client, err := cfg.NewClient()
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				// get the pod that was created in setup to attach an ephemeral container to it
-				pod := &v1.Pod{}
-				err = client.Resources(namespace).Get(ctx, "seccomp-ephemeral", namespace, pod)
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				// define patch type
-				patchType := types.StrategicMergePatchType
-	
-				// define patch data
-        patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "Unconfined"))
+}
 
-				patch := k8s.Patch{patchType, patchData}
-	
-				// patch the pod, this should FAIL!
-				err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
-				if err == nil {
-					t.Fatal("ephemeral container without securityContext.seccompProfile.type field should be rejected")
-				}
-	
-				return ctx
-			}).
-			Assess("A valid ephemeral container is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
-				// get namespace
-				namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
-	
-				// get client
-				client, err := cfg.NewClient()
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				// get the pod that was created in setup to attach an ephemeral container to it
-				pod := &v1.Pod{}
-				err = client.Resources(namespace).Get(ctx, "seccomp-ephemeral", namespace, pod)
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				// define patch type
-				patchType := types.StrategicMergePatchType
-	
-				// define patch data
-        patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "RuntimeDefault"))
-	
-				patch := k8s.Patch{patchType, patchData}
-	
-				// patch the pod
-				err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
-				if err != nil {
-					t.Fatal(err)
-				}
-	
-				return ctx
-			})
+func TestEphemeralContainers(t *testing.T) {
+
+	f := features.New("Pods with ephemeral containers").
+		Setup(func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// create a pod that will be used for ephemeral container tests
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerYAML, "ephemeral", namespace, "ephemeral", "RuntimeDefault"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// wait for the pod
+			time.Sleep(2 * time.Second)
+
+			return ctx
+		}).
+		Assess("An invalid ephemeral container is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// get client
+			client, err := cfg.NewClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// get the pod that was created in setup to attach an ephemeral container to it
+			pod := &v1.Pod{}
+			err = client.Resources(namespace).Get(ctx, "seccomp-ephemeral", namespace, pod)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// define patch type
+			patchType := types.StrategicMergePatchType
+
+			// define patch data
+			patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "Unconfined"))
+
+			patch := k8s.Patch{patchType, patchData}
+
+			// patch the pod, this should FAIL!
+			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+			if err == nil {
+				t.Fatal("ephemeral container without securityContext.seccompProfile.type field should be rejected")
+			}
+
+			return ctx
+		}).
+		Assess("A valid ephemeral container is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// get client
+			client, err := cfg.NewClient()
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// get the pod that was created in setup to attach an ephemeral container to it
+			pod := &v1.Pod{}
+			err = client.Resources(namespace).Get(ctx, "seccomp-ephemeral", namespace, pod)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// define patch type
+			patchType := types.StrategicMergePatchType
+
+			// define patch data
+			patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "RuntimeDefault"))
+
+			patch := k8s.Patch{patchType, patchData}
+
+			// patch the pod
+			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		})
 	_ = testEnv.Test(t, f.Feature())
 
 }
