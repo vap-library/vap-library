@@ -22,6 +22,8 @@ yq '... comments=""' -i vendoring/gateway-api/experimental-install.yaml
 ```
 
 # rootless podman issues with testing
+More info in the issue: https://github.com/containers/podman/issues/16412
+
 Verify that you have all cgroups controllers
 ```
 $ podman info --format json|jq '.host.cgroupControllers'
@@ -42,8 +44,13 @@ Delegate=yes
 $ sudo systemctl daemon-reload
 ```
 
-If still not then create a bash with systemd-run and run the tests from this bash:
+If still not then test if enforcing a new `systemd-run` would solve it:
+```bash
+systemd-run --scope --user podman info --format "{{ .Host.CgroupControllers }}"
 ```
-$ systemd-run --scope --user bash
-Running scope as unit: run-rd115f5ba51634ba898cf07275d493fe5.scope
+
+If not then just start a new session through SSH:
+```bash
+ssh localhost
+podman info --format json|jq '.host.cgroupControllers'
 ```
