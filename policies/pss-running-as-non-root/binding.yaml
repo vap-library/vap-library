@@ -1,0 +1,31 @@
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: pss-running-as-non-root-deny.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/pss-running-as-non-root: deny
+    objectSelector: {}
+  policyName: pss-running-as-non-root.vap-library.com
+  validationActions:
+  - Deny
+  - Audit
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: pss-running-as-non-root-warn.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/pss-running-as-non-root: warn
+    objectSelector: {}
+  policyName: pss-running-as-non-root.vap-library.com
+  validationActions:
+    - Warn

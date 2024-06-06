@@ -1,0 +1,46 @@
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "pss-running-as-non-root.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["pods","replicationcontrollers","podtemplates", "pods/ephemeralcontainers"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations: 
+    - expression: "object.kind != 'Pod' || 
+      (!has(object.spec.initContainers) || (has(object.spec.initContainers) && (object.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.securityContext) && has(object.spec.securityContext.runAsNonRoot) && object.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (!has(object.spec.ephemeralContainers) || (has(object.spec.ephemeralContainers) && (object.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.securityContext) && has(object.spec.securityContext.runAsNonRoot) && object.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (object.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.securityContext) && has(object.spec.securityContext.runAsNonRoot) && object.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true)))"
+      message: "securityContext.runAsNonRoot must be set to true on any containers, initContainers, and ephemeralContainers in Pods"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job','ReplicationController'].all(kind, object.kind != kind) ||
+      (!has(object.spec.template.spec.initContainers) || (has(object.spec.template.spec.initContainers) && (object.spec.template.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.runAsNonRoot) && object.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (!has(object.spec.template.spec.ephemeralContainers) || (has(object.spec.template.spec.ephemeralContainers) && (object.spec.template.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.runAsNonRoot) && object.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (object.spec.template.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.runAsNonRoot) && object.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true)))"
+      message: "securityContext.runAsNonRoot must be set to true on containers in Workloads"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' || 
+      (!has(object.spec.jobTemplate.spec.template.spec.initContainers) || (has(object.spec.jobTemplate.spec.template.spec.initContainers) && (object.spec.jobTemplate.spec.template.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot) && object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (!has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) || (has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) && (object.spec.jobTemplate.spec.template.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot) && object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (object.spec.jobTemplate.spec.template.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot) && object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true)))"
+      message: "securityContext.runAsNonRoot must be set to true on containers in CronJobs"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      (!has(object.template.spec.initContainers) || (has(object.template.spec.initContainers) && (object.template.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.template.spec.securityContext) && has(object.template.spec.securityContext.runAsNonRoot) && object.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (!has(object.template.spec.ephemeralContainers) || (has(object.template.spec.ephemeralContainers) && (object.template.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.template.spec.securityContext) && has(object.template.spec.securityContext.runAsNonRoot) && object.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (object.template.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.template.spec.securityContext) && has(object.template.spec.securityContext.runAsNonRoot) && object.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) &&  container.securityContext.runAsNonRoot == true)))"
+      message: "securityContext.runAsNonRoot must be set to true on containers in PodTemplates"
+      reason: Invalid
