@@ -2,8 +2,14 @@
 This Validating Admission Policy ensures that containers are run as non-root users.
 This policy is part of the Pod Security Standards provided by Kubernetes, found here - https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted.
 
+# Policy logic
+This policy evaluates securityContext.runAsNonRoot within spec (Pod-level), `spec.containers[\*]`,
+`spec.initContainers[\*]` and `spec.ephemeralContainers[\*]`. For the API call to be accepted then for each and every
+container: `securityContext.runAsNonRoot` must be set to true. Note that the value defined at the container level takes
+precedence over that defined at Pod-level.
+
 # Parameter used by the policy
-This policy evaluates securityContext.runAsNonRoot within spec (Pod-level), spec.containers[\*], spec.initContainers[\*] and spec.ephemeralContainers[\*]. For the API call to be accepted then for each and every container: securityContext.runAsNonRoot must be set to true. Note that the value defined at the container level takes precedence over that defined at Pod-level.
+This policy does not use parameters.
 
 # Examples
 ### Pass
