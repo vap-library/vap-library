@@ -84,6 +84,26 @@ spec:
       runAsNonRoot: false
 `
 
+var twoContainersWithDefaultOnlyOneYAML string = `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: seccomp-two-with-default-only-one-%s
+  namespace: %s
+spec:
+  securityContext:
+    seccompProfile:
+      type: %s
+  containers:
+  - name: seccomp-two-with-default-only-one-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+    securityContext:
+      seccompProfile:
+        type: %s
+  - name: seccomp-two-with-default-only-one-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+`
+
 var initContainerYAML string = `
 apiVersion: v1
 kind: Pod
@@ -144,6 +164,32 @@ spec:
     image: public.ecr.aws/docker/library/busybox:1.36
   initContainers:
   - name: init-seccomp-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+`
+
+var twoInitContainersWithDefaultOnlyOneYAML string = `
+apiVersion: v1
+kind: Pod
+metadata:
+  name: init-seccomp-two-with-default-only-one-%s
+  namespace: %s
+spec:
+  securityContext:
+    seccompProfile:
+      type: %s
+  containers:
+  - name: seccomp-two-with-default-only-one-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+    securityContext:
+      seccompProfile:
+        type: %s
+  initContainers:
+  - name: init-seccomp-two-with-default-only-one-%s
+    image: public.ecr.aws/docker/library/busybox:1.36
+    securityContext:
+      seccompProfile:
+        type: %s
+  - name: init-seccomp-two-with-default-only-one-%s
     image: public.ecr.aws/docker/library/busybox:1.36
 `
 
@@ -226,6 +272,37 @@ spec:
         seccompProfile:
           type: %s
       containers:
+      - name: seccomp-%s
+        image: public.ecr.aws/docker/library/busybox:1.36
+`
+
+var twoContainersDeploymentWithDefaultOnlyOneYAML string = `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-deployment-%s
+  namespace: %s
+  labels:
+    app: busybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      securityContext:
+        seccompProfile:
+          type: %s
+      containers:
+      - name: seccomp-%s
+        image: public.ecr.aws/docker/library/busybox:1.36
+        securityContext:
+          seccompProfile:
+            type: %s
       - name: seccomp-%s
         image: public.ecr.aws/docker/library/busybox:1.36
 `
@@ -322,6 +399,43 @@ spec:
       - name: seccomp-%s
         image: public.ecr.aws/docker/library/busybox:1.36
       initContainers:
+      - name: init-seccomp-%s
+        image: public.ecr.aws/docker/library/busybox:1.36
+`
+
+var twoInitContainersDeploymentWithDefaultOnlyOneYAML string = `
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: init-busybox-deployment-%s
+  namespace: %s
+  labels:
+    app: busybox
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      securityContext:
+        seccompProfile:
+          type: %s
+      containers:
+      - name: seccomp-%s
+        image: public.ecr.aws/docker/library/busybox:1.36
+        securityContext:
+          seccompProfile:
+            type: %s
+      initContainers:
+      - name: init-seccomp-%s
+        image: public.ecr.aws/docker/library/busybox:1.36
+        securityContext:
+          seccompProfile:
+            type: %s
       - name: init-seccomp-%s
         image: public.ecr.aws/docker/library/busybox:1.36
 `
@@ -1062,6 +1176,32 @@ spec:
           restartPolicy: OnFailure
 `
 
+var twoContainersCronJobWithDefaultOnlyOneYAML string = `
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: busybox-cronjob-%s
+  namespace: %s
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            seccompProfile:
+              type: %s
+          containers:
+          - name: seccomp-%s
+            image: public.ecr.aws/docker/library/busybox:1.36
+            securityContext:
+              seccompProfile:
+                type: %s
+          - name: seccomp-%s
+            image: public.ecr.aws/docker/library/busybox:1.36
+          restartPolicy: OnFailure
+`
+
 var initContainerCronJobYAML string = `
 apiVersion: batch/v1
 kind: CronJob
@@ -1138,6 +1278,38 @@ spec:
           - name: seccomp-%s
             image: public.ecr.aws/docker/library/busybox:1.36
           initContainers:
+          - name: init-seccomp-%s
+            image: public.ecr.aws/docker/library/busybox:1.36
+          restartPolicy: OnFailure
+`
+
+var twoInitContainersCronJobWithDefaultOnlyOneYAML string = `
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: init-busybox-cronjob-%s
+  namespace: %s
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          securityContext:
+            seccompProfile:
+              type: %s
+          containers:
+          - name: seccomp-%s
+            image: public.ecr.aws/docker/library/busybox:1.36
+            securityContext:
+              seccompProfile:
+                type: %s
+          initContainers:
+          - name: init-seccomp-%s
+            image: public.ecr.aws/docker/library/busybox:1.36
+            securityContext:
+              seccompProfile:
+                type: %s
           - name: init-seccomp-%s
             image: public.ecr.aws/docker/library/busybox:1.36
           restartPolicy: OnFailure
@@ -1360,6 +1532,28 @@ template:
     restartPolicy: Always
 `
 
+var twoContainersPodTemplateWithDefaultOnlyOneYAML string = `
+apiVersion: v1
+kind: PodTemplate
+metadata:
+  name: busybox-podtemplate-%s
+  namespace: %s
+template:
+  spec:
+    securityContext:
+      seccompProfile:
+          type: %s
+    containers:
+    - name: seccomp-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+      securityContext:
+        seccompProfile:
+          type: %s
+    - name: seccomp-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+    restartPolicy: Always
+`
+
 var initContainerPodTemplateYAML string = `
 apiVersion: v1
 kind: PodTemplate
@@ -1425,6 +1619,34 @@ template:
       image: public.ecr.aws/docker/library/busybox:1.36
     restartPolicy: Always
     initContainers:
+    - name: init-seccomp-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+`
+
+var twoInitContainersPodTemplateWithDefaultOnlyOneYAML string = `
+apiVersion: v1
+kind: PodTemplate
+metadata:
+  name: init-busybox-podtemplate-%s
+  namespace: %s
+template:
+  spec:
+    securityContext:
+      seccompProfile:
+        type: %s
+    containers:
+    - name: seccomp-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+      securityContext:
+        seccompProfile:
+          type: %s
+    restartPolicy: Always
+    initContainers:
+    - name: init-seccomp-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+      securityContext:
+        seccompProfile:
+          type: %s
     - name: init-seccomp-%s
       image: public.ecr.aws/docker/library/busybox:1.36
 `
@@ -1523,6 +1745,18 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
+		Assess("Successful deployment of a Pod with two containers as spec.seccompProfile.type set to RuntimeDefault and container.seccompProfile.type is set to RuntimeDefault for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoContainersWithDefaultOnlyOneYAML, "success", namespace, "RuntimeDefault", "success-01", "RuntimeDefault", "success-02"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
 		Assess("Successful deployment of a Pod with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1553,6 +1787,18 @@ func TestSeccomp(t *testing.T) {
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a Pod with two initContainers as spec.seccompProfile.type set to RuntimeDefault and container.seccompProfile.type is set to RuntimeDefault for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoInitContainersWithDefaultOnlyOneYAML, "success", namespace, "RuntimeDefault", "success-01", "RuntimeDefault", "success-02", "RuntimeDefault", "success-03"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -1728,6 +1974,18 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
+		Assess("Successful deployment of a Deployment with two containers as spec.seccompProfile.type set to RuntimeDefault and container.seccompProfile.type is set to RuntimeDefault for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoContainersDeploymentWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "RuntimeDefault", "success-01", "RuntimeDefault", "success-02"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
 		Assess("Successful deployment of a Deployment with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -1758,6 +2016,18 @@ func TestSeccomp(t *testing.T) {
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerDeploymentOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a Deployment with two initContainers as spec.seccompProfile.type set to RuntimeDefault and container.seccompProfile.type is set to RuntimeDefault for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoInitContainersDeploymentWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "RuntimeDefault", "success-01", "RuntimeDefault", "success-02", "RuntimeDefault", "success-03"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2693,6 +2963,18 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
+		Assess("Successful deployment of a CronJob with two containers as spec.seccompProfile.type set to RuntimeDefault and container.seccompProfile.type is set to RuntimeDefault for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoContainersCronJobWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "RuntimeDefault", "success-01", "RuntimeDefault", "success-02"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
 		Assess("Successful deployment of a CronJob with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -2723,6 +3005,18 @@ func TestSeccomp(t *testing.T) {
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerCronJobOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a CronJob with two initContainers as spec.runAsNonRoot set to RuntimeDefault and container.runAsNonRoot is set to RuntimeDefault for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoInitContainersCronJobWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "RuntimeDefault", "success-01", "RuntimeDefault", "success-02", "RuntimeDefault", "success-03"))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -3091,6 +3385,18 @@ func TestSeccomp(t *testing.T) {
 
 			return ctx
 		}).
+		Assess("Successful deployment of a PodTemplate with two containers as spec.seccompProfile.type set to RuntimeDefault and container.seccompProfile.type is set to RuntimeDefault for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoContainersPodTemplateWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "RuntimeDefault", "success-01", "RuntimeDefault", "success-02"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
 		Assess("Successful deployment of a PodTemplate with initContainer as seccompProfile.type is set to RuntimeDefault or Localhost", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
@@ -3121,6 +3427,18 @@ func TestSeccomp(t *testing.T) {
 
 			// this should PASS!
 			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateOnlyDefaultYAML, "success-only-default-rd", namespace, "RuntimeDefault", "success", "success"))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("Successful deployment of a PodTemplate with two initContainers as spec.seccompProfile.type set to RuntimeDefault and container.seccompProfile.type is set to RuntimeDefault for one container and unset for the other", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(twoInitContainersPodTemplateWithDefaultOnlyOneYAML, "success-two-container-default", namespace, "RuntimeDefault", "success-01", "RuntimeDefault", "success-02", "RuntimeDefault", "success-03"))
 			if err != nil {
 				t.Fatal(err)
 			}
