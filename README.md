@@ -30,6 +30,20 @@ applying the relevant label to the namespace with a `deny` value (to warn them u
 vap-library.com/POLICYNAME: deny
 ```
 
+# Policies
+| Policy                       | Description                                                                                                                                                                                                                                                               | Parameter                                    |
+|------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------------------------|
+| pss-capabilities             | Enforces container capabilities as outlined by the [Pod Security Standard restricted profile](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).                                                                                           | N/A                                          |
+| pss-privilege-escalation     | Ensures that containers explicitly disallow privilege escalation as outlined by the [Pod Security Standard restricted profile](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).                                                          | N/A                                          |
+| pss-running-as-non-root      | Ensures that containers are run as non-root users as outlined by the [Pod Security Standard restricted profile](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).                                                                         | N/A                                          |
+| pss-running-as-non-root-user | Ensures that containers do not set to run as the root user **in the k8s manifest** as outlined by the [Pod Security Standard restricted profile](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).                                        | N/A                                          |
+| pss-seccomp                  | Ensures that containers explicitly set the Seccomp profile to one of the allowed values (`RuntimeDefault` or `Localhost`) as outlined by the [Pod Security Standard restricted profile](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted). | N/A                                          |
+| pss-volume-types             | Ensures that any defined volumes can only be of one of the allowed types as outlined by the [Pod Security Standard restricted profile](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).                                                  | N/A                                          |
+| service-type                 | Ensures that `Service` resources can only use types that are listed in the `spec.allowedTypes` field of the parameter.                                                                                                                                                    | `VAPLibServiceTypeParam` (Mandatory)         |
+| httproute-hostnames          | Ensures that `HTTPRoute` resources define the `spec.hostnames` field which can only use hostnames that are listed in the `spec.allowedHostnames` field of the parameter.                                                                                                  | `VAPLibHTTPRouteHostnamesParam` (Mandatory)  |
+| kustomization-fields         | Ensures that specific fields of [Flux Kustomization](https://fluxcd.io/flux/components/kustomize/kustomizations/) resources match defined values from parameter.                                                                                                          | `VAPLibKustomizationFieldsParam` (Mandatory) |
+| helmrelease-fields           | Ensures that specific fields of [HelmRelease](https://fluxcd.io/flux/components/helm/helmreleases/)resources match defined values from parameter.                                                                                                                         | `VAPLibHelmReleaseFieldsParam` (Mandatory)   |
+
 # Testing of the policies
 A "testing framework" has been developed (based on Kubernetes e2e) to support testing of admission policies.
 
@@ -48,6 +62,7 @@ go test  ./policies/POLICYNAME/
 ```
 
 # Sources that can help for contribution
-* A great repo to review and learn CEL: [ARMOS's](https://www.armosec.io/) [cel-admission-library](https://github.com/kubescape/cel-admission-library/tree/main)
 * [Official VAP documentation](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/)
 * [Kubernetes CEL documenation](https://kubernetes.io/docs/reference/using-api/cel/)
+* A repo that inspired us: [ARMOS's](https://www.armosec.io/) [cel-admission-library](https://github.com/kubescape/cel-admission-library/tree/main)
+
