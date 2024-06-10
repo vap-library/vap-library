@@ -1,4 +1,4 @@
-package service_enforce_type
+package service_type
 
 import (
 	"context"
@@ -15,9 +15,9 @@ import (
 
 var testParameterYAML string = `
 apiVersion: vap-library.com/v1beta1
-kind: VAPLibServiceEnforceTypeParam
+kind: VAPLibServiceTypeParam
 metadata:
-  name: service-enforce-type.vap-library.com
+  name: service-type.vap-library.com
   namespace: %s
 spec:
   allowedTypes:
@@ -27,9 +27,9 @@ spec:
 
 var testParameterNoCIPYAML string = `
 apiVersion: vap-library.com/v1beta1
-kind: VAPLibServiceEnforceTypeParam
+kind: VAPLibServiceTypeParam
 metadata:
-  name: service-enforce-type.vap-library.com
+  name: service-type.vap-library.com
   namespace: %s
 spec:
   allowedTypes:
@@ -86,7 +86,7 @@ spec:
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
-	var namespaceLabels = map[string]string{"vap-library.com/service-enforce-type": "deny"}
+	var namespaceLabels = map[string]string{"vap-library.com/service-type": "deny"}
 
 	var err error
 	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil)

@@ -2,12 +2,12 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
 metadata:
-  name: "service-enforce-type.vap-library.com"
+  name: "service-type.vap-library.com"
 spec:
   failurePolicy: Fail
   paramKind:
     apiVersion: vap-library.com/v1beta1
-    kind: VAPLibServiceEnforceTypeParam
+    kind: VAPLibServiceTypeParam
   matchConstraints:
     resourceRules:
     - apiGroups:   [""]

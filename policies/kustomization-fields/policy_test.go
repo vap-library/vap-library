@@ -1,4 +1,4 @@
-package kustomization_enforce_fields
+package kustomization_fields
 
 import (
 	"context"
@@ -16,9 +16,9 @@ import (
 
 var testParameterFullYAML string = `
 apiVersion: vap-library.com/v1beta1
-kind: VAPLibKustomizationEnforceFieldsParam
+kind: VAPLibKustomizationFieldsParam
 metadata:
-  name: kustomization-enforce-fields.vap-library.com
+  name: kustomization-fields.vap-library.com
   namespace: %s
 spec:
   targetNamespace: app
@@ -61,9 +61,9 @@ spec:
 
 var testParameterSingleYAML string = `
 apiVersion: vap-library.com/v1beta1
-kind: VAPLibKustomizationEnforceFieldsParam
+kind: VAPLibKustomizationFieldsParam
 metadata:
-  name: kustomization-enforce-fields.vap-library.com
+  name: kustomization-fields.vap-library.com
   namespace: %s
 spec:
   serviceAccountName: deployer
@@ -88,7 +88,7 @@ spec:
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
-	var namespaceLabels = map[string]string{"vap-library.com/kustomization-enforce-fields": "deny"}
+	var namespaceLabels = map[string]string{"vap-library.com/kustomization-fields": "deny"}
 	var extraResourcesFromDir = map[string]string{"../../vendoring/flux-kustomize-controller/": "*.yaml"}
 
 	var err error

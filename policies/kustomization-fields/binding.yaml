@@ -2,18 +2,18 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
-  name: helmrelease-enforce-fields-deny.vap-library.com
+  name: kustomization-fields-deny.vap-library.com
 spec:
   matchResources:
     matchPolicy: Equivalent
     namespaceSelector:
       matchLabels:
-        vap-library.com/helmrelease-enforce-fields: deny
+        vap-library.com/kustomization-fields: deny
     objectSelector: {}
   paramRef:
-    name: helmrelease-enforce-fields.vap-library.com
+    name: kustomization-fields.vap-library.com
     parameterNotFoundAction: Deny
-  policyName: helmrelease-enforce-fields.vap-library.com
+  policyName: kustomization-fields.vap-library.com
   validationActions:
   - Deny
   - Audit
@@ -21,17 +21,17 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
-  name: helmrelease-enforce-fields-warn.vap-library.com
+  name: kustomization-fields-warn.vap-library.com
 spec:
   matchResources:
     matchPolicy: Equivalent
     namespaceSelector:
       matchLabels:
-        vap-library.com/helmrelease-enforce-fields: warn
+        vap-library.com/kustomization-fields: warn
     objectSelector: {}
   paramRef:
-    name: helmrelease-enforce-fields.vap-library.com
+    name: kustomization-fields.vap-library.com
     parameterNotFoundAction: Deny
-  policyName: helmrelease-enforce-fields.vap-library.com
+  policyName: kustomization-fields.vap-library.com
   validationActions:
     - Warn

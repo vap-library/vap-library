@@ -4,13 +4,13 @@ the `spec.allowedHostnames` list of the parameter custom resource. When there is
 denys.
 
 # Parameter used by the policy
-The policy is using a mandatory custom resource (CR) kind called `VAPLibHTTPRouteEnforceHostnamesParam`. The CR has to
+The policy is using a mandatory custom resource (CR) kind called `VAPLibHTTPRouteHostnamesParam`. The CR has to
 list the allowed hostnames in an array of strings field called `spec.allowedHostnames`.
 
 # Example parameter
 ```
 apiVersion: vap-library.com/v1beta1
-kind: VAPLibHTTPRouteEnforceHostnamesParam
+kind: VAPLibHTTPRouteHostnamesParam
 metadata:
   name: example
   namespace: example

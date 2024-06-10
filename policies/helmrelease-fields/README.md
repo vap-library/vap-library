@@ -5,12 +5,12 @@ resources based on defined values in a parameter.
 When there is no parameter custom resource the policy denys.
 
 # Parameter used by the policy
-The policy is using a mandatory custom resource (CR) kind called `VAPLibHelmReleaseEnforceFieldsParam`.
+The policy is using a mandatory custom resource (CR) kind called `VAPLibHelmReleaseFieldsParam`.
 
 # Example parameter
 ```
 apiVersion: vap-library.com/v1beta1
-kind: VAPLibHelmReleaseEnforceFieldsParam
+kind: VAPLibHelmReleaseFieldsParam
 metadata:
   name: example
   namespace: example

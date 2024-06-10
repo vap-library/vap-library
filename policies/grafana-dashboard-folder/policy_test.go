@@ -1,4 +1,4 @@
-package grafana_enforce_dashboard_folder
+package grafana_dashboard_folder
 
 import (
 	"context"
@@ -53,7 +53,7 @@ data:
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
-	var namespaceLabels = map[string]string{"vap-library.com/grafana-enforce-dashboard-folder": "deny"}
+	var namespaceLabels = map[string]string{"vap-library.com/grafana-dashboard-folder": "deny"}
 
 	var err error
 	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil)

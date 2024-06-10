@@ -1,4 +1,4 @@
-package helmrelease_enforce_fields
+package helmrelease_fields
 
 import (
 	"context"
@@ -16,9 +16,9 @@ import (
 
 var testParameterFullYAML string = `
 apiVersion: vap-library.com/v1beta1
-kind: VAPLibHelmReleaseEnforceFieldsParam
+kind: VAPLibHelmReleaseFieldsParam
 metadata:
-  name: helmrelease-enforce-fields.vap-library.com
+  name: helmrelease-fields.vap-library.com
   namespace: %s
 spec:
   targetNamespace: app
@@ -67,9 +67,9 @@ spec:
 
 var testParameterSingleYAML string = `
 apiVersion: vap-library.com/v1beta1
-kind: VAPLibHelmReleaseEnforceFieldsParam
+kind: VAPLibHelmReleaseFieldsParam
 metadata:
-  name: helmrelease-enforce-fields.vap-library.com
+  name: helmrelease-fields.vap-library.com
   namespace: %s
 spec:
   serviceAccountName: deployer
@@ -97,7 +97,7 @@ spec:
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
-	var namespaceLabels = map[string]string{"vap-library.com/helmrelease-enforce-fields": "deny"}
+	var namespaceLabels = map[string]string{"vap-library.com/helmrelease-fields": "deny"}
 	var extraResourcesFromDir = map[string]string{"../../vendoring/flux-helm-controller/": "*.yaml"}
 
 	var err error

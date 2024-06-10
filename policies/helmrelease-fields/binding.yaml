@@ -2,18 +2,18 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
-  name: httproute-enforce-hostnames-deny.vap-library.com
+  name: helmrelease-fields-deny.vap-library.com
 spec:
   matchResources:
     matchPolicy: Equivalent
     namespaceSelector:
       matchLabels:
-        vap-library.com/httproute-enforce-hostnames: deny
+        vap-library.com/helmrelease-fields: deny
     objectSelector: {}
   paramRef:
-    name: httproute-enforce-hostnames.vap-library.com
+    name: helmrelease-fields.vap-library.com
     parameterNotFoundAction: Deny
-  policyName: httproute-enforce-hostnames.vap-library.com
+  policyName: helmrelease-fields.vap-library.com
   validationActions:
   - Deny
   - Audit
@@ -21,17 +21,17 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
-  name: httproute-enforce-hostnames-warn.vap-library.com
+  name: helmrelease-fields-warn.vap-library.com
 spec:
   matchResources:
     matchPolicy: Equivalent
     namespaceSelector:
       matchLabels:
-        vap-library.com/httproute-enforce-hostnames: warn
+        vap-library.com/helmrelease-fields: warn
     objectSelector: {}
   paramRef:
-    name: httproute-enforce-hostnames.vap-library.com
+    name: helmrelease-fields.vap-library.com
     parameterNotFoundAction: Deny
-  policyName: httproute-enforce-hostnames.vap-library.com
+  policyName: helmrelease-fields.vap-library.com
   validationActions:
     - Warn

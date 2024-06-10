@@ -2,18 +2,18 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
 metadata:
-  name: "kustomization-enforce-fields.vap-library.com"
+  name: "helmrelease-fields.vap-library.com"
 spec:
   failurePolicy: Fail
   paramKind:
     apiVersion: vap-library.com/v1beta1
-    kind: VAPLibKustomizationEnforceFieldsParam
+    kind: VAPLibHelmReleaseFieldsParam
   matchConstraints:
     resourceRules:
-    - apiGroups:   ["kustomize.toolkit.fluxcd.io"]
+    - apiGroups:   ["helm.toolkit.fluxcd.io"]
       apiVersions: ["*"]
       operations:  ["CREATE", "UPDATE"]
-      resources:   ["kustomizations"]
+      resources:   ["helmreleases"]
   validations:
     - expression: >
         !(has(params.spec.targetNamespace)) ||
