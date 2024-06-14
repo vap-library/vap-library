@@ -15,9 +15,9 @@ import (
 
 var testParameterYAML string = `
 apiVersion: vap-library.com/v1beta1
-kind: VAPLibHTTPRouteHostnamesParam
+kind: VAPLibHTTPRouteFieldsParam
 metadata:
-  name: httproute-hostnames.vap-library.com
+  name: httproute-fields.vap-library.com
   namespace: %s
 spec:
   allowedHostnames:
@@ -65,7 +65,7 @@ spec:
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
-	var namespaceLabels = map[string]string{"vap-library.com/httproute-hostnames": "deny"}
+	var namespaceLabels = map[string]string{"vap-library.com/httproute-fields": "deny"}
 	var extraResourcesFromDir = map[string]string{"../../vendoring/gateway-api/": "*.yaml"}
 
 	var err error

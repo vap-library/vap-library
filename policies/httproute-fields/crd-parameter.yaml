@@ -1,0 +1,86 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: vaplibhttproutefieldsparams.vap-library.com
+spec:
+  group: vap-library.com
+  versions:
+    - name: v1beta1
+      additionalPrinterColumns:
+      - jsonPath: .spec.allowedHostnames
+        name: Hostnames
+        type: string
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                allowedHostnames:
+                  description: "allowedHostnames defines a set of hostnames that are allowed
+                    to be used in the HTTPRoute manifest."
+                  minItems: 1
+                  type: array
+                  items:
+                    description: "See Hostnames in the official Gateway API HTTPRoute CRD"
+                    maxLength: 253
+                    minLength: 1
+                    pattern: ^(\*\.)?[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+                    type: string
+                allowedParentRefs:
+                  description: "allowedParentRefs defines a set of parent references that
+                    are allowed to be used in the HTTPRoute manifests."
+                  minItems: 1
+                  items:
+                    description: "See ParentRefs in the official Gateway API HTTPRoute CRD"
+                    properties:
+                      group:
+                        default: gateway.networking.k8s.io
+                        description: "See properties.group in the official Gateway API HTTPRoute CRD"
+                        maxLength: 253
+                        pattern: ^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+                        type: string
+                      kind:
+                        default: Gateway
+                        description: "See properties.kind in the official Gateway API HTTPRoute CRD"
+                        maxLength: 63
+                        minLength: 1
+                        pattern: ^[a-zA-Z]([-a-zA-Z0-9]*[a-zA-Z0-9])?$
+                        type: string
+                      name:
+                        description: "See properties.name in the official Gateway API HTTPRoute CRD"
+                        maxLength: 253
+                        minLength: 1
+                        type: string
+                      namespace:
+                        description: "See properties.namespace in the official Gateway API HTTPRoute CRD"
+                        maxLength: 63
+                        minLength: 1
+                        pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                        type: string
+                      port:
+                        description: "See properties.port in the official Gateway API HTTPRoute CRD"
+                        format: int32
+                        maximum: 65535
+                        minimum: 1
+                        type: integer
+                      sectionName:
+                        description: "See properties.sectionName in the official Gateway API HTTPRoute CRD"
+                        maxLength: 253
+                        minLength: 1
+                        pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+                        type: string
+                    required:
+                      - name
+                    type: object
+                  maxItems: 32
+                  type: array
+  scope: Namespaced
+  names:
+    plural: vaplibhttproutefieldsparams
+    singular: vaplibhttproutefieldsparam
+    kind: VAPLibHTTPRouteFieldsParam
