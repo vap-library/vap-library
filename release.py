@@ -85,14 +85,16 @@ class Release:
             pass
     
         for subdirectory, details in self.__config.items():
-            # Add the requested policy
-            self.__append_policy(subdirectory)
-            bindings = details.get('bindings', {})
-            # Generate the requested bindings
-            if bindings:
-                self.__append_bindings(subdirectory, bindings)
-            # Add CRDs for the policy if they exist
-            self.__append_crds(subdirectory)
+            # If enabled:true is present we process the entry, else we skip it
+            if details.get('enabled', False) == True:
+                # Add the requested policy
+                self.__append_policy(subdirectory)
+                bindings = details.get('bindings', {})
+                # Generate the requested bindings
+                if bindings:
+                    self.__append_bindings(subdirectory, bindings)
+                # Add CRDs for the policy if they exist
+                self.__append_crds(subdirectory)
 
 
 def main(config_path):
