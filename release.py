@@ -42,7 +42,7 @@ class Release:
                 'matchResources': {
                     'matchPolicy': 'Equivalent',
                     'namespaceSelector': {
-                        'matchLabels': {'vap-library.com/pss-seccomp': actions[0]}
+                        'matchLabels': {f'vap-library.com/{policy_name}': actions[0]}
                     },
                 'objectSelector': {}
             },
