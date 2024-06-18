@@ -9,7 +9,7 @@ pss-privilege-escalation:
         validationActions:
           - Warn
 pss-running-as-non-root:
-  enabled: true
+  enabled: false
   bindings:
     - pss-running-as-non-root-deny.vap-library.com:
         validationActions:
