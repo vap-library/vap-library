@@ -13,7 +13,8 @@ import (
 	"vap-library/testutils"
 )
 
-var testParameterYAML string = `
+// Variables for hostname tests
+var testParameterHostnameYAML string = `
 apiVersion: vap-library.com/v1beta1
 kind: VAPLibHTTPRouteFieldsParam
 metadata:
@@ -62,6 +63,123 @@ spec:
   - name: dummy
 `
 
+// Variables for parentRef tests
+var testParameterParentRefYAML string = `
+apiVersion: vap-library.com/v1beta1
+kind: VAPLibHTTPRouteFieldsParam
+metadata:
+  name: httproute-fields.vap-library.com
+  namespace: %s
+spec:
+  allowedParentRefs:
+  - name: name-only-gateway
+  - name: with-namespace-gateway
+    namespace: gateway-namespace
+`
+
+// PASS: name is correct, no namespace defined
+var validNameGatewayYAML string = `
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: test-httproute
+  namespace: %s
+spec:
+  parentRefs:
+  - name: name-only-gateway
+`
+
+// PASS: name and namespace are correct
+var validNameAndNamespaceGatewayYAML string = `
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: test-httproute
+  namespace: %s
+spec:
+  parentRefs:
+  - name: with-namespace-gateway
+    namespace: gateway-namespace
+`
+
+// PASS: multiple parentRefs
+var validMultiGatewayYAML string = `
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: test-httproute
+  namespace: %s
+spec:
+  parentRefs:
+  - name: name-only-gateway
+  - name: with-namespace-gateway
+    namespace: gateway-namespace
+`
+
+// FAIL: name is wrong
+var wrongNameGatewayYAML string = `
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: test-httproute
+  namespace: %s
+spec:
+  parentRefs:
+  - name: dummy
+`
+
+// FAIL: name is right but namespace is defined but should not be
+var wrongNamespaceGatewayYAML string = `
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: test-httproute
+  namespace: %s
+spec:
+  parentRefs:
+  - name: name-only-gateway
+    namespace: should-not-be-defined
+`
+
+// FAIL: name is right but namespace is defined but should not be
+var wrongWithNamespaceGatewayYAML string = `
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: test-httproute
+  namespace: %s
+spec:
+  parentRefs:
+  - name: name-only-gateway
+    namespace: should-not-be-defined
+`
+
+// FAIL: name is right but namespace is taken from the other allowed parent
+var wrongMixedGatewayYAML string = `
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: test-httproute
+  namespace: %s
+spec:
+  parentRefs:
+  - name: name-only-gateway
+    namespace: gateway-namespace
+`
+
+// FAIL: one item is right the other is wrong
+var wrongMultiGatewayYAML string = `
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: test-httproute
+  namespace: %s
+spec:
+  parentRefs:
+  - name: name-only-gateway
+  - name: wrong-gateway
+`
+
 var testEnv env.Environment
 
 func TestMain(m *testing.M) {
@@ -88,7 +206,7 @@ func TestWithParameter(t *testing.T) {
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// apply parameter first
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(testParameterYAML, namespace))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(testParameterHostnameYAML, namespace))
 			if err != nil {
 				t.Fatal(err)
 			}
