@@ -1,0 +1,30 @@
+pss-privilege-escalation:
+  enabled: true
+  bindings:
+    - pss-privilege-escalation-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+    - pss-privilege-escalation-warn.vap-library.com:
+        validationActions:
+          - Warn
+pss-running-as-non-root:
+  enabled: false
+  bindings:
+    - pss-running-as-non-root-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+    - pss-running-as-non-root-warn.vap-library.com:
+        validationActions:
+          - Warn
+helmrelease-fields:
+  enabled: true
+  bindings:
+    - helmrelease-fields-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+    - helmrelease-fields-warn.vap-library.com:
+        validationActions:
+          - Warn
