@@ -11,6 +11,9 @@ spec:
       - jsonPath: .spec.allowedHostnames
         name: Hostnames
         type: string
+      - jsonPath: .spec.allowedParentRefs[*].name
+        name: ParentRefNames
+        type: string
       served: true
       storage: true
       schema:
