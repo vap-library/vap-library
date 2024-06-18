@@ -1,7 +1,7 @@
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
 metadata:
-  name: "grafana-enforce-dashboard-folder.vap-library.com"
+  name: "grafana-dashboard-folder.vap-library.com"
 spec:
   failurePolicy: Fail
   matchConstraints:
@@ -21,12 +21,12 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
 metadata:
-  name: "helmrelease-enforce-fields.vap-library.com"
+  name: "helmrelease-fields.vap-library.com"
 spec:
   failurePolicy: Fail
   paramKind:
     apiVersion: vap-library.com/v1beta1
-    kind: VAPLibHelmReleaseEnforceFieldsParam
+    kind: VAPLibHelmReleaseFieldsParam
   matchConstraints:
     resourceRules:
     - apiGroups:   ["helm.toolkit.fluxcd.io"]
@@ -50,12 +50,12 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
 metadata:
-  name: "httproute-enforce-hostnames.vap-library.com"
+  name: "httproute-fields.vap-library.com"
 spec:
   failurePolicy: Fail
   paramKind:
     apiVersion: vap-library.com/v1beta1
-    kind: VAPLibHTTPRouteEnforceHostnamesParam
+    kind: VAPLibHTTPRouteFieldsParam
   matchConstraints:
     resourceRules:
     - apiGroups:   ["gateway.networking.k8s.io"]
@@ -70,12 +70,12 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
 metadata:
-  name: "kustomization-enforce-fields.vap-library.com"
+  name: "kustomization-fields.vap-library.com"
 spec:
   failurePolicy: Fail
   paramKind:
     apiVersion: vap-library.com/v1beta1
-    kind: VAPLibKustomizationEnforceFieldsParam
+    kind: VAPLibKustomizationFieldsParam
   matchConstraints:
     resourceRules:
     - apiGroups:   ["kustomize.toolkit.fluxcd.io"]
@@ -99,12 +99,324 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1beta1
 kind: ValidatingAdmissionPolicy
 metadata:
-  name: "service-enforce-type.vap-library.com"
+  name: "pss-capabilities.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["pods","replicationcontrollers","podtemplates", "pods/ephemeralcontainers"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations: 
+    - expression: "object.kind != 'Pod' || 
+      (!has(object.spec.initContainers) || (has(object.spec.initContainers) && (object.spec.initContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      (!has(object.spec.ephemeralContainers) || (has(object.spec.ephemeralContainers) && (object.spec.ephemeralContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      ((object.spec.containers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))"
+      message: "securityContext.capabilities.drop must include ALL and securityContext.capabilities.add can only include NET_BIND_SERVICE on containers in Pods"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job','ReplicationController'].all(kind, object.kind != kind) ||       
+      (!has(object.spec.template.spec.initContainers) || (has(object.spec.template.spec.initContainers) && (object.spec.template.spec.initContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      (!has(object.spec.template.spec.ephemeralContainers) || (has(object.spec.template.spec.ephemeralContainers) && (object.spec.template.spec.ephemeralContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      ((object.spec.template.spec.containers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))"
+      message: "securityContext.capabilities.drop must include ALL and securityContext.capabilities.add can only include NET_BIND_SERVICE on containers in Workloads"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' || 
+      (!has(object.spec.jobTemplate.spec.template.spec.initContainers) || (has(object.spec.jobTemplate.spec.template.spec.initContainers) && (object.spec.jobTemplate.spec.template.spec.initContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      (!has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) || (has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) && (object.spec.jobTemplate.spec.template.spec.ephemeralContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      ((object.spec.jobTemplate.spec.template.spec.containers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))"
+      message: "securityContext.capabilities.drop must include ALL and securityContext.capabilities.add can only include NET_BIND_SERVICE on containers in CronJobs"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      (!has(object.template.spec.initContainers) || (has(object.template.spec.initContainers) && (object.template.spec.initContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      (!has(object.template.spec.ephemeralContainers) || (has(object.template.spec.ephemeralContainers) && (object.template.spec.ephemeralContainers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))) &&
+      ((object.template.spec.containers.all(container, (has(container.securityContext) && has(container.securityContext.capabilities.drop) && ('ALL' in container.securityContext.capabilities.drop) && (!has(container.securityContext.capabilities.add) || ((size(container.securityContext.capabilities.add) == 1) && ('NET_BIND_SERVICE' in container.securityContext.capabilities.add)))))))"
+      message: "securityContext.capabilities.drop must include ALL and securityContext.capabilities.add can only include NET_BIND_SERVICE on containers in PodTemplates"
+      reason: Invalid
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "pss-privilege-escalation.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["pods","replicationcontrollers","podtemplates", "pods/ephemeralcontainers"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations: 
+    - expression: "object.kind != 'Pod' || 
+      (!has(object.spec.initContainers) || (has(object.spec.initContainers) && object.spec.initContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) &&
+      (!has(object.spec.ephemeralContainers) || (has(object.spec.ephemeralContainers) && object.spec.ephemeralContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) && 
+      (object.spec.containers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) &&  container.securityContext.allowPrivilegeEscalation == false))"
+      message: "securityContext.allowPrivilegeEscalation must be set to false on any containers, initContainers, and ephemeralContainers in Pods"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job','ReplicationController'].all(kind, object.kind != kind) ||       
+      (!has(object.spec.template.spec.initContainers) || (has(object.spec.template.spec.initContainers) && object.spec.template.spec.initContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) &&
+      (!has(object.spec.template.spec.ephemeralContainers) || (has(object.spec.template.spec.ephemeralContainers) && object.spec.template.spec.ephemeralContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) && 
+      (object.spec.template.spec.containers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) &&  container.securityContext.allowPrivilegeEscalation == false))"
+      message: "securityContext.allowPrivilegeEscalation must be set to false on containers in Workloads"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' || 
+      (!has(object.spec.jobTemplate.spec.template.spec.initContainers) || (has(object.spec.jobTemplate.spec.template.spec.initContainers) && object.spec.jobTemplate.spec.template.spec.initContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) &&
+      (!has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) || (has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) && object.spec.jobTemplate.spec.template.spec.ephemeralContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) && 
+      (object.spec.jobTemplate.spec.template.spec.containers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) &&  container.securityContext.allowPrivilegeEscalation == false))"
+      message: "securityContext.allowPrivilegeEscalation must be set to false on containers in CronJobs"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      (!has(object.template.spec.initContainers) || (has(object.template.spec.initContainers) && object.template.spec.initContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) &&
+      (!has(object.template.spec.ephemeralContainers) || (has(object.template.spec.ephemeralContainers) && object.template.spec.ephemeralContainers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) && container.securityContext.allowPrivilegeEscalation == false))) && 
+      (object.template.spec.containers.all(container, has(container.securityContext) && has(container.securityContext.allowPrivilegeEscalation) &&  container.securityContext.allowPrivilegeEscalation == false))"
+      message: "securityContext.allowPrivilegeEscalation must be set to false on containers in PodTemplates"
+      reason: Invalid
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "pss-running-as-non-root.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["pods","replicationcontrollers","podtemplates", "pods/ephemeralcontainers"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations: 
+    - expression: "object.kind != 'Pod' || 
+      (!has(object.spec.initContainers) || (has(object.spec.initContainers) && (object.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.securityContext) && has(object.spec.securityContext.runAsNonRoot) && object.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (!has(object.spec.ephemeralContainers) || (has(object.spec.ephemeralContainers) && (object.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.securityContext) && has(object.spec.securityContext.runAsNonRoot) && object.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (object.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.securityContext) && has(object.spec.securityContext.runAsNonRoot) && object.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true)))"
+      message: "securityContext.runAsNonRoot must be set to true on any containers, initContainers, and ephemeralContainers in Pods"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job','ReplicationController'].all(kind, object.kind != kind) ||
+      (!has(object.spec.template.spec.initContainers) || (has(object.spec.template.spec.initContainers) && (object.spec.template.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.runAsNonRoot) && object.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (!has(object.spec.template.spec.ephemeralContainers) || (has(object.spec.template.spec.ephemeralContainers) && (object.spec.template.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.runAsNonRoot) && object.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (object.spec.template.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.runAsNonRoot) && object.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true)))"
+      message: "securityContext.runAsNonRoot must be set to true on containers in Workloads"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' || 
+      (!has(object.spec.jobTemplate.spec.template.spec.initContainers) || (has(object.spec.jobTemplate.spec.template.spec.initContainers) && (object.spec.jobTemplate.spec.template.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot) && object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (!has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) || (has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) && (object.spec.jobTemplate.spec.template.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot) && object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (object.spec.jobTemplate.spec.template.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot) && object.spec.jobTemplate.spec.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true)))"
+      message: "securityContext.runAsNonRoot must be set to true on containers in CronJobs"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      (!has(object.template.spec.initContainers) || (has(object.template.spec.initContainers) && (object.template.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.template.spec.securityContext) && has(object.template.spec.securityContext.runAsNonRoot) && object.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (!has(object.template.spec.ephemeralContainers) || (has(object.template.spec.ephemeralContainers) && (object.template.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.template.spec.securityContext) && has(object.template.spec.securityContext.runAsNonRoot) && object.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) && container.securityContext.runAsNonRoot == true))))) &&
+      (object.template.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.runAsNonRoot))) && (has(object.template.spec.securityContext) && has(object.template.spec.securityContext.runAsNonRoot) && object.template.spec.securityContext.runAsNonRoot == true)) || (has(container.securityContext) && has(container.securityContext.runAsNonRoot) &&  container.securityContext.runAsNonRoot == true)))"
+      message: "securityContext.runAsNonRoot must be set to true on containers in PodTemplates"
+      reason: Invalid
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "pss-running-as-non-root-user.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["pods","replicationcontrollers","podtemplates", "pods/ephemeralcontainers"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations: 
+    - expression: "object.kind != 'Pod' ||
+      !(has(object.spec.securityContext) && has(object.spec.securityContext.runAsUser) && object.spec.securityContext.runAsUser == 0) &&
+      !(has(object.spec.initContainers) && object.spec.initContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(has(object.spec.ephemeralContainers) && object.spec.ephemeralContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(object.spec.containers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0))"
+      message: "securityContext.runAsUser must not equal 0, root user id, on any containers, initContainers, and ephemeralContainers in Pods"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job','ReplicationController'].all(kind, object.kind != kind) ||
+      !(has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.runAsUser) && object.spec.template.spec.securityContext.runAsUser == 0) &&
+      !(has(object.spec.template.spec.initContainers) && object.spec.template.spec.initContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(has(object.spec.template.spec.ephemeralContainers) && object.spec.template.spec.ephemeralContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(object.spec.template.spec.containers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0))"
+      message: "securityContext.runAsUser must not equal 0 (root user id) on containers in Workloads"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' ||
+      !(has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.runAsUser) && object.spec.jobTemplate.spec.template.spec.securityContext.runAsUser == 0) &&
+      !(has(object.spec.jobTemplate.spec.template.spec.initContainers) && object.spec.jobTemplate.spec.template.spec.initContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) && object.spec.jobTemplate.spec.template.spec.ephemeralContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(object.spec.jobTemplate.spec.template.spec.containers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0))"
+      message: "securityContext.runAsUser must not equal 0 (root user id) on containers in CronJobs"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      !(has(object.template.spec.securityContext) && has(object.template.spec.securityContext.runAsUser) && object.template.spec.securityContext.runAsUser == 0) &&
+      !(has(object.template.spec.initContainers) && object.template.spec.initContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(has(object.template.spec.ephemeralContainers) && object.template.spec.ephemeralContainers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0)) &&
+      !(object.template.spec.containers.exists(container, has(container.securityContext) && has(container.securityContext.runAsUser) && container.securityContext.runAsUser == 0))"
+      message: "securityContext.runAsUser must not equal 0 (root user id) on containers in PodTemplates"
+      reason: Invalid
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "pss-seccomp.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["pods","replicationcontrollers","podtemplates", "pods/ephemeralcontainers"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations: 
+    - expression: "object.kind != 'Pod' || 
+      (!(has(object.spec.securityContext) && has(object.spec.securityContext.seccompProfile) && has(object.spec.securityContext.seccompProfile.type)) || ((has(object.spec.securityContext) && has(object.spec.securityContext.seccompProfile) && has(object.spec.securityContext.seccompProfile.type)) && (object.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.securityContext.seccompProfile.type == 'Localhost'))) &&
+      (!has(object.spec.initContainers) || (has(object.spec.initContainers) && (object.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.spec.securityContext) && has(object.spec.securityContext.seccompProfile) && has(object.spec.securityContext.seccompProfile.type)) && (object.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.securityContext.seccompProfile.type == 'Localhost') || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost'))))))) &&
+      (!has(object.spec.ephemeralContainers) || (has(object.spec.ephemeralContainers) && (object.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.spec.securityContext) && has(object.spec.securityContext.seccompProfile) && has(object.spec.securityContext.seccompProfile.type)) && (object.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.securityContext.seccompProfile.type == 'Localhost') || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost'))))))) &&
+      (object.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.spec.securityContext) && (has(object.spec.securityContext.seccompProfile) && has(object.spec.securityContext.seccompProfile.type)) && (object.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.securityContext.seccompProfile.type == 'Localhost')) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost')))))"
+      message: "securityContext.seccompProfile.type must be set to RuntimeDefault or Localhost on any containers, initContainers, and ephemeralContainers in Pods"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job','ReplicationController'].all(kind, object.kind != kind) ||
+      (!(has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.seccompProfile) && has(object.spec.template.spec.securityContext.seccompProfile.type)) || ((has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.seccompProfile) && has(object.spec.template.spec.securityContext.seccompProfile.type)) && (object.spec.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.template.spec.securityContext.seccompProfile.type == 'Localhost'))) &&
+      (!has(object.spec.template.spec.initContainers) || (has(object.spec.template.spec.initContainers) && (object.spec.template.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.seccompProfile) && has(object.spec.template.spec.securityContext.seccompProfile.type)) && (object.spec.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.template.spec.securityContext.seccompProfile.type == 'Localhost') || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost'))))))) &&
+      (!has(object.spec.template.spec.ephemeralContainers) || (has(object.spec.template.spec.ephemeralContainers) && (object.spec.template.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.spec.template.spec.securityContext) && has(object.spec.template.spec.securityContext.seccompProfile) && has(object.spec.template.spec.securityContext.seccompProfile.type)) && (object.spec.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.template.spec.securityContext.seccompProfile.type == 'Localhost') || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost'))))))) &&
+      (object.spec.template.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.spec.template.spec.securityContext) && (has(object.spec.template.spec.securityContext.seccompProfile) && has(object.spec.template.spec.securityContext.seccompProfile.type)) && (object.spec.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.template.spec.securityContext.seccompProfile.type == 'Localhost')) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost')))))"
+      message: "securityContext.seccompProfile.type must be set to RuntimeDefault or Localhost on containers in Workloads"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' || 
+      (!(has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile) && has(object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type)) || ((has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile) && has(object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type)) && (object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type == 'Localhost'))) &&
+      (!has(object.spec.jobTemplate.spec.template.spec.initContainers) || (has(object.spec.jobTemplate.spec.template.spec.initContainers) && (object.spec.jobTemplate.spec.template.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile) && has(object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type)) && (object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type == 'Localhost') || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost'))))))) &&
+      (!has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) || (has(object.spec.jobTemplate.spec.template.spec.ephemeralContainers) && (object.spec.jobTemplate.spec.template.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.spec.jobTemplate.spec.template.spec.securityContext) && has(object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile) && has(object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type)) && (object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type == 'Localhost') || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost'))))))) &&
+      (object.spec.jobTemplate.spec.template.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.spec.jobTemplate.spec.template.spec.securityContext) && (has(object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile) && has(object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type)) && (object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.spec.jobTemplate.spec.template.spec.securityContext.seccompProfile.type == 'Localhost')) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost')))))"
+      message: "securityContext.seccompProfile.type must be set to RuntimeDefault or Localhost on containers in CronJobs"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      (!(has(object.template.spec.securityContext) && has(object.template.spec.securityContext.seccompProfile) && has(object.template.spec.securityContext.seccompProfile.type)) || ((has(object.template.spec.securityContext) && has(object.template.spec.securityContext.seccompProfile) && has(object.template.spec.securityContext.seccompProfile.type)) && (object.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.template.spec.securityContext.seccompProfile.type == 'Localhost'))) &&
+      (!has(object.template.spec.initContainers) || (has(object.template.spec.initContainers) && (object.template.spec.initContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.template.spec.securityContext) && has(object.template.spec.securityContext.seccompProfile) && has(object.template.spec.securityContext.seccompProfile.type)) && (object.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.template.spec.securityContext.seccompProfile.type == 'Localhost') || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost'))))))) &&
+      (!has(object.template.spec.ephemeralContainers) || (has(object.template.spec.ephemeralContainers) && (object.template.spec.ephemeralContainers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.template.spec.securityContext) && has(object.template.spec.securityContext.seccompProfile) && has(object.template.spec.securityContext.seccompProfile.type)) && (object.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.template.spec.securityContext.seccompProfile.type == 'Localhost') || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost'))))))) &&
+      (object.template.spec.containers.all(container, ((!has(container.securityContext) || (has(container.securityContext) && !has(container.securityContext.seccompProfile)) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && !has(container.securityContext.seccompProfile.type))) && (has(object.template.spec.securityContext) && (has(object.template.spec.securityContext.seccompProfile) && has(object.template.spec.securityContext.seccompProfile.type)) && (object.template.spec.securityContext.seccompProfile.type == 'RuntimeDefault' || object.template.spec.securityContext.seccompProfile.type == 'Localhost')) || (has(container.securityContext) && has(container.securityContext.seccompProfile) && has(container.securityContext.seccompProfile.type) && (container.securityContext.seccompProfile.type == 'RuntimeDefault' || container.securityContext.seccompProfile.type == 'Localhost')))))"
+      message: "securityContext.seccompProfile.type must be set to RuntimeDefault or Localhost on containers in PodTemplates"
+      reason: Invalid
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "pss-volume-types.vap-library.com"
+spec:
+  failurePolicy: Fail
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["pods","replicationcontrollers","podtemplates"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations: 
+    - expression: "object.kind != 'Pod' ||
+      !has(object.spec.volumes) ||
+      (has(object.spec.volumes) && object.spec.volumes.all(volume, has(volume.configMap) ||
+      has(volume.csi) ||
+      has(volume.downwardAPI) ||
+      has(volume.emptyDir) ||
+      has(volume.ephemeral) ||
+      has(volume.persistentVolumeClaim) ||
+      has(volume.projected) ||
+      has(volume.secret)))"
+      message: "Every item in a spec.volumes[*] list (if present) must set one of the following fields to a non-null value:
+      spec.volumes[*].configMap, spec.volumes[*].csi, spec.volumes[*].downwardAPI, spec.volumes[*].emptyDir, spec.volumes[*].ephemeral, spec.volumes[*].persistentVolumeClaim, spec.volumes[*].projected, spec.volumes[*].secret"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job','ReplicationController'].all(kind, object.kind != kind) ||
+      !has(object.spec.template.spec.volumes) ||
+      (has(object.spec.template.spec.volumes) && object.spec.template.spec.volumes.all(volume, has(volume.configMap) ||
+      has(volume.csi) ||
+      has(volume.downwardAPI) ||
+      has(volume.emptyDir) ||
+      has(volume.ephemeral) ||
+      has(volume.persistentVolumeClaim) ||
+      has(volume.projected) ||
+      has(volume.secret)))"
+      message: "Every item in a spec.volumes[*] list (if present) must set one of the following fields to a non-null value:
+      spec.volumes[*].configMap, spec.volumes[*].csi, spec.volumes[*].downwardAPI, spec.volumes[*].emptyDir, spec.volumes[*].ephemeral, spec.volumes[*].persistentVolumeClaim, spec.volumes[*].projected, spec.volumes[*].secret"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' ||
+      !has(object.spec.jobTemplate.spec.template.spec.volumes) ||
+      (has(object.spec.jobTemplate.spec.template.spec.volumes) && object.spec.jobTemplate.spec.template.spec.volumes.all(volume, has(volume.configMap) ||
+      has(volume.csi) ||
+      has(volume.downwardAPI) ||
+      has(volume.emptyDir) ||
+      has(volume.ephemeral) ||
+      has(volume.persistentVolumeClaim) ||
+      has(volume.projected) ||
+      has(volume.secret)))"
+      message: "Every item in a spec.volumes[*] list (if present) must set one of the following fields to a non-null value:
+      spec.volumes[*].configMap, spec.volumes[*].csi, spec.volumes[*].downwardAPI, spec.volumes[*].emptyDir, spec.volumes[*].ephemeral, spec.volumes[*].persistentVolumeClaim, spec.volumes[*].projected, spec.volumes[*].secret"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      !has(object.template.spec.volumes) ||
+      (has(object.template.spec.volumes) && object.template.spec.volumes.all(volume, has(volume.configMap) ||
+      has(volume.csi) ||
+      has(volume.downwardAPI) ||
+      has(volume.emptyDir) ||
+      has(volume.ephemeral) ||
+      has(volume.persistentVolumeClaim) ||
+      has(volume.projected) ||
+      has(volume.secret)))"
+      message: "Every item in a spec.volumes[*] list (if present) must set one of the following fields to a non-null value:
+      spec.volumes[*].configMap, spec.volumes[*].csi, spec.volumes[*].downwardAPI, spec.volumes[*].emptyDir, spec.volumes[*].ephemeral, spec.volumes[*].persistentVolumeClaim, spec.volumes[*].projected, spec.volumes[*].secret"
+      reason: Invalid
+---
+apiVersion: admissionregistration.k8s.io/v1beta1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "service-type.vap-library.com"
 spec:
   failurePolicy: Fail
   paramKind:
     apiVersion: vap-library.com/v1beta1
-    kind: VAPLibServiceEnforceTypeParam
+    kind: VAPLibServiceTypeParam
   matchConstraints:
     resourceRules:
     - apiGroups:   [""]
