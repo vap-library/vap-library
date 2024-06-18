@@ -11,8 +11,8 @@ spec:
       - jsonPath: .spec.allowedHostnames
         name: Hostnames
         type: string
-      - jsonPath: .spec.allowedParentRefs[*].name
-        name: ParentRefNames
+      - jsonPath: .spec.allowedParentRefs
+        name: ParentRefs
         type: string
       served: true
       storage: true
@@ -42,13 +42,11 @@ spec:
                     description: "See ParentRefs in the official Gateway API HTTPRoute CRD"
                     properties:
                       group:
-                        default: gateway.networking.k8s.io
                         description: "See properties.group in the official Gateway API HTTPRoute CRD"
                         maxLength: 253
                         pattern: ^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
                         type: string
                       kind:
-                        default: Gateway
                         description: "See properties.kind in the official Gateway API HTTPRoute CRD"
                         maxLength: 63
                         minLength: 1
