@@ -102,7 +102,20 @@ spec:
     namespace: gateway-namespace
 `
 
-// PASS: multiple parentRefs
+// PASS: name is right, and we ignore everything what is not defined in the parameter
+var wrongNamespaceGatewayYAML string = `
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: test-httproute
+  namespace: %s
+spec:
+  parentRefs:
+  - name: name-only-gateway
+    namespace: should-be-ignored
+`
+
+// PASS: multiple parentRefs and all good
 var validMultiGatewayYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -126,32 +139,6 @@ metadata:
 spec:
   parentRefs:
   - name: dummy
-`
-
-// FAIL: name is right but namespace is defined but should not be
-var wrongNamespaceGatewayYAML string = `
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: test-httproute
-  namespace: %s
-spec:
-  parentRefs:
-  - name: name-only-gateway
-    namespace: should-not-be-defined
-`
-
-// FAIL: name is right but namespace is defined but should not be
-var wrongWithNamespaceGatewayYAML string = `
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: test-httproute
-  namespace: %s
-spec:
-  parentRefs:
-  - name: name-only-gateway
-    namespace: should-not-be-defined
 `
 
 // FAIL: name is right but namespace is taken from the other allowed parent
