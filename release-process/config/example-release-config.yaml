@@ -1,0 +1,134 @@
+grafana-dashboard-folder:
+  enabled: true
+  bindings:
+    - grafana-dashboard-folder-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+    - grafana-dashboard-folder-warn.vap-library.com:
+        validationActions:
+          - Warn
+helmrelease-fields:
+  enabled: true
+  bindings:
+    - helmrelease-fields-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+        paramRef:
+          name: helmrelease-fields.vap-library.com
+          parameterNotFoundAction: Deny
+    - helmrelease-fields-warn.vap-library.com:
+        validationActions:
+          - Warn
+        paramRef:
+          name: helmrelease-fields.vap-library.com
+          parameterNotFoundAction: Deny
+httproute-fields:
+  enabled: true
+  bindings:
+    - httproute-fields-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+        paramRef:
+          name: httproute-fields.vap-library.com
+          parameterNotFoundAction: Deny
+    - httproute-fields-warn.vap-library.com:
+        validationActions:
+          - Warn
+        paramRef:
+          name: httproute-fields.vap-library.com
+          parameterNotFoundAction: Deny
+kustomization-fields:
+  enabled: true
+  bindings:
+    - kustomization-fields-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+        paramRef:
+          name: kustomization-fields.vap-library.com
+          parameterNotFoundAction: Deny
+    - kustomization-fields-warn.vap-library.com:
+        validationActions:
+          - Warn
+        paramRef:
+          name: kustomization-fields.vap-library.com
+          parameterNotFoundAction: Deny
+pss-capabilities:
+  enabled: true
+  bindings:
+    - pss-capabilities-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+    - pss-capabilities-warn.vap-library.com:
+        validationActions:
+          - Warn
+pss-privilege-escalation:
+  enabled: true
+  bindings:
+    - pss-privilege-escalation-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+    - pss-privilege-escalation-warn.vap-library.com:
+        validationActions:
+          - Warn
+pss-running-as-non-root:
+  enabled: true
+  bindings:
+    - pss-running-as-non-root-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+    - pss-running-as-non-root-warn.vap-library.com:
+        validationActions:
+          - Warn
+pss-running-as-non-root-user:
+  enabled: true
+  bindings:
+    - pss-running-as-non-root-user-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+    - pss-running-as-non-root-user-warn.vap-library.com:
+        validationActions:
+          - Warn
+pss-seccomp:
+  enabled: true
+  bindings:
+    - pss-seccomp-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+    - pss-seccomp-warn.vap-library.com:
+        validationActions:
+          - Warn
+pss-volume-types:
+  enabled: true
+  bindings:
+    - pss-volume-types-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+    - pss-volume-types-warn.vap-library.com:
+        validationActions:
+          - Warn
+service-type:
+  enabled: true
+  bindings:
+    - service-type-deny.vap-library.com:
+        validationActions:
+          - Deny
+          - Audit
+        paramRef:
+          name: service-type.vap-library.com
+          parameterNotFoundAction: Deny
+    - service-type-warn.vap-library.com:
+        validationActions:
+          - Warn
+        paramRef:
+          name: service-type.vap-library.com
+          parameterNotFoundAction: Deny
