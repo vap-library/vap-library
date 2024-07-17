@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sigs.k8s.io/e2e-framework/pkg/env"
-	"sigs.k8s.io/e2e-framework/pkg/envconf"
-	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
 	"time"
 	"vap-library/testutils"
+
+	"sigs.k8s.io/e2e-framework/pkg/env"
+	"sigs.k8s.io/e2e-framework/pkg/envconf"
+	"sigs.k8s.io/e2e-framework/pkg/features"
 )
 
 // Variables for hostname tests
@@ -82,7 +83,7 @@ var validNameGatewayYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: test-httproute
+  name: test-httproute-valid-parentref
   namespace: %s
 spec:
   parentRefs:
@@ -94,7 +95,7 @@ var validNameAndNamespaceGatewayYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: test-httproute
+  name: test-httproute-valid-parentref-multi-attribute
   namespace: %s
 spec:
   parentRefs:
@@ -107,7 +108,7 @@ var wrongNamespaceGatewayYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: test-httproute
+  name: test-httproute-valid-parentref-ignore-extra
   namespace: %s
 spec:
   parentRefs:
@@ -120,7 +121,7 @@ var validMultiGatewayYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: test-httproute
+  name: test-httproute-valid-parentrefs-multi
   namespace: %s
 spec:
   parentRefs:
@@ -134,24 +135,11 @@ var wrongNameGatewayYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: test-httproute
+  name: test-httproute-invalid-parentref
   namespace: %s
 spec:
   parentRefs:
   - name: dummy
-`
-
-// FAIL: name is right but namespace is taken from the other allowed parent
-var wrongMixedGatewayYAML string = `
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: test-httproute
-  namespace: %s
-spec:
-  parentRefs:
-  - name: name-only-gateway
-    namespace: gateway-namespace
 `
 
 // FAIL: one item is right the other is wrong
@@ -159,12 +147,24 @@ var wrongMultiGatewayYAML string = `
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: test-httproute
+  name: test-httproute-incorrect-parentref-attribute
   namespace: %s
 spec:
   parentRefs:
   - name: name-only-gateway
   - name: wrong-gateway
+`
+
+// FAIL: name is right but namespace attribute is missing
+var wrongMissingAttributeGatewayYAML string = `
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: test-httproute-missing-parentref-attribute
+  namespace: %s
+spec:
+  parentRefs:
+  - name: with-namespace-gateway
 `
 
 var testEnv env.Environment
@@ -176,7 +176,7 @@ func TestMain(m *testing.M) {
 	var err error
 	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, extraResourcesFromDir)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
+		log.Fatalf("Unable to create Kind cluster for test. Error msg: %s", err)
 	}
 
 	// wait for the cluster to be ready
@@ -227,7 +227,7 @@ func TestWithParameter(t *testing.T) {
 
 			return ctx
 		}).
-		Assess("A HTTPRoute which does not contain any hostname is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+		Assess("An HTTPRoute which does not contain any hostname is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
 			// get namespace
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
@@ -240,6 +240,112 @@ func TestWithParameter(t *testing.T) {
 			return ctx
 		})
 
+	_ = testEnv.Test(t, f.Feature())
+
+}
+
+func TestWithParentRefParameter(t *testing.T) {
+
+	f := features.New("HTTPRoute with parameter specifying parentRefs").
+		Setup(func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// apply parameter first
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(testParameterParentRefYAML, namespace))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// wait for the parameter to be registered properly
+			time.Sleep(10 * time.Second)
+
+			return ctx
+		}).
+		Assess("A valid HTTPRoute with allowed name-only parentRef is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(validNameGatewayYAML, namespace))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("A valid HTTPRoute with allowed parentRef where all attributes match is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(validNameAndNamespaceGatewayYAML, namespace))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("An HTTPRoute with allowed parentRef which includes an extra attribute not in the param is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(wrongNamespaceGatewayYAML, namespace))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("An HTTPRoute with multiple allowed parentRefs is accepted", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should PASS!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(validMultiGatewayYAML, namespace))
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			return ctx
+		}).
+		Assess("An HTTPRoute with a parentRef with no matching name in the param is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(wrongNameGatewayYAML, namespace))
+			if err == nil {
+				t.Fatal("An HTTPRoute with invalid parentRef name was accepted")
+			}
+
+			return ctx
+		}).
+		Assess("An HTTPRoute with multiple parentRefs, where one has no matching name in the param, is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(wrongMultiGatewayYAML, namespace))
+			if err == nil {
+				t.Fatal("An HTTPRoute with a mixture of valid and invalid parentRef names was accepted")
+			}
+
+			return ctx
+		}).
+		Assess("An HTTPRoute with a parentRef which partly matches an allowedParentRef Param but doesn't include all the param's attributes, is rejected", func(ctx context.Context, t *testing.T, cfg *envconf.Config) context.Context {
+			// get namespace
+			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
+
+			// this should FAIL!
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(wrongMissingAttributeGatewayYAML, namespace))
+			if err == nil {
+				t.Fatal("An HTTPRoute which is allowed by name but doesn't include all required attributes was accepted")
+			}
+
+			return ctx
+		})
 	_ = testEnv.Test(t, f.Feature())
 
 }
