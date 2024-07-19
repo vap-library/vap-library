@@ -102,7 +102,6 @@ kustomization-fields:
         paramRef:
           name: kustomization-fields.vap-library.com
           parameterNotFoundAction: Deny
-        policyName: kustomization-fields.vap-library.com
         validationActions:
           - Warn
 pss-capabilities:
