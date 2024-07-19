@@ -32,7 +32,7 @@ class Release:
         else:
           print(f"Warning: {policy_path} does not exist.")
 
-    def __create_binding(self, policy_name, binding_name, actions, param_ref=None):
+    def __create_binding(self, policy_name, binding_name, param_ref=None, validation_actions=None, match_resources=None):
         binding = {
             'apiVersion': 'admissionregistration.k8s.io/v1beta1',
             'kind': 'ValidatingAdmissionPolicyBinding',
@@ -40,30 +40,28 @@ class Release:
                 'name': binding_name
             },
             'spec': {
-                'matchResources': {
-                    'matchPolicy': 'Equivalent',
-                    'namespaceSelector': {
-                        'matchLabels': {f'vap-library.com/{policy_name}': actions[0].lower()}
-                    },
-                    'objectSelector': {}
-                },
-                'policyName': f'{policy_name}.{self.__policies_domain}',
-                'validationActions': actions
+                'policyName': f'{policy_name}.{self.__policies_domain}'
             }
         }
+
+        if match_resources is not None:
+            binding['spec']['matchResources'] = match_resources
+        
+        if validation_actions is not None:
+            binding['spec']['validationActions'] = validation_actions
+
         if param_ref is not None:
             binding['spec']['paramRef'] = param_ref
+
         return binding
     
     def __append_bindings(self, policy_name, bindings):
         for binding in bindings:
           for key in binding:
-            actions = binding[key]['validationActions']
-            if 'paramRef' in binding[key]:
-                param_ref = binding[key]['paramRef']
-                binding_object = self.__create_binding(policy_name, key, actions, param_ref)
-            else:
-                binding_object = self.__create_binding(policy_name, key, actions)
+            param_ref          = binding[key]['paramRef'] if 'paramRef' in binding[key] else None
+            validation_actions = binding[key]['validationActions'] if 'validationActions' in binding[key] else None
+            match_resources    = binding[key]['matchResources'] if 'matchResources' in binding[key] else None
+            binding_object     = self.__create_binding(policy_name, key, param_ref, validation_actions, match_resources)
 
           with open(self.__bindings_file, 'a') as file:
               yaml.dump(binding_object, file, default_flow_style=False)
