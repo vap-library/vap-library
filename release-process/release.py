@@ -9,6 +9,7 @@ import sys
 class Release:
     def __init__(self, config_path, policies_domain, policies_output_filename, bindings_output_filename, crds_output_filename, kustomization_output_filename):
         self.__policies_domain = policies_domain
+        self.__release_output_dir = "release"
         self.__policies_file = policies_output_filename
         self.__bindings_file = bindings_output_filename
         self.__crds_file = crds_output_filename
@@ -21,12 +22,12 @@ class Release:
         return config
     
     def __append_policy(self, subdirectory):
-        policy_path = os.path.join('../../policies', subdirectory, 'policy.yaml')
+        policy_path = os.path.join('../policies', subdirectory, 'policy.yaml')
         if os.path.exists(policy_path):
             with open(policy_path, 'r') as file:
                 policy_content = file.read().rstrip('\n').lstrip('---\n')
   
-            with open(self.__policies_file, 'a') as file:
+            with open(os.path.join(self.__release_output_dir, self.__policies_file), 'a') as file:
                 file.write(policy_content + "\n")
                 file.write('---\n')
         else:
@@ -63,17 +64,17 @@ class Release:
             match_resources    = binding[key]['matchResources'] if 'matchResources' in binding[key] else None
             binding_object     = self.__create_binding(policy_name, key, param_ref, validation_actions, match_resources)
 
-          with open(self.__bindings_file, 'a') as file:
+          with open(os.path.join(self.__release_output_dir, self.__bindings_file), 'a') as file:
               yaml.dump(binding_object, file, default_flow_style=False)
               file.write('---\n')
     
     def __append_crds(self, subdirectory):
-        crd_path = os.path.join('../../policies', subdirectory, 'crd-parameter.yaml')
+        crd_path = os.path.join('../policies', subdirectory, 'crd-parameter.yaml')
         if os.path.exists(crd_path):
             with open(crd_path, 'r') as file:
                 policy_content = file.read().rstrip('\n').lstrip('---\n')
   
-            with open(self.__crds_file, 'a') as file:
+            with open(os.path.join(self.__release_output_dir, self.__crds_file), 'a') as file:
                 file.write(policy_content + "\n")
                 file.write('---\n')
         else:
@@ -86,22 +87,22 @@ class Release:
             'resources': [self.__bindings_file, self.__crds_file, self.__policies_file]
         }
 
-        with open(self.__kustomization_file, 'a') as file:
+        with open(os.path.join(self.__release_output_dir, self.__kustomization_file), 'a') as file:
               yaml.dump(kustomization_config, file, default_flow_style=False)
 
 
     def generate_release_files(self):
         # Ensure the output files are empty at the start
-        with open(self.__policies_file, 'w') as file:
+        with open(os.path.join(self.__release_output_dir, self.__policies_file), 'w') as file:
             pass
     
-        with open(self.__bindings_file, 'w') as file:
+        with open(os.path.join(self.__release_output_dir, self.__bindings_file), 'w') as file:
             pass
     
-        with open(self.__crds_file, 'w') as file:
+        with open(os.path.join(self.__release_output_dir, self.__crds_file), 'w') as file:
             pass
         
-        with open(self.__kustomization_file, 'w') as file:
+        with open(os.path.join(self.__release_output_dir, self.__kustomization_file), 'w') as file:
             pass
     
         for subdirectory, details in self.__config.items():

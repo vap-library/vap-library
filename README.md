@@ -27,8 +27,8 @@ kubectl apply -k https://github.com/vap-library/vap-library.git/release-process/
 It is possible to generate a custom subset of the policies, policy bindings, and parameter CRDs available in the vap-library. To do this, a release script exists which takes a yaml config file, and generates custom release artifacts (`policies.yaml`, `bindings.yaml`, `crds.yaml`) based on the provided config.
 
 Everything associated with the release process sits in the release-process directory. In order to create a release:
-1) Create a new config file specifying the desired policies and bindings. The file `release-process/config/example-release-config.yaml` will include all policies from the library, along with a pair of bindings (deny+audit & warn) for each, and all CRDs, so this should be used as a template, removing/modifying any entries as desired.
-2) Run the script, providing the path to the prepared config file: `python release.py ../config/example-release-config.yaml`
+1) Create a new config file specifying the desired policies and bindings. The file `release-process/example-release-config.yaml` will include all policies from the library, along with a pair of bindings (deny+audit & warn) for each, and all CRDs, so this should be used as a template, removing/modifying any entries as desired.
+2) Run the script, providing the path to the prepared config file, e.g: `python release.py example-release-config.yaml`
 
 For the release script to correctly include a policy and associated resources, the policy must be in its own directory under `./policies`, and any CRD must be in the same directory, named `crd-parameter.yaml`. See existing policies for reference.
 
