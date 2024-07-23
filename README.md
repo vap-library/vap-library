@@ -19,9 +19,20 @@ Parameter CRDs, policies and policy bindings are available in separate yaml file
 It is possible to apply all policies, policy bindings and parameter CRDs available in the vap-library (this would not
 enforce anything without proper labels on the namespaces):
 ```
-export VAPRELEASE=v0.1.6
-kubectl apply -k https://github.com/vap-library/vap-library.git/release?ref=${VAPRELEASE}
+export VAPRELEASE=v0.1.7
+kubectl apply -k https://github.com/vap-library/vap-library.git/release-process/release?ref=${VAPRELEASE}
 ```
+
+## To apply SELECTED
+It is possible to generate a custom subset of the policies, policy bindings, and parameter CRDs available in the vap-library. To do this, a release script exists which takes a yaml config file, and generates custom release artifacts (`policies.yaml`, `bindings.yaml`, `crds.yaml`) based on the provided config.
+
+Everything associated with the release process sits in the release-process directory. In order to create a release:
+1) Create a new config file specifying the desired policies and bindings. The file `release-process/example-release-config.yaml` will include all policies from the library, along with a pair of bindings (deny+audit & warn) for each, and all CRDs, so this should be used as a template, removing/modifying any entries as desired.
+2) Run the script, providing the path to the prepared config file, e.g: `python release.py example-release-config.yaml`
+
+For the release script to correctly include a policy and associated resources, the policy must be in its own directory under `./policies`, and any CRD must be in the same directory, named `crd-parameter.yaml`. See existing policies for reference.
+
+The generated yaml files can then be applied. As with applying ALL, note that the proper labels must be set on the namespaces in order for the policies to enforce anything.
 
 ## Enforcing a policy
 Make sure that you create a parameter ConfigMap or CR in case the policy requires it. You can enforce the policy with
@@ -56,9 +67,14 @@ To run all the tests (use -v for verbose output):
 go test -p 2 ./policies/...
 ```
 
-To run tests for a single policy (use -v for verbose output)
+To run tests for a single policy (use -v for verbose output):
 ```bash
 go test  ./policies/POLICYNAME/
+```
+
+To test the yaml for a release can be applied to a cluster without error (use -v for verbose output):
+```bash
+go test ./release-process/release/
 ```
 
 # Sources that can help for contribution

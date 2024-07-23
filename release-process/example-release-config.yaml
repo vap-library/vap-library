@@ -1,0 +1,267 @@
+grafana-dashboard-folder:
+  enabled: true
+  bindings:
+    - grafana-dashboard-folder-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/grafana-dashboard-folder: deny
+          objectSelector: {}
+        validationActions:
+          - Deny
+          - Audit
+    - grafana-dashboard-folder-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/grafana-dashboard-folder: warn
+          objectSelector: {}
+        validationActions:
+          - Warn
+helmrelease-fields:
+  enabled: true
+  bindings:
+    - helmrelease-fields-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/helmrelease-fields: deny
+          objectSelector: {}
+        paramRef:
+          name: helmrelease-fields.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+        - Deny
+        - Audit
+    - helmrelease-fields-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/helmrelease-fields: warn
+          objectSelector: {}
+        paramRef:
+          name: helmrelease-fields.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+          - Warn
+httproute-fields:
+  enabled: true
+  bindings:
+    - httproute-fields-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/httproute-fields: deny
+          objectSelector: {}
+        paramRef:
+          name: httproute-fields.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+        - Deny
+        - Audit
+    - httproute-fields-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/httproute-fields: warn
+          objectSelector: {}
+        paramRef:
+          name: httproute-fields.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+          - Warn
+kustomization-fields:
+  enabled: true
+  bindings:
+    - kustomization-fields-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/kustomization-fields: deny
+          objectSelector: {}
+        paramRef:
+          name: kustomization-fields.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+        - Deny
+        - Audit
+    - kustomization-fields-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/kustomization-fields: warn
+          objectSelector: {}
+        paramRef:
+          name: kustomization-fields.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+          - Warn
+pss-capabilities:
+  enabled: true
+  bindings:
+    - pss-capabilities-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-capabilities: deny
+          objectSelector: {}
+        validationActions:
+        - Deny
+        - Audit
+    - pss-capabilities-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-capabilities: warn
+          objectSelector: {}
+        validationActions:
+          - Warn
+pss-privilege-escalation:
+  enabled: true
+  bindings:
+    - pss-privilege-escalation-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-privilege-escalation: deny
+          objectSelector: {}
+        validationActions:
+        - Deny
+        - Audit
+    - pss-privilege-escalation-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-privilege-escalation: warn
+          objectSelector: {}
+        validationActions:
+          - Warn
+
+pss-running-as-non-root:
+  enabled: true
+  bindings:
+    - pss-running-as-non-root-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-running-as-non-root: deny
+          objectSelector: {}
+        validationActions:
+        - Deny
+        - Audit
+    - pss-running-as-non-root-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-running-as-non-root: warn
+          objectSelector: {}
+        validationActions:
+          - Warn
+pss-running-as-non-root-user:
+  enabled: true
+  bindings:
+    - pss-running-as-non-root-user-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-running-as-non-root-user: deny
+          objectSelector: {}
+        validationActions:
+        - Deny
+        - Audit
+    - pss-running-as-non-root-user-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-running-as-non-root-user: warn
+          objectSelector: {}
+        validationActions:
+          - Warn
+pss-seccomp:
+  enabled: true
+  bindings:
+    - pss-seccomp-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-seccomp: deny
+          objectSelector: {}
+        validationActions:
+        - Deny
+        - Audit
+    - pss-seccomp-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-seccomp: warn
+          objectSelector: {}
+        validationActions:
+          - Warn
+pss-volume-types:
+  enabled: true
+  bindings:
+    - pss-volume-types-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-volume-types: deny
+          objectSelector: {}
+        validationActions:
+        - Deny
+        - Audit
+    - pss-volume-types-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/pss-volume-types: warn
+          objectSelector: {}
+        validationActions:
+          - Warn
+service-type:
+  enabled: true
+  bindings:
+    - service-type-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/service-type: deny
+          objectSelector: {}
+        paramRef:
+          name: service-type.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+        - Deny
+        - Audit
+    - service-type-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/service-type: warn
+          objectSelector: {}
+        paramRef:
+          name: service-type.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+          - Warn
