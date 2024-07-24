@@ -3,6 +3,10 @@ package testutils
 import (
 	"context"
 	"fmt"
+	"strings"
+	"testing"
+	"time"
+
 	v1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/e2e-framework/klient/decoder"
 	"sigs.k8s.io/e2e-framework/klient/k8s/resources"
@@ -10,13 +14,10 @@ import (
 	"sigs.k8s.io/e2e-framework/pkg/envconf"
 	"sigs.k8s.io/e2e-framework/pkg/envfuncs"
 	"sigs.k8s.io/e2e-framework/support/kind"
-	"strings"
-	"testing"
-	"time"
 )
 
 const (
-	defaultKindVersion = "v1.29.2"
+	defaultKindVersion = "v1.30.0"
 	kindNamePrefix     = "vaplibtest"
 	testNamespace      = "vap-testing"
 )

@@ -1,4 +1,4 @@
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: "grafana-dashboard-folder.vap-library.com"
@@ -18,7 +18,7 @@ spec:
       message: "metadata.annotations.grafana_folder must be set to the namespace of the ConfigMap/Secret"
       reason: Invalid
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: "helmrelease-fields.vap-library.com"
@@ -47,7 +47,7 @@ spec:
       message: "spec.serviceAccountName must be set to the service account specified in the Validating Admission Policy parameter"
       reason: Invalid
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: "httproute-fields.vap-library.com"
@@ -67,7 +67,7 @@ spec:
       message: "spec.hostnames must be present and each item must be on the spec.allowedHostnames list in the policy parameter"
       reason: Invalid
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: "kustomization-fields.vap-library.com"
@@ -96,7 +96,7 @@ spec:
       message: "spec.serviceAccountName must be set to the service account specified in the Validating Admission Policy parameter"
       reason: Invalid
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: "pss-capabilities.vap-library.com"
@@ -142,7 +142,7 @@ spec:
       message: "securityContext.capabilities.drop must include ALL and securityContext.capabilities.add can only include NET_BIND_SERVICE on containers in PodTemplates"
       reason: Invalid
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: "pss-privilege-escalation.vap-library.com"
@@ -188,7 +188,7 @@ spec:
       message: "securityContext.allowPrivilegeEscalation must be set to false on containers in PodTemplates"
       reason: Invalid
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: "pss-running-as-non-root.vap-library.com"
@@ -234,7 +234,7 @@ spec:
       message: "securityContext.runAsNonRoot must be set to true on containers in PodTemplates"
       reason: Invalid
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: "pss-running-as-non-root-user.vap-library.com"
@@ -284,7 +284,7 @@ spec:
       message: "securityContext.runAsUser must not equal 0 (root user id) on containers in PodTemplates"
       reason: Invalid
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: "pss-seccomp.vap-library.com"
@@ -334,7 +334,7 @@ spec:
       message: "securityContext.seccompProfile.type must be set to RuntimeDefault or Localhost on containers in PodTemplates"
       reason: Invalid
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: "pss-volume-types.vap-library.com"
@@ -408,7 +408,7 @@ spec:
       spec.volumes[*].configMap, spec.volumes[*].csi, spec.volumes[*].downwardAPI, spec.volumes[*].emptyDir, spec.volumes[*].ephemeral, spec.volumes[*].persistentVolumeClaim, spec.volumes[*].projected, spec.volumes[*].secret"
       reason: Invalid
 ---
-apiVersion: admissionregistration.k8s.io/v1beta1
+apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicy
 metadata:
   name: "service-type.vap-library.com"

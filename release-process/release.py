@@ -35,7 +35,7 @@ class Release:
 
     def __create_binding(self, policy_name, binding_name, param_ref=None, validation_actions=None, match_resources=None):
         binding = {
-            'apiVersion': 'admissionregistration.k8s.io/v1beta1',
+            'apiVersion': 'admissionregistration.k8s.io/v1',
             'kind': 'ValidatingAdmissionPolicyBinding',
             'metadata': {
                 'name': binding_name
