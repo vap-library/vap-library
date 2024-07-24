@@ -72,11 +72,6 @@ To run tests for a single policy (use -v for verbose output):
 go test  ./policies/POLICYNAME/
 ```
 
-To test the yaml for a release can be applied to a cluster without error (use -v for verbose output):
-```bash
-go test ./release-process/release/
-```
-
 # Sources that can help for contribution
 * [Official VAP documentation](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/)
 * [Kubernetes CEL documenation](https://kubernetes.io/docs/reference/using-api/cel/)
