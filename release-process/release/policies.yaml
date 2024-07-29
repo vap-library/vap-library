@@ -63,8 +63,11 @@ spec:
       operations:  ["CREATE", "UPDATE"]
       resources:   ["httproutes"]
   validations:
-    - expression: "has(object.spec.hostnames) && has(params.spec.allowedHostnames) && object.spec.hostnames.all(h, h in params.spec.allowedHostnames)"
-      message: "spec.hostnames must be present and each item must be on the spec.allowedHostnames list in the policy parameter"
+    - expression: "!has(params.spec.allowedHostnames) || has(object.spec.hostnames) && object.spec.hostnames.all(h, h in params.spec.allowedHostnames)"
+      message: "If allowedHostnames is set on the parameter, spec.hostnames must be present and each item must be on the spec.allowedHostnames list in the policy parameter"
+      reason: Invalid
+    - expression: "!has(params.spec.allowedParentRefs) || has(object.spec.parentRefs) && object.spec.parentRefs.all(parentRef, params.spec.allowedParentRefs.exists(allowedParentRef, allowedParentRef.all(k, k in parentRef && parentRef[k] == allowedParentRef[k])))"
+      message: "If allowedParentRefs is set on the parameter, spec.parentRefs must be present and each item must contain all key:value pairs from the spec.allowedParentRefs list in the policy parameter"
       reason: Invalid
 ---
 apiVersion: admissionregistration.k8s.io/v1
