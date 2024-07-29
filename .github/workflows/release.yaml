@@ -1,8 +1,10 @@
 permissions: write-all
 on:
  push:
-  tags:
-    - 'v*.*.*'
+  branches:
+    - 'main'
+  paths:
+    - release-process/version
 
 name: Release
 
@@ -17,19 +19,39 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11' # install the python version needed
+      - name: Install Python packages
+        run: |
+          cd release-process
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
       - name: Package
-        run: ./release.sh
+        run: |
+          cd release-process
+          python release.py example-release-config.yaml
+      - name: Get Version Number
+        id: get-version-number
+        run: |
+          VERSION=$(cat VERSION)
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
       - name: Release
         uses: softprops/action-gh-release@v1
+        env:
+          VERSION: ${{ steps.get-version-number.outputs.VERSION }}
         with:
           files: |
-            release/policies.yaml
-            release/bindings.yaml
-            release/crds.yaml
+            release-process/release/policies.yaml
+            release-process/release/bindings.yaml
+            release-process/release/crds.yaml
+            release-process/release/kustomization.yaml
+          name: $VERSION
       # we want to keep the releases in the git repo too
-      - name: Push to git        
+      - name: Push to main        
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Pushing ${{ github.ref_name }} release files
           branch: main
-          file_pattern: release
+          file_pattern: release-process/release
