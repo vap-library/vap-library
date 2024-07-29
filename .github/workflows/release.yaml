@@ -49,6 +49,7 @@ jobs:
             release-process/release/crds.yaml
             release-process/release/kustomization.yaml
           name: $VERSION
+          tag_name: $VERSION
       # we want to keep the releases in the git repo too
       - name: Push to main        
         uses: stefanzweifel/git-auto-commit-action@v5
