@@ -36,7 +36,7 @@ jobs:
       - name: Get Version Number
         id: get-version-number
         run: |
-          VERSION=$(cat VERSION)
+          VERSION=$(cat release-process/version)
           echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
       - name: Release
         uses: softprops/action-gh-release@v1
