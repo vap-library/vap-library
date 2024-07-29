@@ -5,6 +5,7 @@ on:
     - 'main'
   paths:
     - release-process/version
+ workflow_dispatch:
 
 name: Release
 
