@@ -72,7 +72,7 @@ func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string
 		setupFuncs = append(
 			setupFuncs,
 			func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
-				return GenerateDenyBindingForTesting(ctx, cfg, name, paramExists)
+				return GenerateDenyBindingForTesting(ctx, cfg, name, paramExists, 2)
 			},
 		)
 	}
@@ -188,7 +188,7 @@ func ApplyK8sResourceFromYAML(ctx context.Context, cfg *envconf.Config, yaml str
 	return handler(ctx, obj)
 }
 
-func GenerateDenyBindingForTesting(ctx context.Context, cfg *envconf.Config, policyName string, paramRef bool) (context.Context, error) {
+func GenerateDenyBindingForTesting(ctx context.Context, cfg *envconf.Config, policyName string, paramRef bool, waitSec time.Duration) (context.Context, error) {
 
 	var sb strings.Builder
 
@@ -223,6 +223,8 @@ spec:
 	if err != nil {
 		return ctx, err
 	} else {
+		// wait for the resources to be registered properly
+		time.Sleep(waitSec * time.Second)
 		return ctx, nil
 	}
 

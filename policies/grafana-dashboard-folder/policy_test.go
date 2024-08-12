@@ -55,7 +55,7 @@ var testEnv env.Environment
 
 func TestMain(m *testing.M) {
 	var namespaceLabels = map[string]string{"vap-library.com/grafana-dashboard-folder": "deny"}
-	var bindingsToGenerate = map[string]bool{"grafana-dashboard-folder": true}
+	var bindingsToGenerate = map[string]bool{"grafana-dashboard-folder": false}
 
 	var err error
 	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil, bindingsToGenerate)

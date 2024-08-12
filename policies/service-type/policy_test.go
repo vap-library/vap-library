@@ -97,7 +97,7 @@ func TestMain(m *testing.M) {
 	}
 
 	// wait for the cluster to be ready
-	time.Sleep(10 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	os.Exit(testEnv.Run(m))
 }
