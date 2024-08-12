@@ -32,7 +32,7 @@ jobs:
       - name: Package
         run: |
           cd release-process
-          python release.py example-release-config.yaml
+          python release.py full-release-config.yaml
       - name: Get Version Number
         id: get-version-number
         run: |

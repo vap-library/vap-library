@@ -24,11 +24,13 @@ kubectl apply -k https://github.com/vap-library/vap-library.git/release-process/
 ```
 
 ## To apply SELECTED
-It is possible to generate a custom subset of the policies, policy bindings, and parameter CRDs available in the vap-library. To do this, a release script exists which takes a yaml config file, and generates custom release artifacts (`policies.yaml`, `bindings.yaml`, `crds.yaml`) based on the provided config.
+To not enforce a certain policy, one can simply not add the given label (specified in the binding) to the namespace.
 
-Everything associated with the release process sits in the release-process directory. In order to create a release:
-1) Create a new config file specifying the desired policies and bindings. The file `release-process/example-release-config.yaml` will include all policies from the library, along with a pair of bindings (deny+audit & warn) for each, and all CRDs, so this should be used as a template, removing/modifying any entries as desired.
-2) Run the script, providing the path to the prepared config file, e.g: `python release.py example-release-config.yaml`
+In addition, it is possible to generate a custom subset of the policies, policy bindings, and parameter CRDs available in the vap-library. To do this, a release script exists which takes a yaml config file, and generates custom release artifacts (`policies.yaml`, `bindings.yaml`, `crds.yaml`) based on the provided config.
+
+Everything associated with the release process sits in the `release-process` directory. In order to create a custom release:
+1) Create a new config file specifying the desired policies and bindings. The file `release-process/full-release-config.yaml` will include all policies from the library, along with a pair of bindings (deny+audit & warn) for each, and all CRDs, so this should be used as a template, removing/modifying any entries as desired
+2) Run the script, providing the path to the prepared config file, e.g: `python release.py full-release-config.yaml`
 
 For the release script to correctly include a policy and associated resources, the policy must be in its own directory under `./policies`, and any CRD must be in the same directory, named `crd-parameter.yaml`. See existing policies for reference.
 
@@ -71,6 +73,19 @@ To run tests for a single policy (use -v for verbose output):
 ```bash
 go test  ./policies/POLICYNAME/
 ```
+
+## Maintainers
+Versioned release artifacts are generated automatically by the GitHub action defined in `.github/workflows/release.yaml`. The full config and generated release artifacts found in `release-process` should always represent the complete set of policies available in the repository, with `Deny&Audit` and `Warn` bindings for each policy. 
+
+To generate a new release, the process is as follows:
+1) Create a new feature branch
+2) Ensure any new policy is defined in the standard way, with a folder under `policies` containing any required CRD parameters, the policy itself, a set of tests, and a README
+3) Update `release-process/full-release-config.yaml` with a new section for any new policy, and the two bindings (use other config entries as examples, they will be very similar)
+4) If desired, run the release script (`release.py`) locally as per the instructions above
+5) Bump the version found in `release-process/version`, as per semantic versioning
+6) Update the Policies table above in this README, adding details of any new policies
+7) Push your changes, and submit a pull request
+8) Once approved and merged, the GitHub Action will run, automatically running the script, thus overwriting the output files found in `release-process/release` and creating a new release artifact, named as per the semantic version in `release-process/version`.
 
 # Sources that can help for contribution
 * [Official VAP documentation](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/)
