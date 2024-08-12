@@ -27,7 +27,7 @@ type (
 	ClusterCtxKey   string
 )
 
-func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string]string, extraResourcesFromDir map[string]string) (env.Environment, error) {
+func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string]string, extraResourcesFromDir map[string]string, policyNameForBindingGeneration map[string]bool) (env.Environment, error) {
 
 	// Specifying a run ID so that multiple runs wouldn't collide.
 	runID := envconf.RandomName(testNamespace, 14)
@@ -63,6 +63,16 @@ func CreateTestEnv(kindVersion string, keepLogs bool, namespaceLabels map[string
 			setupFuncs,
 			func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
 				return applyResourcesFromDir(ctx, cfg, dir, pattern, 1)
+			},
+		)
+	}
+
+	// Create and apply bindings
+	for name, paramExists := range policyNameForBindingGeneration {
+		setupFuncs = append(
+			setupFuncs,
+			func(ctx context.Context, cfg *envconf.Config) (context.Context, error) {
+				return GenerateDenyBindingForTesting(ctx, cfg, name, paramExists, 2)
 			},
 		)
 	}
@@ -176,4 +186,46 @@ func ApplyK8sResourceFromYAML(ctx context.Context, cfg *envconf.Config, yaml str
 	}
 	handler := decoder.CreateHandler(r)
 	return handler(ctx, obj)
+}
+
+func GenerateDenyBindingForTesting(ctx context.Context, cfg *envconf.Config, policyName string, paramRef bool, waitSec time.Duration) (context.Context, error) {
+
+	var sb strings.Builder
+
+	var binding string = `
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: %s-deny.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/%s: deny
+    objectSelector: {}
+  policyName: %s.vap-library.com
+  validationActions:
+  - Deny
+  - Audit`
+
+	sb.WriteString(fmt.Sprintf(binding, policyName, policyName, policyName))
+
+	if paramRef {
+		sb.WriteString(fmt.Sprintf(`
+  paramRef:
+    name: %s.vap-library.com
+    parameterNotFoundAction: Deny`, policyName))
+	}
+
+	err := ApplyK8sResourceFromYAML(ctx, cfg, sb.String())
+
+	if err != nil {
+		return ctx, err
+	} else {
+		// wait for the resources to be registered properly
+		time.Sleep(waitSec * time.Second)
+		return ctx, nil
+	}
+
 }

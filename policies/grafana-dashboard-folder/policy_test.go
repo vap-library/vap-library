@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sigs.k8s.io/e2e-framework/pkg/envconf"
-	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
 	"time"
 	"vap-library/testutils"
+
+	"sigs.k8s.io/e2e-framework/pkg/envconf"
+	"sigs.k8s.io/e2e-framework/pkg/features"
 
 	"sigs.k8s.io/e2e-framework/pkg/env"
 )
@@ -54,9 +55,10 @@ var testEnv env.Environment
 
 func TestMain(m *testing.M) {
 	var namespaceLabels = map[string]string{"vap-library.com/grafana-dashboard-folder": "deny"}
+	var bindingsToGenerate = map[string]bool{"grafana-dashboard-folder": false}
 
 	var err error
-	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil)
+	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil, bindingsToGenerate)
 	if err != nil {
 		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
 	}
