@@ -1,14 +1,3 @@
-# Releasing
-
-In order to release a new version of the library, just create a tag and push it.
-```
-./release.sh
-git commit -a -m 'message'
-export GTAG=v0.1.4
-git tag -a ${GTAG} -m "Initial release"
-git push origin ${GTAG}
-```
-
 # Vendoring
 We are using [carvel's vendir](https://carvel.dev/vendir/) to vendor 3rd party resources that are needed for the tests.
 We store these components in the `./vendoring` directory. To include/update components, add/update them in `./vendir.yml`

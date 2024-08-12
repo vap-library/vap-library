@@ -5,9 +5,13 @@ and a **testing framework** that can be used to verify that admission policies a
 **The policies in the library can be installed with a few commands and can be enforced with namespace labels.**
 
 # Installing and using the library
-> **_NOTE:_** Validating Admission Policy is beta in 1.28+ and disabled by default in most Kubernetes distributions up
-> to 1.30 (in which it turned to GA and got enabled by default). Follow the [official instructions](https://kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/#before-you-begin)
-> to enable it on your k8s cluster/distribution*
+Validating Admission Policy (VAP) has been promoted to GA in Kubernetes 1.30. The policies in this library are using the
+v1 API and as such, they **require Kubernetes 1.30 or newer**.
+
+> **_NOTE:_** Validating Admission Policy was beta in 1.28 and 1.29 and were disabled by default in most Kubernetes
+> distributions. One could modify the API of the policies from `v1` to `v1beta1` and most probably they would work in
+> those version of Kubernetes as well. For 1.28 and 1.29 follow the [official instructions](https://v1-29.docs.kubernetes.io/docs/reference/access-authn-authz/validating-admission-policy/#before-you-begin)
+> to enable VAP on your k8s cluster/distribution*. However, we do not run tests on older K8s versions.
 
 Every CRD that is used for policy parameter has a name prefix of `VAPLib` and every resource that the library creates
 has a suffix of `.vap-library.com` to avoid name collisions. This allows that the resources can be safely applied from
@@ -19,7 +23,7 @@ Parameter CRDs, policies and policy bindings are available in separate yaml file
 It is possible to apply all policies, policy bindings and parameter CRDs available in the vap-library (this would not
 enforce anything without proper labels on the namespaces):
 ```
-export VAPRELEASE=v0.1.7
+export VAPRELEASE=v0.1.9
 kubectl apply -k https://github.com/vap-library/vap-library.git/release-process/release?ref=${VAPRELEASE}
 ```
 
@@ -66,13 +70,15 @@ Prerequisites:
 
 To run all the tests (use -v for verbose output): 
 ```bash
-go test -p 2 ./policies/...
+go clean -testcache && go test -p 2 ./policies/...
 ```
 
 To run tests for a single policy (use -v for verbose output):
 ```bash
-go test  ./policies/POLICYNAME/
+go clean -testcache && go test  ./policies/POLICYNAME/
 ```
+
+> **_NOTE:_** in case test fails with error it may leak kind cluster. Cleanup with `kind delete clusters --all`
 
 ## Maintainers
 Versioned release artifacts are generated automatically by the GitHub action defined in `.github/workflows/release.yaml`. The full config and generated release artifacts found in `release-process` should always represent the complete set of policies available in the repository, with `Deny&Audit` and `Warn` bindings for each policy. 

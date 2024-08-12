@@ -1,3 +1,4 @@
 # Validating Admission Policies Library
 
-Initial Release
+## v0.1.9
+* remove obsolete bindings from the policies
