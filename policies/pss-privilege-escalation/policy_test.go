@@ -484,15 +484,16 @@ var testEnv env.Environment
 
 func TestMain(m *testing.M) {
 	var namespaceLabels = map[string]string{"vap-library.com/pss-privilege-escalation": "deny"}
-
+	var bindingsToGenerate = map[string]bool{"pss-privilege-escalation": false}
 	var err error
-	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil)
+
+	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil, bindingsToGenerate)
 	if err != nil {
 		log.Fatalf("Unable to create Kind cluster for test. Error msg: %s", err)
 	}
 
 	// wait for the cluster to be ready
-	time.Sleep(2 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	os.Exit(testEnv.Run(m))
 }

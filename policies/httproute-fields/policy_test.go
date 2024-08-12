@@ -172,9 +172,10 @@ var testEnv env.Environment
 func TestMain(m *testing.M) {
 	var namespaceLabels = map[string]string{"vap-library.com/httproute-fields": "deny"}
 	var extraResourcesFromDir = map[string]string{"../../vendoring/gateway-api/": "*.yaml"}
+	var bindingsToGenerate = map[string]bool{"httproute-fields": true}
 
 	var err error
-	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, extraResourcesFromDir)
+	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, extraResourcesFromDir, bindingsToGenerate)
 	if err != nil {
 		log.Fatalf("Unable to create Kind cluster for test. Error msg: %s", err)
 	}
