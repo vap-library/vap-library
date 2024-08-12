@@ -5,12 +5,13 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sigs.k8s.io/e2e-framework/pkg/env"
-	"sigs.k8s.io/e2e-framework/pkg/envconf"
-	"sigs.k8s.io/e2e-framework/pkg/features"
 	"testing"
 	"time"
 	"vap-library/testutils"
+
+	"sigs.k8s.io/e2e-framework/pkg/env"
+	"sigs.k8s.io/e2e-framework/pkg/envconf"
+	"sigs.k8s.io/e2e-framework/pkg/features"
 )
 
 var testParameterYAML string = `
@@ -87,11 +88,12 @@ var testEnv env.Environment
 
 func TestMain(m *testing.M) {
 	var namespaceLabels = map[string]string{"vap-library.com/service-type": "deny"}
+	var bindingsToGenerate = map[string]bool{"service-type": true}
 
 	var err error
-	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil)
+	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, nil, bindingsToGenerate)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
+		log.Fatalf("Unable to create Kind cluster for test. Error msg: %s", err)
 	}
 
 	// wait for the cluster to be ready

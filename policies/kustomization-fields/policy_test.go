@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"sigs.k8s.io/e2e-framework/pkg/env"
-	"sigs.k8s.io/e2e-framework/pkg/envconf"
-	"sigs.k8s.io/e2e-framework/pkg/features"
 	"strings"
 	"testing"
 	"time"
 	"vap-library/testutils"
+
+	"sigs.k8s.io/e2e-framework/pkg/env"
+	"sigs.k8s.io/e2e-framework/pkg/envconf"
+	"sigs.k8s.io/e2e-framework/pkg/features"
 )
 
 var testParameterFullYAML string = `
@@ -90,15 +91,16 @@ var testEnv env.Environment
 func TestMain(m *testing.M) {
 	var namespaceLabels = map[string]string{"vap-library.com/kustomization-fields": "deny"}
 	var extraResourcesFromDir = map[string]string{"../../vendoring/flux-kustomize-controller/": "*.yaml"}
+	var bindingsToGenerate = map[string]bool{"kustomization-fields": true}
 
 	var err error
-	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, extraResourcesFromDir)
+	testEnv, err = testutils.CreateTestEnv("", false, namespaceLabels, extraResourcesFromDir, bindingsToGenerate)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("Unable to create Kind cluster for test. Error msg: %s", err))
+		log.Fatalf("Unable to create Kind cluster for test. Error msg: %s", err)
 	}
 
 	// wait for the cluster to be ready
-	time.Sleep(3 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	os.Exit(testEnv.Run(m))
 }
