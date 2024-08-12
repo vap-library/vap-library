@@ -98,3 +98,5 @@ To generate a new release, the process is as follows:
 * [Kubernetes CEL documenation](https://kubernetes.io/docs/reference/using-api/cel/)
 * A repo that inspired us: [ARMOS's](https://www.armosec.io/) [cel-admission-library](https://github.com/kubescape/cel-admission-library/tree/main)
 
+# Disclaimer
+This repository is not an official repository of our employers. The content and code provided here are solely created and maintained by the community. They do not reflect the views, positions, or endorsements of our employers. Use of the material in this repository is at your own risk.
