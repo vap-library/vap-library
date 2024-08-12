@@ -3,8 +3,11 @@ This policy enforces specific fields for Gateway API HTTPRoute rosources based o
 
 # Policy logic
 Currently supported:
-* when `spec.allowedHostnames` list of the parameter custom resource exists, the `spec.hostnames` field of the HTTPRoute
-  is defined and it only contains hostnames that are on the list
+* when `spec.allowedHostnames` exists in the parameter: the `spec.hostnames` field of the HTTPRoute must be defined
+  and can only contain hostnames that are on the parameter list
+* when `spec.allowedParentRefs` exists in the parameter: if any of the allowedParentRef list item matches with ALL it's
+  attributes on the requested HTTPRoute resource, then the resource is allowed otherwise it is rejected 
+
 
 When there is no parameter custom resource the policy denys.
 
@@ -22,4 +25,9 @@ spec:
   allowedHostnames:
   - test.example.com
   - test2.exmaple.com
+  allowedParentRefs:
+  - name: name-only-gateway
+  - name: with-namespace-gateway
+    namespace: gateway-namespace
+
 ```
