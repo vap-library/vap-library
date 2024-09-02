@@ -463,11 +463,11 @@ metadata:
 template:
   spec:
     containers:
-      - name: resource-limit-types-%s
-        image: public.ecr.aws/docker/library/busybox:1.36
-        resources:
-          limits:
-            %s
+    - name: resource-limit-types-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+      resources:
+        limits:
+          %s
     restartPolicy: Always
 `
 
@@ -480,11 +480,11 @@ metadata:
 template:
   spec:
     containers:
-      - name: resource-limit-types-%s
-        image: public.ecr.aws/docker/library/busybox:1.36
-        resources:
-          limits:
-            %s
+    - name: resource-limit-types-%s
+      image: public.ecr.aws/docker/library/busybox:1.36
+      resources:
+        limits:
+          %s
     restartPolicy: Always
     initContainers:
     - name: init-resource-limit-types-%s
@@ -516,11 +516,11 @@ var nonMatchingResourceLimitsCronjob string = `cpu: 500m
                 memory: 128Mi`
 
 var matchingResourceLimitsPodTemplate string = `cpu: 500m
-            memory: 128Mi
-            ephemeral-storage: 400M`
+          memory: 128Mi
+          ephemeral-storage: 400M`
 
 var nonMatchingResourceLimitsPodTemplate string = `cpu: 500m
-            memory: 128Mi`
+          memory: 128Mi`
 
 var testEnv env.Environment
 
@@ -956,7 +956,7 @@ func TestResourceLimits(t *testing.T) {
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateYAML, "success", namespace, "success", matchingResourceLimitsWorkload))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateYAML, "success", namespace, "success", matchingResourceLimitsPodTemplate))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -968,7 +968,7 @@ func TestResourceLimits(t *testing.T) {
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateYAML, "rejected", namespace, "rejected", nonMatchingResourceLimitsWorkload))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(containerPodTemplateYAML, "rejected", namespace, "rejected", nonMatchingResourceLimitsPodTemplate))
 			if err == nil {
 				t.Fatal(err)
 			}
@@ -980,7 +980,7 @@ func TestResourceLimits(t *testing.T) {
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should PASS!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateYAML, "success", namespace, "success", matchingResourceLimitsWorkload, "success", matchingResourceLimitsWorkload))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateYAML, "success", namespace, "success", matchingResourceLimitsPodTemplate, "success", matchingResourceLimitsPodTemplate))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -992,7 +992,7 @@ func TestResourceLimits(t *testing.T) {
 			namespace := ctx.Value(testutils.GetNamespaceKey(t)).(string)
 
 			// this should FAIL!
-			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateYAML, "rejected", namespace, "rejected", matchingResourceLimitsWorkload, "rejected", nonMatchingResourceLimitsWorkload))
+			err := testutils.ApplyK8sResourceFromYAML(ctx, cfg, fmt.Sprintf(initContainerPodTemplateYAML, "rejected", namespace, "rejected", matchingResourceLimitsPodTemplate, "rejected", nonMatchingResourceLimitsPodTemplate))
 			if err == nil {
 				t.Fatal(err)
 			}
