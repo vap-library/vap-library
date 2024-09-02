@@ -1,0 +1,48 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicy
+metadata:
+  name: "resource-request-types.vap-library.com"
+spec:
+  failurePolicy: Fail
+  paramKind:
+    apiVersion: vap-library.com/v1beta1
+    kind: VAPLibResourceRequestTypesParam
+  matchConstraints:
+    resourceRules:
+    - apiGroups:   [""]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["pods","replicationcontrollers","podtemplates", "pods/ephemeralcontainers"]
+    - apiGroups:   ["apps"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["deployments","replicasets","daemonsets","statefulsets"]
+    - apiGroups:   ["batch"]
+      apiVersions: ["v1"]
+      operations:  ["CREATE", "UPDATE"]
+      resources:   ["jobs","cronjobs"]
+  validations:
+    - expression: "object.kind != 'Pod' ||
+      !has(params.spec.enforcedResourceRequestTypes) ||
+      (!has(object.spec.initContainers) || object.spec.initContainers.all(container, has(container.resources) && has(container.resources.requests) && params.spec.enforcedResourceRequestTypes.all(r, r in container.resources.requests))) &&
+      object.spec.containers.all(container, has(container.resources) && has(container.resources.requests) && params.spec.enforcedResourceRequestTypes.all(r, r in container.resources.requests))"
+      message: "If enforcedResourceRequestTypes is set on the parameter, for every container and initContainer in Pods, spec.resources.requests must be present and contain every item from the spec.enforcedResourceRequestTypes list in the policy parameter"
+      reason: Invalid
+    - expression: "['Deployment','ReplicaSet','DaemonSet','StatefulSet','Job','ReplicationController'].all(kind, object.kind != kind) ||
+      !has(params.spec.enforcedResourceRequestTypes) ||
+      (!has(object.spec.template.spec.initContainers) || (object.spec.template.spec.initContainers.all(container, has(container.resources) && has(container.resources.requests) && params.spec.enforcedResourceRequestTypes.all(r, r in container.resources.requests)))) &&
+      object.spec.template.spec.containers.all(container, has(container.resources) && has(container.resources.requests) && params.spec.enforcedResourceRequestTypes.all(r, r in container.resources.requests))"
+      message: "If enforcedResourceRequestTypes is set on the parameter, for every container and initContainer in Workloads, spec.resources.requests must be present and contain every item from the spec.enforcedResourceRequestTypes list in the policy parameter"
+      reason: Invalid
+    - expression: "object.kind != 'CronJob' || 
+      !has(params.spec.enforcedResourceRequestTypes) ||
+      (!has(object.spec.jobTemplate.spec.template.spec.initContainers) || object.spec.jobTemplate.spec.template.spec.initContainers.all(container, has(container.resources) && has(container.resources.requests) && params.spec.enforcedResourceRequestTypes.all(r, r in container.resources.requests))) &&
+      object.spec.jobTemplate.spec.template.spec.containers.all(container, has(container.resources) && has(container.resources.requests) && params.spec.enforcedResourceRequestTypes.all(r, r in container.resources.requests))"
+      message: "If enforcedResourceRequestTypes is set on the parameter, for every container and initContainer in CronJobs, spec.resources.requests must be present and contain every item from the spec.enforcedResourceRequestTypes list in the policy parameter"
+      reason: Invalid
+    - expression: "object.kind != 'PodTemplate' ||
+      !has(params.spec.enforcedResourceRequestTypes) ||
+      (!has(object.template.spec.initContainers) || object.template.spec.initContainers.all(container, has(container.resources) && has(container.resources.requests) && params.spec.enforcedResourceRequestTypes.all(r, r in container.resources.requests))) &&
+      object.template.spec.containers.all(container, has(container.resources) && has(container.resources.requests) && params.spec.enforcedResourceRequestTypes.all(r, r in container.resources.requests))"
+      message: "If enforcedResourceRequestTypes is set on the parameter, for every container and initContainer in PodTemplates, spec.resources.requests must be present and contain every item from the spec.enforcedResourceRequestTypes list in the policy parameter"
+      reason: Invalid
