@@ -143,27 +143,6 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
-  name: kustomization-fields-gitops-chaining.ctbto.org
-spec:
-  matchResources:
-    matchPolicy: Equivalent
-    namespaceSelector:
-      matchLabels:
-        ctbto.org/gitops-namespace: 'true'
-    objectSelector:
-      matchLabels:
-        ctbto.org/flux-chained: 'true'
-  paramRef:
-    name: kustomization-fields-gitops-chaining.ctbto.org
-    parameterNotFoundAction: Deny
-  policyName: kustomization-fields.vap-library.com
-  validationActions:
-  - Deny
-  - Audit
----
-apiVersion: admissionregistration.k8s.io/v1
-kind: ValidatingAdmissionPolicyBinding
-metadata:
   name: pss-capabilities-deny.vap-library.com
 spec:
   matchResources:
@@ -381,6 +360,80 @@ spec:
     name: service-type.vap-library.com
     parameterNotFoundAction: Deny
   policyName: service-type.vap-library.com
+  validationActions:
+  - Warn
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: resource-limit-types-deny.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/resource-limit-types: deny
+    objectSelector: {}
+  paramRef:
+    name: resource-limit-types.vap-library.com
+    parameterNotFoundAction: Deny
+  policyName: resource-limit-types.vap-library.com
+  validationActions:
+  - Deny
+  - Audit
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: resource-limit-types-warn.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/resource-limit-types: warn
+    objectSelector: {}
+  paramRef:
+    name: resource-limit-types.vap-library.com
+    parameterNotFoundAction: Deny
+  policyName: resource-limit-types.vap-library.com
+  validationActions:
+  - Warn
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: resource-request-types-deny.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/resource-request-types: deny
+    objectSelector: {}
+  paramRef:
+    name: resource-request-types.vap-library.com
+    parameterNotFoundAction: Deny
+  policyName: resource-request-types.vap-library.com
+  validationActions:
+  - Deny
+  - Audit
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: resource-request-types-warn.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/resource-request-types: warn
+    objectSelector: {}
+  paramRef:
+    name: resource-request-types.vap-library.com
+    parameterNotFoundAction: Deny
+  policyName: resource-request-types.vap-library.com
   validationActions:
   - Warn
 ---

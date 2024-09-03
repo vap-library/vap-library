@@ -220,3 +220,89 @@ spec:
     singular: vaplibservicetypeparam
     kind: VAPLibServiceTypeParam
 ---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: vaplibresourcelimittypesparams.vap-library.com
+spec:
+  group: vap-library.com
+  versions:
+    - name: v1beta1
+      additionalPrinterColumns:
+      - jsonPath: .spec.enforcedResourceLimitTypes
+        name: Limits
+        type: string
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                enforcedResourceLimitTypes:
+                  description: "enforcedResourceLimitTypes defines a set of resource limit types which
+                    must be provided in container manifests."
+                  minItems: 1
+                  type: array
+                  items:
+                    description: "resources.limits allows resource limits to be provided on
+                        certain resource types. Valid options are cpu, memory,
+                        and ephemeral-storage."
+                    type: string
+                    enum:
+                      - "cpu"
+                      - "memory"
+                      - "ephemeral-storage"
+              required:
+                - enforcedResourceLimitTypes
+  scope: Namespaced
+  names:
+    plural: vaplibresourcelimittypesparams
+    singular: vaplibresourcelimittypesparam
+    kind: VAPLibResourceLimitTypesParam
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: vaplibresourcerequesttypesparams.vap-library.com
+spec:
+  group: vap-library.com
+  versions:
+    - name: v1beta1
+      additionalPrinterColumns:
+      - jsonPath: .spec.enforcedResourceRequestTypes
+        name: Requests
+        type: string
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                enforcedResourceRequestTypes:
+                  description: "enforcedResourceRequestTypes defines a set of resource request types which
+                    must be provided in container manifests."
+                  minItems: 1
+                  type: array
+                  items:
+                    description: "resources.requests allows resource requests to be provided on
+                        certain resource types. Valid options are cpu, memory,
+                        and ephemeral-storage."
+                    type: string
+                    enum:
+                      - "cpu"
+                      - "memory"
+                      - "ephemeral-storage"
+              required:
+                - enforcedResourceRequestTypes
+  scope: Namespaced
+  names:
+    plural: vaplibresourcerequesttypesparams
+    singular: vaplibresourcerequesttypesparam
+    kind: VAPLibResourceRequestTypesParam
+---
