@@ -265,3 +265,59 @@ service-type:
           parameterNotFoundAction: Deny
         validationActions:
           - Warn
+resource-limit-types:
+  enabled: true
+  bindings:
+    - resource-limit-types-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/resource-limit-types: deny
+          objectSelector: {}
+        paramRef:
+          name: resource-limit-types.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+        - Deny
+        - Audit
+    - resource-limit-types-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/resource-limit-types: warn
+          objectSelector: {}
+        paramRef:
+          name: resource-limit-types.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+          - Warn
+resource-request-types:
+  enabled: true
+  bindings:
+    - resource-request-types-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/resource-request-types: deny
+          objectSelector: {}
+        paramRef:
+          name: resource-request-types.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+        - Deny
+        - Audit
+    - resource-request-types-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/resource-request-types: warn
+          objectSelector: {}
+        paramRef:
+          name: resource-request-types.vap-library.com
+          parameterNotFoundAction: Deny
+        validationActions:
+          - Warn
