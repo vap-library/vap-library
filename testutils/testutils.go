@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	defaultKindVersion = "v1.30.0"
+	defaultKindVersion = "v1.32.0"
 	kindNamePrefix     = "vaplibtest"
 	testNamespace      = "vap-testing"
 )
