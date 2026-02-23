@@ -293,6 +293,28 @@ resource-limit-types:
           parameterNotFoundAction: Deny
         validationActions:
           - Warn
+no-default-sa-rolebinding:
+  enabled: true
+  bindings:
+    - no-default-sa-rolebinding-deny.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/no-default-sa-rolebinding: deny
+          objectSelector: {}
+        validationActions:
+        - Deny
+        - Audit
+    - no-default-sa-rolebinding-warn.vap-library.com:
+        matchResources:
+          matchPolicy: Equivalent
+          namespaceSelector:
+            matchLabels:
+              vap-library.com/no-default-sa-rolebinding: warn
+          objectSelector: {}
+        validationActions:
+          - Warn
 resource-request-types:
   enabled: true
   bindings:

@@ -62,12 +62,13 @@ vap-library.com/POLICYNAME: deny
 | helmrelease-fields           | Ensures that specific fields of [HelmRelease](https://fluxcd.io/flux/components/helm/helmreleases/) resources match defined values from parameter.                                                                                                                        | `VAPLibHelmReleaseFieldsParam` (Mandatory)   |
 | resource-limit-types         | Ensures that containers define resource limits for types that are defined in the parameter                                                                                                                                                                                | `VAPLibResourceLimitTypesParam` (Mandatory)  |
 | resource-request-types       | Ensures that containers define resource requests for types that are defined in the parameter                                                                                                                                                                              | `VAPLibResourceRequestTypesParam` (Mandatory)|
+| no-default-sa-rolebinding    | Ensures that the subjects of RoleBindings cannot include the "default" service account. Note that this policy does not cover ClusterRoleBindings.                                                                                                              | N/A                                          |
 
 # Testing of the policies
 A "testing framework" has been developed (based on Kubernetes e2e) to support testing of admission policies.
 
 Prerequisites:
-- Go v1.22.x
+- Go >=v1.22.x
 - Docker (for Kind)
 
 To run all the tests (use -v for verbose output): 

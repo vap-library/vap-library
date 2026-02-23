@@ -403,6 +403,37 @@ spec:
 apiVersion: admissionregistration.k8s.io/v1
 kind: ValidatingAdmissionPolicyBinding
 metadata:
+  name: no-default-sa-rolebinding-deny.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/no-default-sa-rolebinding: deny
+    objectSelector: {}
+  policyName: no-default-sa-rolebinding.vap-library.com
+  validationActions:
+  - Deny
+  - Audit
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
+  name: no-default-sa-rolebinding-warn.vap-library.com
+spec:
+  matchResources:
+    matchPolicy: Equivalent
+    namespaceSelector:
+      matchLabels:
+        vap-library.com/no-default-sa-rolebinding: warn
+    objectSelector: {}
+  policyName: no-default-sa-rolebinding.vap-library.com
+  validationActions:
+  - Warn
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingAdmissionPolicyBinding
+metadata:
   name: resource-request-types-deny.vap-library.com
 spec:
   matchResources:
