@@ -3542,7 +3542,7 @@ func TestEphemeralContainers(t *testing.T) {
 			// define patch data
 			patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "false"))
 
-			patch := k8s.Patch{patchType, patchData}
+			patch := k8s.Patch{PatchType: patchType, Data: patchData}
 
 			// patch the pod, this should FAIL!
 			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
@@ -3575,7 +3575,7 @@ func TestEphemeralContainers(t *testing.T) {
 			// define patch data
 			patchData := []byte(fmt.Sprintf(containerEphemeralPatchYAML, "true"))
 
-			patch := k8s.Patch{patchType, patchData}
+			patch := k8s.Patch{PatchType: patchType, Data: patchData}
 
 			// patch the pod
 			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
@@ -3608,7 +3608,7 @@ func TestEphemeralContainers(t *testing.T) {
 			// define patch data
 			patchData := []byte(fmt.Sprintf(twoContainersEphemeralPatchYAML, "true", "true"))
 
-			patch := k8s.Patch{patchType, patchData}
+			patch := k8s.Patch{PatchType: patchType, Data: patchData}
 
 			// patch the pod
 			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
@@ -3641,7 +3641,7 @@ func TestEphemeralContainers(t *testing.T) {
 			// define patch data
 			patchData := []byte(fmt.Sprintf(twoContainersEphemeralOneUnsetPatchYAML, "true"))
 
-			patch := k8s.Patch{patchType, patchData}
+			patch := k8s.Patch{PatchType: patchType, Data: patchData}
 
 			// patch the pod
 			err = client.Resources(namespace).PatchSubresource(ctx, pod, "ephemeralcontainers", patch)
