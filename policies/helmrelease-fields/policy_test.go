@@ -27,7 +27,7 @@ spec:
 `
 
 var helmReleaseFullYAML string = `
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: test-helmrelease
@@ -47,7 +47,7 @@ spec:
 `
 
 var helmReleaseWrongSAYAML string = `
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: test-helmrelease-wrong-sa
@@ -77,7 +77,7 @@ spec:
 `
 
 var helmReleaseSingleYAML string = `
-apiVersion: helm.toolkit.fluxcd.io/v2beta2
+apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
 metadata:
   name: test-helmrelease-single-field

@@ -22,7 +22,7 @@ directories:
       slug: kubernetes-sigs/gateway-api
       # use release tag (optional)
       # optional if tagSelection is specified (available in v0.22.0+)
-      tag: v1.0.0
+      tag: v1.4.1
       # only download specific assets (optional; v0.12.0+)
       assetNames: ["experimental-install.yaml"]
       # disables checking auto-found checksums for downloaded files (optional)
@@ -36,7 +36,7 @@ directories:
       slug: fluxcd/kustomize-controller
       # use release tag (optional)
       # optional if tagSelection is specified (available in v0.22.0+)
-      tag: v1.2.2
+      tag: v1.8.0
       # only download specific assets (optional; v0.12.0+)
       assetNames: ["kustomize-controller.crds.yaml"]
       # disables checking auto-found checksums for downloaded files (optional)
@@ -50,7 +50,7 @@ directories:
       slug: fluxcd/helm-controller
       # use release tag (optional)
       # optional if tagSelection is specified (available in v0.22.0+)
-      tag: v0.37.4
+      tag: v1.5.0
       # only download specific assets (optional; v0.12.0+)
       assetNames: ["helm-controller.crds.yaml"]
       # disables checking auto-found checksums for downloaded files (optional)

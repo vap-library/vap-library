@@ -2,16 +2,16 @@ apiVersion: vendir.k14s.io/v1alpha1
 directories:
 - contents:
   - githubRelease:
-      tag: v1.0.0
-      url: https://api.github.com/repos/kubernetes-sigs/gateway-api/releases/127397429
+      tag: v1.4.1
+      url: https://api.github.com/repos/kubernetes-sigs/gateway-api/releases/267312881
     path: gateway-api
   - githubRelease:
-      tag: v1.2.2
-      url: https://api.github.com/repos/fluxcd/kustomize-controller/releases/139657093
+      tag: v1.8.0
+      url: https://api.github.com/repos/fluxcd/kustomize-controller/releases/287656700
     path: flux-kustomize-controller
   - githubRelease:
-      tag: v0.37.4
-      url: https://api.github.com/repos/fluxcd/helm-controller/releases/139865877
+      tag: v1.5.0
+      url: https://api.github.com/repos/fluxcd/helm-controller/releases/288680897
     path: flux-helm-controller
   path: vendoring
 kind: LockConfig
